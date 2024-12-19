@@ -13,7 +13,7 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { IImageService } from './interface/image.service.interface';
 
-@Controller('image')
+@Controller('images')
 export class ImageController {
   constructor(
     @Inject(ImageService)
