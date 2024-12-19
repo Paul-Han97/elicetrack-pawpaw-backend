@@ -13,7 +13,7 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { ILocationService } from './interface/location.service.interface';
 
-@Controller('location')
+@Controller('locations')
 export class LocationController {
   constructor(
     @Inject(LocationService)

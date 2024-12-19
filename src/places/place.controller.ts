@@ -13,7 +13,7 @@ import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { IPlaceService } from './interface/place.service.interface';
 
-@Controller('place')
+@Controller('places')
 export class PlaceController {
   constructor(
     @Inject(PlaceService)

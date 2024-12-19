@@ -10,24 +10,24 @@ import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { Board } from './boards/entities/board.entity';
 import { BoardModule } from './boards/board.module';
-import { BoardImageModule } from './boardimage/boardimage.module';
-import { BoardImage } from './boardimage/entities/boardimage.entity';
-import { PetImageModule } from './petimage/petimage.module';
-import { PetImage } from './petimage/entities/petimage.entity';
-import { UserImageModule } from './userimage/userimage.module';
-import { UserImage } from './userimage/entities/userimage.entity';
-import { BoardCategoryModule } from './boardcategory/boardcategory.module';
-import { BoardCategory } from './boardcategory/entities/boardcategory.entity';
+import { BoardImageModule } from './boardimage/board-image.module';
+import { BoardImage } from './boardimage/entities/board-image.entity';
+import { PetImageModule } from './petimage/pet-image.module';
+import { PetImage } from './petimage/entities/pet-image.entity';
+import { UserImageModule } from './userimage/user-image.module';
+import { UserImage } from './userimage/entities/user-image.entity';
+import { BoardCategoryModule } from './boardcategory/board-category.module';
+import { BoardCategory } from './boardcategory/entities/board-category.entity';
 import { CommentModule } from './comment/comment.module';
 import { Comment } from './comment/entities/comment.entity';
-import { UserBoardLikeModule } from './userboardlike/userboardlike.module';
-import { UserBoardLike } from './userboardlike/entities/userboardlike.entity';
+import { UserBoardLikeModule } from './userboardlike/user-board-like.module';
+import { UserBoardLike } from './userboardlike/entities/user-board-like.entity';
 import { PlaceModule } from './places/place.module';
 import { Place } from './places/entities/place.entity';
-import { PlacelocationModule } from './placelocation/placelocation.module';
-import { UserLocationModule } from './userlocation/userlocation.module';
-import { PlaceLocation } from './placelocation/entities/placelocation.entity';
-import { UserLocation } from './userlocation/entities/userlocation.entity';
+import { PlaceLocationModule } from './placelocation/place-location.module';
+import { UserLocationModule } from './userlocation/user-location.module';
+import { PlaceLocation } from './placelocation/entities/place-location.entity';
+import { UserLocation } from './userlocation/entities/user-location.entity';
 import { LocationModule } from './location/location.module';
 
 @Module({
@@ -91,7 +91,7 @@ import { LocationModule } from './location/location.module';
     CommentModule,
     UserBoardLikeModule,
     PlaceModule,
-    PlacelocationModule,
+    PlaceLocationModule,
     UserLocationModule,
     LocationModule,
   ],
