@@ -8,6 +8,27 @@ import { AppService } from './app.service';
 import { ENV_KEYS, MYSQL_MIGRATION_PATH } from './common/constants';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
+import { Board } from './boards/entities/board.entity';
+import { BoardModule } from './boards/board.module';
+import { BoardImageModule } from './boardimage/boardimage.module';
+import { BoardImage } from './boardimage/entities/boardimage.entity';
+import { PetImageModule } from './petimage/petimage.module';
+import { PetImage } from './petimage/entities/petimage.entity';
+import { UserImageModule } from './userimage/userimage.module';
+import { UserImage } from './userimage/entities/userimage.entity';
+import { BoardCategoryModule } from './boardcategory/boardcategory.module';
+import { BoardCategory } from './boardcategory/entities/boardcategory.entity';
+import { CommentModule } from './comment/comment.module';
+import { Comment } from './comment/entities/comment.entity';
+import { UserBoardLikeModule } from './userboardlike/userboardlike.module';
+import { UserBoardLike } from './userboardlike/entities/userboardlike.entity';
+import { PlaceModule } from './places/place.module';
+import { Place } from './places/entities/place.entity';
+import { PlacelocationModule } from './placelocation/placelocation.module';
+import { UserLocationModule } from './userlocation/userlocation.module';
+import { PlaceLocation } from './placelocation/entities/placelocation.entity';
+import { UserLocation } from './userlocation/entities/userlocation.entity';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -38,7 +59,21 @@ import { UserModule } from './users/user.module';
         username: configService.get<string>(ENV_KEYS.DATABASE_MYSQL_USERNAME),
         password: configService.get<string>(ENV_KEYS.DATABASE_MYSQL_PASSWORD),
         database: configService.get<string>(ENV_KEYS.DATABASE_MYSQL_NAME),
-        entities: [User],
+        entities: [
+          User,
+          Board,
+          Image,
+          BoardImage,
+          PetImage,
+          UserImage,
+          BoardCategory,
+          Comment,
+          UserBoardLike,
+          Place,
+          PlaceLocation,
+          UserLocation,
+          Location,
+        ],
         migrations: [MYSQL_MIGRATION_PATH],
         migrationsTableName: 'migrations',
         synchronize: true,
@@ -48,6 +83,17 @@ import { UserModule } from './users/user.module';
       }),
     }),
     UserModule,
+    BoardModule,
+    BoardImageModule,
+    PetImageModule,
+    UserImageModule,
+    BoardCategoryModule,
+    CommentModule,
+    UserBoardLikeModule,
+    PlaceModule,
+    PlacelocationModule,
+    UserLocationModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
