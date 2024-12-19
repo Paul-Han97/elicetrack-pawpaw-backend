@@ -21,7 +21,6 @@ export class TypeOrmCustomModule extends TypeOrmModule {
         provide: repository,
         useFactory: (dataSource: DataSource): typeof repository => {
           const baseRepository = dataSource.getRepository<any>(entity);
-          console.log('datasource', dataSource);
           return new repository(
             baseRepository.target,
             baseRepository.manager,
