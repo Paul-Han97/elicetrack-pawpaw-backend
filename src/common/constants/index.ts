@@ -58,3 +58,33 @@ export const enum ENV_KEYS {
 export const CUSTOM_REPOSITORY = 'CUSTOM_REPOSITORY';
 
 export const MYSQL_MIGRATION_PATH = 'dist/migrations/*.js';
+
+export enum GENDER_TYPE {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}
+
+export enum ROLE_TYPE {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
+export enum LOGIN_METHOD_TYPE {
+  BASIC = 'BASIC',
+  GOOGLE = 'GOOGLE',
+  KAKAO = 'KAKAO',
+}
+
+export enum PET_SIZE_TYPE {
+  SMALL = 'SMALL',
+  MEDIUM = 'MEDIUM',
+  LARGE = 'LARGE',
+}
+
+// 추가 해야 함
+export enum BOARD_CATEGORY_TYPE {}
+
+export enum NOTIFICATION_TYPE {
+  RECEIVE_MESSAGE = 'RECEIVE_MESSAGE',
+  INVITE = 'INVITE',
+}
