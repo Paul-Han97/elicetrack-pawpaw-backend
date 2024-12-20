@@ -1,8 +1,12 @@
 import { CommonEntity } from 'src/common/typeorm/common.entity';
-import { Column, Entity } from 'typeorm';
+import { Notification } from 'src/notifications/entities/notification.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class NotificationType extends CommonEntity {
-  @Column()
+  @Column({ length: 15 })
   type: string;
+
+  @OneToMany(() => Notification, (notification) => notification.notificationType)
+  notification: Notification[];
 }

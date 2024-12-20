@@ -1,5 +1,8 @@
 import { CommonEntity } from 'src/common/typeorm/common.entity';
-import { Column, Entity } from 'typeorm';
+import { PlaceLocation } from 'src/place-locations/entities/place-location.entity';
+import { ReviewPlaceLike } from 'src/review-place-likes/entities/review-place-like.entity';
+import { Review } from 'src/reviews/entities/review.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class Place extends CommonEntity {
@@ -47,4 +50,13 @@ export class Place extends CommonEntity {
 
   @Column({ type: 'datetime' })
   lastUpdate: Date;
+
+  @OneToMany(() => Review, (review) => review.place)
+  review: Review[];
+
+  @OneToMany(() => ReviewPlaceLike, (reviewPlaceLike) => reviewPlaceLike.place)
+  reviewPlaceLike: ReviewPlaceLike[];
+
+  @OneToMany(() => PlaceLocation, (placeLocation) => placeLocation.place)
+  placeLocation: PlaceLocation[];
 }

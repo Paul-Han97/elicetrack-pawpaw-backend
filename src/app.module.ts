@@ -38,6 +38,10 @@ import { RoomUser } from './room-user/entities/room-user.entity';
 import { NotificationType } from './notification-types/entities/notification-type.entity';
 import { Review } from './reviews/entities/review.entity';
 import { ReviewPlaceLike } from './review-place-likes/entities/review-place-like.entity';
+import { Image } from './images/entities/image.entity';
+import { Location } from './locations/entities/location.entity';
+import { Credential } from './credentials/entities/credential.entity';
+import { Notification } from './notifications/entities/notification.entity';
 
 @Module({
   imports: [

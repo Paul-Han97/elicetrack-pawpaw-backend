@@ -1,5 +1,18 @@
+import { Board } from 'src/boards/entities/board.entity';
 import { CommonEntity } from 'src/common/typeorm/common.entity';
-import { Entity } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()
-export class UserBoardLike extends CommonEntity {}
+export class UserBoardLike extends CommonEntity {
+  @Column()
+  isLike: boolean;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ referencedColumnName: 'id' })
+  user: User;
+
+  @ManyToOne(() => Board)
+  @JoinColumn({ referencedColumnName: 'id' })
+  board: Board;
+}

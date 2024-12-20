@@ -1,7 +1,9 @@
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { Gender } from 'src/genders/entities/gender.entity';
+import { PetImage } from 'src/pet-images/entities/pet-image.entity';
 import { PetSize } from 'src/pet-sizes/entities/pet-size.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class Pet extends CommonEntity {
@@ -14,9 +16,18 @@ export class Pet extends CommonEntity {
   @Column()
   description: string;
 
-  @OneToMany(() => Gender, (gender) => gender.pet)
-  gender: Gender[];
+  @ManyToOne(() => User)
+  @JoinColumn({ referencedColumnName: 'id' })
+  user: User;
 
-  @OneToMany(() => PetSize, (petSize) => petSize.pet)
-  petSize: PetSize[];
+  @ManyToOne(() => Gender)
+  @JoinColumn({ referencedColumnName: 'id' })
+  gender: Gender;
+
+  @ManyToOne(() => PetSize)
+  @JoinColumn({ referencedColumnName: 'id' })
+  petSize: PetSize;
+
+  @OneToMany(() => PetImage, (petImage) => petImage.pet)
+  petImage: PetImage[];
 }

@@ -1,13 +1,12 @@
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { Pet } from 'src/pets/entities/pet.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class PetSize extends CommonEntity {
   @Column({ length: 6 })
   type: string;
 
-  @ManyToOne(() => Pet)
-  @JoinColumn({ referencedColumnName: 'id' })
-  pet: Pet;
+  @OneToMany(() => Pet, (pet) => pet.gender)
+  pet: Pet[];
 }
