@@ -29,6 +29,15 @@ import { UserBoardLikeModule } from './user-board-likes/user-board-like.module';
 import { PlaceLocationModule } from './place-locations/place-location.module';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { LocationModule } from './locations/location.module';
+import { Gender } from './genders/entities/gender.entity';
+import { Role } from './roles/entities/role.entity';
+import { LoginMethod } from './login-methods/entities/login-method.entity';
+import { Pet } from './pets/entities/pet.entity';
+import { PetSize } from './pet-sizes/entities/pet-size.entity';
+import { RoomUser } from './room-user/entities/room-user.entity';
+import { NotificationType } from './notification-types/entities/notification-type.entity';
+import { Review } from './reviews/entities/review.entity';
+import { ReviewPlaceLike } from './review-place-likes/entities/review-place-like.entity';
 
 @Module({
   imports: [
