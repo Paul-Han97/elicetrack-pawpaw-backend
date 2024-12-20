@@ -1,4 +1,4 @@
-import { BoardImage } from 'src/boardimage/entities/board-image.entity';
+import { BoardImage } from 'src/board-images/entities/board-image.entity';
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
