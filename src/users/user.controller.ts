@@ -42,7 +42,7 @@ export class UserController {
     - 사용자가 작성한 게시글 목록을 조회 합니다.`,
   })
   @ApiOkResponse({
-    type: GetMyBoardListResponseDto,
+    type: [GetMyBoardListResponseDto],
   })
   @Get(':id/boards')
   async getMyBoardList(@Query() paginationDto: PaginationDto) {}
@@ -53,7 +53,7 @@ export class UserController {
     - 사용자가 작성한 리뷰 목록을 조회 합니다.`,
   })
   @ApiOkResponse({
-    type: GetMyReviewListDto,
+    type: [GetMyReviewListDto],
   })
   @Get(':id/reviews')
   async getMyReviewList(@Query() paginationDto: PaginationDto) {}

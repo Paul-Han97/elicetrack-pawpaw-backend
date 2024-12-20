@@ -25,7 +25,7 @@ export class BoardController {
     description: '가져올 게시글 개수',
   })
   @ApiOkResponse({
-    type: GetPopularListResponseDto,
+    type: [GetPopularListResponseDto],
   })
   @Get('popular-lists')
   async getPopularList(@Query() count: number) {}
@@ -40,7 +40,7 @@ export class BoardController {
     description: '가져올 게시글 개수',
   })
   @ApiOkResponse({
-    type: GetLatestListResponseDto,
+    type: [GetLatestListResponseDto],
   })
   @Get('latest-lists')
   async getLatestList(@Query() count: number) {}
