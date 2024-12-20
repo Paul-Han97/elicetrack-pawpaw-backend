@@ -42,6 +42,19 @@ import { Image } from './images/entities/image.entity';
 import { Location } from './locations/entities/location.entity';
 import { Credential } from './credentials/entities/credential.entity';
 import { Notification } from './notifications/entities/notification.entity';
+import { PetModule } from './pets/pet.module';
+import { RoleModule } from './roles/role.module';
+import { LoginMethodModule } from './login-methods/login-method.module';
+import { CredentialModule } from './credentials/credential.module';
+import { GenderModule } from './genders/gender.module';
+import { PetSizeModule } from './pet-sizes/pet-size..module';
+import { ReviewModule } from './reviews/review.module';
+import { ReviewPlaceLikeModule } from './review-place-likes/review-place-like.module';
+import { RoomUserModule } from './room-user/room-user.module';
+import { RoomModule } from './rooms/room.module';
+import { ChatModule } from './chats/room.module';
+import { NotificationModule } from './notifications/notification.module';
+import { NotificationTypeModule } from './notification-types/notification-type.module';
 
 @Module({
   imports: [
@@ -119,6 +132,19 @@ import { Notification } from './notifications/entities/notification.entity';
     PlaceLocationModule,
     UserLocationModule,
     LocationModule,
+    PetModule,
+    RoleModule,
+    LoginMethodModule,
+    CredentialModule,
+    GenderModule,
+    PetSizeModule,
+    ReviewModule,
+    ReviewPlaceLikeModule,
+    RoomUserModule,
+    // RoomModule,
+    // ChatModule,
+    NotificationModule,
+    NotificationTypeModule
   ],
   controllers: [AppController],
   providers: [AppService],

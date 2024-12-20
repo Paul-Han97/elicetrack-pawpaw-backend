@@ -81,7 +81,6 @@ export enum PET_SIZE_TYPE {
   LARGE = 'LARGE',
 }
 
-// 추가 해야 함
 export enum BOARD_CATEGORY_TYPE {
   PROUD_PETS = 'PROUD_PETS',
   CONSULTATION = 'CONSULTATION',

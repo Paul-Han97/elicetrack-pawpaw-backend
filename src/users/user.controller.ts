@@ -1,7 +1,17 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Put, Query } from '@nestjs/common';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { GetMyBoardListResponseDto } from './dto/get-my-board-list.dto';
+import { GetMyPageResponseDto } from './dto/get-my-page.dto';
+import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
-import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('users')
 export class UserController {
@@ -9,4 +19,51 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
+
+  @ApiOperation({
+    summary: '사용자와 반려동물의 정보를 조회 합니다.',
+    description: `
+    - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
+    - 사용자의 반려동물들의 정보를 조회 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '사용자의 id',
+  })
+  @ApiResponse({
+    type: GetMyPageResponseDto,
+  })
+  @Get(':id/my-pages')
+  async getMyPage() {}
+
+  @ApiOperation({
+    summary: '사용자가 작성한 게시글 목록을 조회 합니다.',
+    description: `
+    - 사용자가 작성한 게시글 목록을 조회 합니다.`,
+  })
+  @ApiOkResponse({
+    type: GetMyBoardListResponseDto,
+  })
+  @Get(':id/boards')
+  async getMyBoardList(@Query() paginationDto: PaginationDto) {}
+
+  @ApiOperation({
+    summary: '사용자가 작성한 리뷰 목록을 조회 합니다.',
+    description: `
+    - 사용자가 작성한 리뷰 목록을 조회 합니다.`,
+  })
+  @ApiOkResponse({
+    type: GetMyReviewListDto,
+  })
+  @Get(':id/reviews')
+  async getMyReviewList(@Query() paginationDto: PaginationDto) {}
+
+  @ApiOperation({
+    summary: '사용자의 정보를 수정 합니다.',
+    description: `
+    - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.`,
+  })
+  @Put(':id')
+  @ApiOkResponse()
+  async updateOne(@Body() updateUserDto: UpdateUserDto) {}
 }
