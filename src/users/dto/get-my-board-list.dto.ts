@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
-class ImageUrlList {
+class ImageList {
   @ApiProperty({
     description: '대표 이미지 여부',
   })
@@ -33,11 +33,11 @@ export class GetMyBoardListResponseDto {
   @ApiProperty({
     description: '게시글의 이미지 배열',
     isArray: true,
-    type: ImageUrlList,
+    type: ImageList,
   })
   @ValidateNested({ each: true })
-  @Type(() => ImageUrlList)
-  imageUrlList: ImageUrlList[];
+  @Type(() => ImageList)
+  imageList: ImageList[];
 
   @ApiProperty({
     description: '게시글의 카테고리',
