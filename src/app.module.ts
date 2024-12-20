@@ -29,6 +29,17 @@ import { UserLocationModule } from './userlocation/user-location.module';
 import { PlaceLocation } from './placelocation/entities/place-location.entity';
 import { UserLocation } from './userlocation/entities/user-location.entity';
 import { LocationModule } from './location/location.module';
+import { Gender } from './genders/entities/gender.entity';
+import { Role } from './roles/entities/role.entity';
+import { LoginMethod } from './login-methods/entities/login-method.entity';
+import { Credential } from './credentials/entities/credential.entity';
+import { Pet } from './pets/entities/pet.entity';
+import { PetSize } from './pet-sizes/entities/pet-size.entity';
+import { RoomUser } from './room-user/entities/room-user.entity';
+import { Notification } from './notifications/entities/notification.entity';
+import { NotificationType } from './notification-types/entities/notification-type.entity';
+import { Review } from './reviews/entities/review.entity';
+import { ReviewPlaceLike } from './review-place-likes/entities/review-place-like.entity';
 
 @Module({
   imports: [
@@ -73,6 +84,18 @@ import { LocationModule } from './location/location.module';
           PlaceLocation,
           UserLocation,
           Location,
+          Gender,
+          Role,
+          LoginMethod,
+          Credential,
+          Pet,
+          Gender,
+          PetSize,
+          RoomUser,
+          Notification,
+          NotificationType,
+          Review,
+          ReviewPlaceLike
         ],
         migrations: [MYSQL_MIGRATION_PATH],
         migrationsTableName: 'migrations',
