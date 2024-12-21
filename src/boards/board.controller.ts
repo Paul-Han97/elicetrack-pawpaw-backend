@@ -1,10 +1,12 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { BoardService } from './board.service';
 import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
+import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { IBoardService } from './interface/board.service.interface';
+import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 
 @Controller('boards')
 export class BoardController {
@@ -48,11 +50,12 @@ export class BoardController {
   @ApiOperation({
     summary: '게시글 목록 조회',
     description: `
-    - 등록된 게시글을 날짜를 내림차순으로 정렬하여 조회 합니다.
+    - 게시글 등록일자를 기준으로 내림차순 정렬하여 조회 합니다.
     - 카테고리를 선택할 수 있습니다.`,
   })
   @ApiQuery({
     name: 'category',
+    enum: BOARD_CATEGORY_TYPE,
     description: `
     - 게시글의 카테고리
     - 기본값 : 전체`,
@@ -63,4 +66,15 @@ export class BoardController {
   })
   @Get()
   async getBoardList(@Query() category: string) {}
+
+  @ApiOperation({
+    summary: '게시글을 조회 합니다.',
+    description: `
+    - 게시글 ID를 인자로 받아 게시글의 데이터를 조회 합니다.`,
+  })
+  @ApiOkResponse({
+    type: GetBoardResponseDto,
+  })
+  @Get(':id')
+  async getBoard(@Param() id: number) {}
 }
