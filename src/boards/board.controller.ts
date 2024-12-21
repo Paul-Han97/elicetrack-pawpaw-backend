@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -138,4 +139,19 @@ export class BoardController {
     @Param('id') id: number,
     @Body() updateOneDto: CreateOneDto,
   ) {}
+
+  @ApiOperation({
+    summary: '게시글을 삭제 합니다.',
+    description: `
+    - 게시글을 삭제 합니다.
+    - 내역이 남지 않기 때문에 삭제 이후 복구 할 수 없습니다.
+    `,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글의 ID',
+  })
+  @ApiOkResponse()
+  @Delete(':id')
+  async deleteOne(@Param('id') id: number) {}
 }
