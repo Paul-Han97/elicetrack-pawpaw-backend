@@ -36,6 +36,11 @@ export class GetBoardResponseDto {
   registerDate: Date;
 
   @ApiProperty({
+    description: '게시글의 좋아요 개수',
+  })
+  likeCount: number;
+
+  @ApiProperty({
     description: '이미지 리스트',
     isArray: true,
     type: ImageList,
