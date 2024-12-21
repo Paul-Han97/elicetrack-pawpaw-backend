@@ -1,12 +1,32 @@
-import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
+import { CreateOneDto } from './dto/create-one.dto';
 import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { IBoardService } from './interface/board.service.interface';
-import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 
 @Controller('boards')
 export class BoardController {
@@ -77,4 +97,45 @@ export class BoardController {
   })
   @Get(':id')
   async getBoard(@Param() id: number) {}
+
+  @ApiOperation({
+    summary: '게시글을 생성 합니다.',
+    description: `
+    - 게시글을 생성 합니다.
+    - 이미지는 최대 10장 업로드 가능합니다.
+    - 이미지의 각 파일은 최대 10MB를 넘지 않아야 합니다.
+    - 제목은 한글 및 공백 포함 최대 30자까지 허용 합니다.
+    - 내용은 최대 1,000Byte까지 허용 합니다.
+    `,
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('imageList'))
+  @ApiCreatedResponse()
+  @Post()
+  async createOne(
+    @UploadedFiles() imageList: Express.Multer.File[],
+    @Body() createOneDto: CreateOneDto,
+  ) {}
+
+  @ApiOperation({
+    summary: '게시글을 수정 합니다.',
+    description: `
+    - 게시글을 수정 합니다.
+    - 이미지는 최대 10장 업로드 가능합니다.
+    - 이미지의 각 파일은 최대 10MB를 넘지 않아야 합니다.
+    - 제목은 한글 및 공백 포함 최대 30자까지 허용 합니다.
+    - 내용은 최대 1,000Byte까지 허용 합니다.
+    - 이미 생성된 이미지들은 모두 삭제하고 입력 받은 이미지를 생성 합니다.
+    `,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글의 ID',
+  })
+  @Put(':id')
+  async updateOne(
+    @UploadedFiles() imageList: Express.Multer.File[],
+    @Param('id') id: number,
+    @Body() updateOneDto: CreateOneDto,
+  ) {}
 }
