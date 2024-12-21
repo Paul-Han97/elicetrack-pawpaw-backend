@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Inject, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Put,
+  Query,
+} from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -34,7 +42,7 @@ export class UserController {
     type: GetMyPageResponseDto,
   })
   @Get(':id/my-pages')
-  async getMyPage() {}
+  async getMyPage(@Param('id') id: number) {}
 
   @ApiOperation({
     summary: '사용자가 작성한 게시글 목록을 조회 합니다.',
@@ -45,7 +53,10 @@ export class UserController {
     type: [GetMyBoardListResponseDto],
   })
   @Get(':id/boards')
-  async getMyBoardList(@Query() paginationDto: PaginationDto) {}
+  async getMyBoardList(
+    @Query() paginationDto: PaginationDto,
+    @Param('id') id: number,
+  ) {}
 
   @ApiOperation({
     summary: '사용자가 작성한 리뷰 목록을 조회 합니다.',
@@ -56,7 +67,10 @@ export class UserController {
     type: [GetMyReviewListDto],
   })
   @Get(':id/reviews')
-  async getMyReviewList(@Query() paginationDto: PaginationDto) {}
+  async getMyReviewList(
+    @Query() paginationDto: PaginationDto,
+    @Param('id') id: number,
+  ) {}
 
   @ApiOperation({
     summary: '사용자의 정보를 수정 합니다.',
@@ -65,5 +79,8 @@ export class UserController {
   })
   @Put(':id')
   @ApiOkResponse()
-  async updateOne(@Body() updateUserDto: UpdateUserDto) {}
+  async updateOne(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {}
 }
