@@ -14,6 +14,28 @@ class ImageList {
   url: string;
 }
 
+class CommentList {
+  @ApiProperty({
+    description: '댓글 작성자의 닉네임',
+  })
+  nickname: string;
+
+  @ApiProperty({
+    description: '댓글 작성자의 프로필 이미지',
+  })
+  imageUrl: string;
+
+  @ApiProperty({
+    description: '댓글의 내용',
+  })
+  content: string;
+
+  @ApiProperty({
+    description: '댓글의 작성 날짜',
+  })
+  createdAt: Date;
+}
+
 export class GetBoardResponseDto {
   @ApiProperty({
     description: '사용자의 닉네임',
@@ -31,14 +53,14 @@ export class GetBoardResponseDto {
   content: string;
 
   @ApiProperty({
-    description: '게시글의 등록 날짜',
-  })
-  registerDate: Date;
-
-  @ApiProperty({
     description: '게시글의 좋아요 개수',
   })
   likeCount: number;
+
+  @ApiProperty({
+    description: '게시글 작성 날짜',
+  })
+  createdAt: Date;
 
   @ApiProperty({
     description: '이미지 리스트',
@@ -50,7 +72,11 @@ export class GetBoardResponseDto {
   imageList: ImageList;
 
   @ApiProperty({
-    description: '게시글 작성 날짜',
+    description: '게시글의 댓글 목록',
+    isArray: true,
+    type: CommentList,
   })
-  createdAt: Date;
+  @ValidateNested({ each: true })
+  @Type(() => CommentList)
+  commentList: CommentList;
 }
