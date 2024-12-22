@@ -1,12 +1,21 @@
-import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { CreateReviewDto } from './dto/create-review.dto';
 import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
 } from './dto/get-nearby-place-list.dto';
+import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceService } from './place.service';
-import { GetPlaceResponseDto } from './dto/get-place.dto';
 
 @Controller('places')
 export class PlaceController {
@@ -42,4 +51,20 @@ export class PlaceController {
   })
   @Get(':id')
   async getPlace(@Param('id') id: number) {}
+
+  @ApiOperation({
+    summary: '리뷰를 작성 합니다.',
+    description: `
+    - Place의 id를 입력받아 리뷰를 작성 합니다.
+    - 제목과 내용을 입력할 수 있습니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'place의 id',
+  })
+  @Post(':id')
+  async createReview(
+    @Param('id') id: number,
+    @Body() createOneDto: CreateReviewDto,
+  ) {}
 }
