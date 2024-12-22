@@ -1,16 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Inject,
-} from '@nestjs/common';
+import { Body, Controller, Inject, Param, Put } from '@nestjs/common';
+import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { UpdateOneDto } from './dto/update-one.dto';
 import { ICommentService } from './interface/comment.service.interface';
 
 @Controller('comments')
@@ -18,5 +9,21 @@ export class CommentController {
   constructor(
     @Inject(CommentService)
     private readonly commentService: ICommentService,
+  ) {}
+
+  @ApiOperation({
+    summary: '댓글을 수정 합니다.',
+    description: `
+    - 댓글의 ID를 입력 받아 수정 합니다.
+    - 내용을 수정할 수 있습니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '댓글의 ID',
+  })
+  @Put(':id')
+  async updateOne(
+    @Param('id') id: number,
+    @Body() updateOneDto: UpdateOneDto,
   ) {}
 }
