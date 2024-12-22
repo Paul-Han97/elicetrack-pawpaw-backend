@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { LoginMethod } from 'src/login-methods/entities/login-method.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -9,7 +9,7 @@ export class Credential extends CommonEntity {
   @Column()
   username: string;
 
-  @Expose()
+  @Exclude()
   @Column()
   password: string;
 
