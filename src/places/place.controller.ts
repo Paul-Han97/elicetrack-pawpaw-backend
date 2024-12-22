@@ -6,6 +6,7 @@ import {
 } from './dto/get-nearby-place-list.dto';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceService } from './place.service';
+import { GetPlaceResponseDto } from './dto/get-place.dto';
 
 @Controller('places')
 export class PlaceController {
@@ -35,6 +36,9 @@ export class PlaceController {
   @ApiParam({
     name: 'id',
     description: '시설물의 ID',
+  })
+  @ApiOkResponse({
+    type: GetPlaceResponseDto,
   })
   @Get(':id')
   async getPlace(@Param('id') id: number) {}
