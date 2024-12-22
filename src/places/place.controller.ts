@@ -1,5 +1,5 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
@@ -26,4 +26,16 @@ export class PlaceController {
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {}
+
+  @ApiOperation({
+    summary: '시설물의 정보를 조회 합니다.',
+    description: `
+    - 입력받은 ID로 시설물의 데이터를 조회 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '시설물의 ID',
+  })
+  @Get(':id')
+  async getPlace(@Param('id') id: number) {}
 }
