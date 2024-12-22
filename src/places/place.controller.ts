@@ -53,7 +53,7 @@ export class PlaceController {
   async getPlace(@Param('id') id: number) {}
 
   @ApiOperation({
-    summary: '리뷰를 작성 합니다.',
+    summary: '시설물에 리뷰를 작성 합니다.',
     description: `
     - Place의 id를 입력받아 리뷰를 작성 합니다.
     - 제목과 내용을 입력할 수 있습니다.`,
@@ -62,7 +62,7 @@ export class PlaceController {
     name: 'id',
     description: 'place의 id',
   })
-  @Post(':id')
+  @Post(':id/reviews')
   async createReview(
     @Param('id') id: number,
     @Body() createOneDto: CreateReviewDto,
