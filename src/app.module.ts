@@ -10,8 +10,8 @@ import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { Board } from './boards/entities/board.entity';
 import { BoardModule } from './boards/board.module';
-import { CommentModule } from './comment/comment.module';
-import { Comment } from './comment/entities/comment.entity';
+import { CommentModule } from './comments/comment.module';
+import { Comment } from './comments/entities/comment.entity';
 import { PlaceModule } from './places/place.module';
 import { Place } from './places/entities/place.entity';
 import { BoardImage } from './board-images/entities/board-image.entity';
@@ -55,6 +55,7 @@ import { RoomModule } from './rooms/room.module';
 import { ChatModule } from './chats/room.module';
 import { NotificationModule } from './notifications/notification.module';
 import { NotificationTypeModule } from './notification-types/notification-type.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { NotificationTypeModule } from './notification-types/notification-type.m
         logging: true,
       }),
     }),
+    AuthModule,
     UserModule,
     BoardModule,
     BoardImageModule,

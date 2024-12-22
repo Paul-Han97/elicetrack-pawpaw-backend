@@ -2,13 +2,20 @@ import {
   Body,
   Controller,
   Inject,
+  Param,
   Post,
   Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { IPetService } from './interfaces/pet.service.interface';
@@ -36,6 +43,7 @@ export class PetController {
   @Put(':id')
   async updateOne(
     @UploadedFile() image: Express.Multer.File,
+    @Param('id') id: number,
     @Body() updatePetDto: UpdatePetDto,
   ) {}
 

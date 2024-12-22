@@ -14,11 +14,11 @@ class ImageList {
   url: string;
 }
 
-export class GetMyBoardListResponseDto {
+export class GetBoardListResponseDto {
   @ApiProperty({
-    description: '게시글의 ID',
+    description: '게시글의 카테고리',
   })
-  boardId: number;
+  category: string;
 
   @ApiProperty({
     description: '게시글의 제목',
@@ -31,21 +31,16 @@ export class GetMyBoardListResponseDto {
   content: string;
 
   @ApiProperty({
-    description: '게시글의 이미지 배열',
+    description: '사용자가 게시글의 좋아요를 클릭 했는지 여부',
+  })
+  isLike: boolean;
+
+  @ApiProperty({
+    description: '이미지 리스트',
     isArray: true,
     type: ImageList,
   })
   @ValidateNested({ each: true })
   @Type(() => ImageList)
-  imageList: ImageList[];
-
-  @ApiProperty({
-    description: '게시글의 카테고리',
-  })
-  boardCategory: string;
-
-  @ApiProperty({
-    description: '사용자가 게시글의 좋아요를 클릭 했는지 여부',
-  })
-  isLike: boolean;
+  imageList: ImageList;
 }

@@ -12,24 +12,20 @@ export class CommonEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Exclude()
   @Column({
     default: PAWPAW,
     nullable: true,
   })
   createdUser: string;
 
-  @Exclude()
   @CreateDateColumn()
   createdAt: Date;
 
-  @Exclude()
   @Column({
     nullable: true,
   })
   updatedUser: string;
 
-  @Exclude()
   @UpdateDateColumn({
     nullable: true
   })
