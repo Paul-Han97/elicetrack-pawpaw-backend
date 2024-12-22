@@ -48,4 +48,9 @@ export class GetBoardResponseDto {
   @ValidateNested({ each: true })
   @Type(() => ImageList)
   imageList: ImageList;
+
+  @ApiProperty({
+    description: '게시글 작성 날짜',
+  })
+  createdAt: Date;
 }
