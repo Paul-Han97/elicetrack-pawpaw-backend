@@ -4,6 +4,11 @@ import { ValidateNested } from 'class-validator';
 
 class ReviewList {
   @ApiProperty({
+    description: '리뷰의 ID'
+  })
+  id: number;
+
+  @ApiProperty({
     description: '리뷰 작성자 닉네임',
   })
   nickname: string;
