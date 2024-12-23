@@ -20,6 +20,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import { UpdateBoardCommentDto } from 'src/boards/dto/update-board-comment.dto';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
@@ -147,6 +148,27 @@ export class BoardController {
   ) {}
 
   @ApiOperation({
+    summary: '댓글을 수정 합니다.',
+    description: `
+      - 댓글의 ID를 입력 받아 수정 합니다.
+      - 내용을 수정할 수 있습니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+  })
+  @ApiParam({
+    name: 'commentId',
+    description: '댓글의 ID',
+  })
+  @Put(':id')
+  async updateBoardComment(
+    @Param('id') id: number,
+    @Param('commentId') commentId: number,
+    @Body() updateBoardCommentDto: UpdateBoardCommentDto,
+  ) {}
+
+  @ApiOperation({
     summary: '게시글을 삭제 합니다.',
     description: `
     - 게시글을 삭제 합니다.
@@ -159,4 +181,24 @@ export class BoardController {
   })
   @Delete(':id')
   async deleteBoard(@Param('id') id: number) {}
+
+  @ApiOperation({
+    summary: '댓글을 삭제 합니다.',
+    description: `
+    - 댓글의 ID를 입력 받아 삭제 합니다.
+    `,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+  })
+  @ApiParam({
+    name: 'commentId',
+    description: '댓글의 ID',
+  })
+  @Delete(':id')
+  async deleteBoardComment(
+    @Param('id') id: number,
+    @Param('commentId') commentId: number,
+  ) {}
 }
