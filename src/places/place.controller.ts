@@ -40,7 +40,7 @@ export class PlaceController {
   @ApiOkResponse({
     type: GetNearbyPlaceListResponseDto,
   })
-  @Get('nearby-place-lists')
+  @Get('nearby-place-list')
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {}

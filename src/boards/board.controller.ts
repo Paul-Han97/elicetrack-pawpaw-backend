@@ -52,7 +52,7 @@ export class BoardController {
   @ApiOkResponse({
     type: [GetPopularListResponseDto],
   })
-  @Get('popular-lists')
+  @Get('popular-list')
   async getPopularList(@Query() count: number) {}
 
   @ApiOperation({
@@ -67,7 +67,7 @@ export class BoardController {
   @ApiOkResponse({
     type: [GetLatestListResponseDto],
   })
-  @Get('latest-lists')
+  @Get('latest-list')
   async getLatestList(@Query() count: number) {}
 
   @ApiOperation({
