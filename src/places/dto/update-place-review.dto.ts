@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateReviewDto {
+export class UpdatePlaceReviewDto {
   @ApiProperty({
     description: '리뷰의 제목',
   })
@@ -17,7 +17,7 @@ export class UpdateReviewDto {
   isLike: boolean;
 }
 
-export class UpdateReviewResponseDto {
+export class UpdatePlaceReviewResponseDto {
   @ApiProperty({
     description: '장소의 ID',
   })

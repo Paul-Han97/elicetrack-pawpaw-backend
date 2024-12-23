@@ -29,7 +29,6 @@ import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
-import { UpdateReviewResponseDto } from 'src/reviews/dto/update-one.dto';
 
 @Controller('boards')
 export class BoardController {
