@@ -1,6 +1,6 @@
 import { BoardCategory } from 'src/board-categories/entities/board-category.entity';
 import { BoardImage } from 'src/board-images/entities/board-image.entity';
-import { Comment } from 'src/comment/entities/comment.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { UserBoardLike } from 'src/user-board-likes/entities/user-board-like.entity';
 import { User } from 'src/users/entities/user.entity';

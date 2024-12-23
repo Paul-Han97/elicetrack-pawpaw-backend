@@ -1,5 +1,5 @@
 import { Board } from 'src/boards/entities/board.entity';
-import { Comment } from 'src/comment/entities/comment.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 import { CommonEntity } from 'src/common/typeorm/common.entity';
 import { Credential } from 'src/credentials/entities/credential.entity';
 import { Notification } from 'src/notifications/entities/notification.entity';

@@ -6,7 +6,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 @Entity()
 export class Comment extends CommonEntity {
   @Column()
-  comment: string;
+  content: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ referencedColumnName: 'id' })

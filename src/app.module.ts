@@ -10,8 +10,8 @@ import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { Board } from './boards/entities/board.entity';
 import { BoardModule } from './boards/board.module';
-import { CommentModule } from './comment/comment.module';
-import { Comment } from './comment/entities/comment.entity';
+import { CommentModule } from './comments/comment.module';
+import { Comment } from './comments/entities/comment.entity';
 import { PlaceModule } from './places/place.module';
 import { Place } from './places/entities/place.entity';
 import { BoardImage } from './board-images/entities/board-image.entity';
@@ -42,6 +42,20 @@ import { Image } from './images/entities/image.entity';
 import { Location } from './locations/entities/location.entity';
 import { Credential } from './credentials/entities/credential.entity';
 import { Notification } from './notifications/entities/notification.entity';
+import { PetModule } from './pets/pet.module';
+import { RoleModule } from './roles/role.module';
+import { LoginMethodModule } from './login-methods/login-method.module';
+import { CredentialModule } from './credentials/credential.module';
+import { GenderModule } from './genders/gender.module';
+import { PetSizeModule } from './pet-sizes/pet-size..module';
+import { ReviewModule } from './reviews/review.module';
+import { ReviewPlaceLikeModule } from './review-place-likes/review-place-like.module';
+import { RoomUserModule } from './room-user/room-user.module';
+import { RoomModule } from './rooms/room.module';
+import { ChatModule } from './chats/room.module';
+import { NotificationModule } from './notifications/notification.module';
+import { NotificationTypeModule } from './notification-types/notification-type.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -107,6 +121,7 @@ import { Notification } from './notifications/entities/notification.entity';
         logging: true,
       }),
     }),
+    AuthModule,
     UserModule,
     BoardModule,
     BoardImageModule,
@@ -119,6 +134,19 @@ import { Notification } from './notifications/entities/notification.entity';
     PlaceLocationModule,
     UserLocationModule,
     LocationModule,
+    PetModule,
+    RoleModule,
+    LoginMethodModule,
+    CredentialModule,
+    GenderModule,
+    PetSizeModule,
+    ReviewModule,
+    ReviewPlaceLikeModule,
+    RoomUserModule,
+    // RoomModule,
+    // ChatModule,
+    NotificationModule,
+    NotificationTypeModule
   ],
   controllers: [AppController],
   providers: [AppService],
