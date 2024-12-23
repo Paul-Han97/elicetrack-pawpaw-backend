@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
-import { CreateOneDto } from './dto/create-one.dto';
+import { CreateOneDto, CreateOneResponseDto } from './dto/create-one.dto';
 import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
@@ -109,9 +109,11 @@ export class BoardController {
     - 내용은 최대 1,000Byte까지 허용 합니다.
     `,
   })
+  @ApiCreatedResponse({
+    type: CreateOneResponseDto,
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('imageList'))
-  @ApiCreatedResponse()
   @Post()
   async createOne(
     @UploadedFiles() imageList: Express.Multer.File[],

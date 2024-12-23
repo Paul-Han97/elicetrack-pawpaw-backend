@@ -27,3 +27,10 @@ export class CreateOneDto {
   })
   content: string;
 }
+
+export class CreateOneResponseDto {
+  @ApiProperty({
+    description: '게시글의 ID',
+  })
+  id: number;
+}
