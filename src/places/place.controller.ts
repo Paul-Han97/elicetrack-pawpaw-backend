@@ -7,8 +7,16 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { CreateReviewDto } from './dto/create-review.dto';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
+import {
+  CreateReviewDto,
+  CreateReviewResponseDto,
+} from './dto/create-review.dto';
 import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
@@ -62,9 +70,12 @@ export class PlaceController {
     name: 'id',
     description: 'place의 id',
   })
+  @ApiCreatedResponse({
+    type: CreateReviewResponseDto,
+  })
   @Post(':id/reviews')
   async createReview(
     @Param('id') id: number,
-    @Body() createOneDto: CreateReviewDto,
+    @Body() createReviewDto: CreateReviewDto,
   ) {}
 }

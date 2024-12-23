@@ -16,3 +16,10 @@ export class CreateReviewDto {
   })
   isLike: boolean;
 }
+
+export class CreateReviewResponseDto {
+  @ApiProperty({
+    description: '장소의 ID',
+  })
+  placeId: number;
+}

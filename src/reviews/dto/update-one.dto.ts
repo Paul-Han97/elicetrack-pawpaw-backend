@@ -16,3 +16,10 @@ export class UpdateOneDto {
   })
   isLike: boolean;
 }
+
+export class UpdateOneResponseDto {
+  @ApiProperty({
+    description: '장소의 ID',
+  })
+  placeId: number;
+}
