@@ -27,7 +27,9 @@ import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
+import { UpdateOneDto } from './dto/update-one.dto';
 import { IBoardService } from './interface/board.service.interface';
+import { UpdateOneResponseDto } from 'src/reviews/dto/update-one.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -103,7 +105,7 @@ export class BoardController {
     summary: '게시글을 생성 합니다.',
     description: `
     - 게시글을 생성 합니다.
-    - 이미지는 최대 10장 업로드 가능합니다.
+    - 이미지는 최대 5장 업로드 가능합니다.
     - 이미지의 각 파일은 최대 10MB를 넘지 않아야 합니다.
     - 제목은 한글 및 공백 포함 최대 30자까지 허용 합니다.
     - 내용은 최대 1,000Byte까지 허용 합니다.
@@ -135,11 +137,14 @@ export class BoardController {
     name: 'id',
     description: '게시글의 ID',
   })
+  @ApiOkResponse({
+    type: UpdateOneResponseDto,
+  })
   @Put(':id')
   async updateOne(
     @UploadedFiles() imageList: Express.Multer.File[],
     @Param('id') id: number,
-    @Body() updateOneDto: CreateOneDto,
+    @Body() updateOneDto: UpdateOneDto,
   ) {}
 
   @ApiOperation({
@@ -153,7 +158,6 @@ export class BoardController {
     name: 'id',
     description: '게시글의 ID',
   })
-  @ApiOkResponse()
   @Delete(':id')
   async deleteOne(@Param('id') id: number) {}
 }
