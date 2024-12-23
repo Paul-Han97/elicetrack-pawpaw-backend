@@ -79,7 +79,7 @@ export class UserController {
   })
   @Put(':id')
   @ApiOkResponse()
-  async updateOne(
+  async updateUser(
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {}

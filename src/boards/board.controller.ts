@@ -20,13 +20,15 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import { UpdateBoardCommentDto } from 'src/boards/dto/update-board-comment.dto';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
-import { CreateOneDto } from './dto/create-one.dto';
+import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
+import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
 
 @Controller('boards')
@@ -50,7 +52,7 @@ export class BoardController {
   @ApiOkResponse({
     type: [GetPopularListResponseDto],
   })
-  @Get('popular-lists')
+  @Get('popular-list')
   async getPopularList(@Query() count: number) {}
 
   @ApiOperation({
@@ -65,7 +67,7 @@ export class BoardController {
   @ApiOkResponse({
     type: [GetLatestListResponseDto],
   })
-  @Get('latest-lists')
+  @Get('latest-list')
   async getLatestList(@Query() count: number) {}
 
   @ApiOperation({
@@ -103,19 +105,21 @@ export class BoardController {
     summary: '게시글을 생성 합니다.',
     description: `
     - 게시글을 생성 합니다.
-    - 이미지는 최대 10장 업로드 가능합니다.
+    - 이미지는 최대 5장 업로드 가능합니다.
     - 이미지의 각 파일은 최대 10MB를 넘지 않아야 합니다.
     - 제목은 한글 및 공백 포함 최대 30자까지 허용 합니다.
     - 내용은 최대 1,000Byte까지 허용 합니다.
     `,
   })
+  @ApiCreatedResponse({
+    type: CreateBoardResponseDto,
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('imageList'))
-  @ApiCreatedResponse()
   @Post()
-  async createOne(
+  async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
-    @Body() createOneDto: CreateOneDto,
+    @Body() createBoardDto: CreateBoardDto,
   ) {}
 
   @ApiOperation({
@@ -133,11 +137,35 @@ export class BoardController {
     name: 'id',
     description: '게시글의 ID',
   })
+  @ApiOkResponse({
+    type: UpdateBoardResponseDto,
+  })
   @Put(':id')
-  async updateOne(
+  async updateBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
     @Param('id') id: number,
-    @Body() updateOneDto: CreateOneDto,
+    @Body() UpdateBoardDto: UpdateBoardDto,
+  ) {}
+
+  @ApiOperation({
+    summary: '댓글을 수정 합니다.',
+    description: `
+      - 댓글의 ID를 입력 받아 수정 합니다.
+      - 내용을 수정할 수 있습니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+  })
+  @ApiParam({
+    name: 'commentId',
+    description: '댓글의 ID',
+  })
+  @Put(':id')
+  async updateBoardComment(
+    @Param('id') id: number,
+    @Param('commentId') commentId: number,
+    @Body() updateBoardCommentDto: UpdateBoardCommentDto,
   ) {}
 
   @ApiOperation({
@@ -151,7 +179,26 @@ export class BoardController {
     name: 'id',
     description: '게시글의 ID',
   })
-  @ApiOkResponse()
   @Delete(':id')
-  async deleteOne(@Param('id') id: number) {}
+  async deleteBoard(@Param('id') id: number) {}
+
+  @ApiOperation({
+    summary: '댓글을 삭제 합니다.',
+    description: `
+    - 댓글의 ID를 입력 받아 삭제 합니다.
+    `,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+  })
+  @ApiParam({
+    name: 'commentId',
+    description: '댓글의 ID',
+  })
+  @Delete(':id')
+  async deleteBoardComment(
+    @Param('id') id: number,
+    @Param('commentId') commentId: number,
+  ) {}
 }
