@@ -8,9 +8,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { DeleteOneResponseDto } from './dto/delete-one.dto';
+import { DeleteReviewResponseDto } from './dto/delete-one.dto';
 import { GetReviewDto } from './dto/get-review.dto';
-import { UpdateOneDto, UpdateOneResponseDto } from './dto/update-one.dto';
+import { UpdateReviewDto, UpdateReviewResponseDto } from './dto/update-one.dto';
 import { IReviewService } from './interfaces/review.service.interface';
 import { ReviewService } from './review.service';
 
@@ -48,12 +48,12 @@ export class ReviewController {
     description: '리뷰의 id',
   })
   @ApiOkResponse({
-    type: UpdateOneResponseDto,
+    type: UpdateReviewResponseDto,
   })
   @Put(':id')
-  async updateOne(
+  async updateReview(
     @Param('id') id: number,
-    @Body() updateOneDto: UpdateOneDto,
+    @Body() updateReviewDto: UpdateReviewDto,
   ) {}
 
   @ApiOperation({
@@ -66,8 +66,8 @@ export class ReviewController {
     description: '리뷰의 id',
   })
   @ApiOkResponse({
-    type: DeleteOneResponseDto,
+    type: DeleteReviewResponseDto,
   })
   @Delete(':id')
-  async deleteOne(@Param('id') id: number) {}
+  async deleteReview(@Param('id') id: number) {}
 }

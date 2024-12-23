@@ -41,7 +41,7 @@ export class PetController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @Put(':id')
-  async updateOne(
+  async updatePetDto(
     @UploadedFile() image: Express.Multer.File,
     @Param('id') id: number,
     @Body() updatePetDto: UpdatePetDto,
@@ -56,7 +56,7 @@ export class PetController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @Post()
-  async createOne(
+  async createPet(
     @UploadedFile() image: Express.Multer.File,
     @Body() createPetDto: CreatePetDto,
   ) {}

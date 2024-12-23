@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class DeleteOneResponseDto {
+export class DeleteReviewResponseDto {
   @ApiProperty({
     description: '장소의 ID',
   })

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateOneDto {
+export class UpdateCommentDto {
   @ApiProperty({
     description: '댓글의 내용',
   })

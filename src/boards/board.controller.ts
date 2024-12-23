@@ -22,14 +22,14 @@ import {
 } from '@nestjs/swagger';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
-import { CreateOneDto, CreateOneResponseDto } from './dto/create-one.dto';
+import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
-import { UpdateOneDto } from './dto/update-one.dto';
+import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
-import { UpdateOneResponseDto } from 'src/reviews/dto/update-one.dto';
+import { UpdateReviewResponseDto } from 'src/reviews/dto/update-one.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -112,14 +112,14 @@ export class BoardController {
     `,
   })
   @ApiCreatedResponse({
-    type: CreateOneResponseDto,
+    type: CreateBoardResponseDto,
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('imageList'))
   @Post()
-  async createOne(
+  async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
-    @Body() createOneDto: CreateOneDto,
+    @Body() createBoardDto: CreateBoardDto,
   ) {}
 
   @ApiOperation({
@@ -138,13 +138,13 @@ export class BoardController {
     description: '게시글의 ID',
   })
   @ApiOkResponse({
-    type: UpdateOneResponseDto,
+    type: UpdateBoardResponseDto,
   })
   @Put(':id')
-  async updateOne(
+  async updateBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
     @Param('id') id: number,
-    @Body() updateOneDto: UpdateOneDto,
+    @Body() UpdateBoardDto: UpdateBoardDto,
   ) {}
 
   @ApiOperation({
@@ -159,5 +159,5 @@ export class BoardController {
     description: '게시글의 ID',
   })
   @Delete(':id')
-  async deleteOne(@Param('id') id: number) {}
+  async deleteBoard(@Param('id') id: number) {}
 }

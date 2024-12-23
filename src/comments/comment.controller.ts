@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Inject, Param, Put } from '@nestjs/common';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
-import { UpdateOneDto } from './dto/update-one.dto';
+import { UpdateCommentDto } from './dto/update-one.dto';
 import { ICommentService } from './interface/comment.service.interface';
 
 @Controller('comments')
@@ -22,9 +22,9 @@ export class CommentController {
     description: '댓글의 ID',
   })
   @Put(':id')
-  async updateOne(
+  async updateComment(
     @Param('id') id: number,
-    @Body() updateOneDto: UpdateOneDto,
+    @Body() updateCommentDto: UpdateCommentDto,
   ) {}
 
   @ApiOperation({
@@ -38,5 +38,5 @@ export class CommentController {
     description: '댓글의 ID',
   })
   @Delete(':id')
-  async deleteOne(@Param('id') id: number) {}
+  async deleteComment(@Param('id') id: number) {}
 }

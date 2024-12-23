@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 
-export class CreateOneDto {
+export class CreateBoardDto {
   @ApiProperty({
     type: 'string',
     format: 'binary',
@@ -28,7 +28,7 @@ export class CreateOneDto {
   content: string;
 }
 
-export class CreateOneResponseDto {
+export class CreateBoardResponseDto {
   @ApiProperty({
     description: '게시글의 ID',
   })
