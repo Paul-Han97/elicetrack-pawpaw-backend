@@ -3,5 +3,5 @@ import { PasswordManager } from './password-manager.util';
 
 @Injectable()
 export class UtilService {
-  constructor(private readonly passwordManager: PasswordManager) {}
+  constructor(public readonly passwordManager: PasswordManager) {}
 }

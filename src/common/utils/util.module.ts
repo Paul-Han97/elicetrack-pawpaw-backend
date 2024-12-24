@@ -4,7 +4,7 @@ import { PasswordManager } from './password-manager.util';
 
 @Global()
 @Module({
-  providers: [PasswordManager],
+  providers: [UtilService, PasswordManager],
   exports: [UtilService],
 })
 export class UtilModule {}

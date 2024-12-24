@@ -56,6 +56,7 @@ import { ChatModule } from './chats/room.module';
 import { NotificationModule } from './notifications/notification.module';
 import { NotificationTypeModule } from './notification-types/notification-type.module';
 import { AuthModule } from './auth/auth.module';
+import { UtilModule } from './common/utils/util.module';
 
 @Module({
   imports: [
@@ -69,6 +70,9 @@ import { AuthModule } from './auth/auth.module';
         DATABASE_MYSQL_PASSWORD: Joi.string().required(),
         DATABASE_MYSQL_NAME: Joi.string().required(),
         DATABASE_MYSQL_PORT: Joi.number().port().required(),
+        SESSION_SECRET: Joi.string().required(),
+        REDIS_HOST: Joi.string().required(),
+        REDIS_PREFIX: Joi.string().required(),
       }),
       isGlobal: true,
     }),
@@ -121,6 +125,7 @@ import { AuthModule } from './auth/auth.module';
         logging: true,
       }),
     }),
+    UtilModule,
     AuthModule,
     UserModule,
     BoardModule,
