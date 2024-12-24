@@ -15,9 +15,6 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 @Entity()
 export class User extends CommonEntity {
   @Column()
-  email: string;
-
-  @Column()
   name: string;
 
   @Column()
@@ -31,7 +28,7 @@ export class User extends CommonEntity {
   role: Role;
 
   @OneToMany(() => Credential, (credential) => credential.user)
-  crendeital: Credential[];
+  credential: Credential[];
 
   @OneToMany(() => UserImage, (userImage) => userImage.user)
   userImage: UserImage[];
