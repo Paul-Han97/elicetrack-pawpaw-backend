@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmCustomModule } from 'src/common/typeorm/typeorm-custom.module';
+import { UserRepository } from 'src/users/user.repository';
+import { UserService } from 'src/users/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [],
+  imports: [TypeOrmCustomModule.forCustomRepository([UserRepository])],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, UserService],
 })
 export class AuthModule {}
