@@ -56,6 +56,7 @@ import { ChatModule } from './chats/room.module';
 import { NotificationModule } from './notifications/notification.module';
 import { NotificationTypeModule } from './notification-types/notification-type.module';
 import { AuthModule } from './auth/auth.module';
+import { UtilModule } from './common/utils/util.module';
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { AuthModule } from './auth/auth.module';
         logging: true,
       }),
     }),
+    UtilModule,
     AuthModule,
     UserModule,
     BoardModule,
