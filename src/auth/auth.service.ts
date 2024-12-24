@@ -23,9 +23,9 @@ export class AuthService implements IAuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<ResponseData> {
-    const { username, password } = loginDto;
+    const { email, password } = loginDto;
 
-    const user = await this.userRepository.findUserCredentialByEmail(username);
+    const user = await this.userRepository.findUserCredentialByEmail(email);
 
     if (!user)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);

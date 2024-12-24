@@ -6,7 +6,7 @@ export class LoginDto {
     description: '사용자의 계정',
   })
   @IsEmail()
-  username: string;
+  email: string;
 
   @ApiProperty({
     description: '사용자의 패스워드',
