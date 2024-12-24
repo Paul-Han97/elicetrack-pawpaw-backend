@@ -34,7 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       this.logger.log(
         `GlobalExceptionFilter 종료`,
-        `반환 값:\n${JSON.stringify(body)}`,
+        `Result :\n${JSON.stringify(body, undefined, 2)}`,
       );
 
       res.status(500).json(body);
@@ -58,7 +58,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     this.logger.log(
       `GlobalExceptionFilter 종료`,
-      `반환 값:\n${JSON.stringify(body)}`,
+      `Result :\n${JSON.stringify(body, undefined, 2)}`,
     );
 
     res.status(statusCode).json(body);
