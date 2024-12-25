@@ -37,6 +37,7 @@ export const enum ERROR_MESSAGE {
   ACCOUNT_ALREADY_EXIST = '계정이 이미 존재합니다.',
   VERIFICATION_CODE_NOT_MATCH = '인증코드가 일치하지 않습니다.',
   EMAIL_PASSWORD_NOT_MATCH = '이메일 또는 패스워드가 일치하지 않습니다.',
+  UNAUTHORIZED = '로그인이 필요 합니다.'
 }
 
 export const enum SUCCESS_MESSAGE {
