@@ -44,7 +44,7 @@ async function bootstrap() {
     .setTitle('포포')
     .setDescription('포포의 API 명세서 입니다.')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addCookieAuth('connect.sid')
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
