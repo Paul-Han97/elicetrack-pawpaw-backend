@@ -11,6 +11,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -27,6 +28,18 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
+
+  @ApiOperation({
+    summary: '닉네임 중복을 확인 합니다.',
+    description: `
+        - 닉네임 중복을 확인 합니다.`,
+  })
+  @ApiQuery({
+    name: 'nickname',
+    description: '사용자의 닉네임',
+  })
+  @Get('duplicate-nickname')
+  async duplicateNickname(@Query('nickname') nickname: string) {}
 
   @ApiOperation({
     summary: '사용자와 반려동물의 정보를 조회 합니다.',

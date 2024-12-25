@@ -34,18 +34,6 @@ export class AuthController {
   ) {}
 
   @ApiOperation({
-    summary: '닉네임 중복을 확인 합니다.',
-    description: `
-      - 닉네임 중복을 확인 합니다.`,
-  })
-  @ApiQuery({
-    name: 'nickname',
-    description: '사용자의 닉네임',
-  })
-  @Get('get-user-nickname')
-  async getUserNickname(@Query('nickname') nickname: string) {}
-
-  @ApiOperation({
     summary: '서비스에 로그인을 진행 합니다.',
     description: `
     - 서비스에 로그인을 진행 합니다.
