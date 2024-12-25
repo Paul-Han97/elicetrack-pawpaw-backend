@@ -24,6 +24,7 @@ import { RegisterDto } from './dto/register.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerficationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
+import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -112,4 +113,15 @@ export class AuthController {
   async validateVerificationCode(
     @Body() validateVerficationDto: ValidateVerficationDto,
   ) {}
+
+  @ApiOperation({
+    summary: '사용자에게 임시 비밀번호 발급 메일을 전송 합니다.',
+    description: `
+    - 사용자에게 임시 비밀번호를 발급 합니다.
+    - 발급된 비밀번호로 사용자의 비밀번호가 변경 됩니다.
+    - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`
+  })
+  @HttpCode(HTTP_STATUS.OK)
+  @Post('send-temporary-password-email')
+  async sendTemporaryPasswordEmail(@Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto) {}
 }
