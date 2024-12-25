@@ -3,6 +3,14 @@ import { IsEmail, IsString, IsStrongPassword, Max, Min } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: false,
+    description: '사용자의 프로필 이미지',
+  })
+  image: Express.Multer.File;
+
+  @ApiProperty({
     description: '사용자의 이메일',
   })
   @IsEmail()

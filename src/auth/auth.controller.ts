@@ -1,30 +1,24 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Inject,
   Post,
-  Query,
   Req,
-  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-} from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { Request } from 'express';
 import { HTTP_STATUS } from 'src/common/constants';
-import { Auth } from 'src/common/guards/auth.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerficationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
-import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -74,8 +68,14 @@ export class AuthController {
     - name: 최소 1글자 최대 30글자를 충족해야 한다.
     - nickname: 최소 1글자 최대 30글자를 충족해야 한다.`,
   })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @Post('register')
-  async register(@Req() req: Request, @Body() registerDto: RegisterDto) {}
+  async register(
+    @UploadedFile() image: Express.Multer.File,
+    @Req() req: Request,
+    @Body() registerDto: RegisterDto,
+  ) {}
 
   @ApiOperation({
     summary: '사용자의 이메일로 인증 코드를 전송 합니다.',
@@ -107,9 +107,11 @@ export class AuthController {
     description: `
     - 사용자에게 임시 비밀번호를 발급 합니다.
     - 발급된 비밀번호로 사용자의 비밀번호가 변경 됩니다.
-    - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`
+    - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`,
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('send-temporary-password-email')
-  async sendTemporaryPasswordEmail(@Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto) {}
+  async sendTemporaryPasswordEmail(
+    @Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto,
+  ) {}
 }
