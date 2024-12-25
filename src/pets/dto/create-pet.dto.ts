@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePetDto {
-  @ApiProperty({ type: 'string', format: 'binary' })
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: false,
+    description: '반려동물의 이미지',
+  })
   image: Express.Multer.File;
 
   @ApiProperty({
