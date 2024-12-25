@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,8 +15,9 @@ import {
   ApiOperation,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { HTTP_STATUS } from 'src/common/constants';
+import { Auth } from 'src/common/guards/auth.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -62,7 +64,8 @@ export class AuthController {
     const result = await this.authService.login(loginDto);
 
     req.session.user = {
-      id: result.data.userId,
+      id: result.data.user.id,
+      role: result.data.user.role,
     };
 
     return result;
@@ -82,7 +85,6 @@ export class AuthController {
     - name: 최소 1글자 최대 30글자를 충족해야 한다.
     - nickname: 최소 1글자 최대 30글자를 충족해야 한다.`,
   })
-  @ApiCreatedResponse()
   @Post('register')
   async register(@Req() req: Request, @Body() registerDto: RegisterDto) {}
 
