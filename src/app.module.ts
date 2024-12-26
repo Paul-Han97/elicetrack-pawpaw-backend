@@ -52,11 +52,12 @@ import { ReviewModule } from './reviews/review.module';
 import { ReviewPlaceLikeModule } from './review-place-likes/review-place-like.module';
 import { RoomUserModule } from './room-user/room-user.module';
 import { RoomModule } from './rooms/room.module';
-import { ChatModule } from './chats/room.module';
+import { ChatModule } from './chats/chat.module';
 import { NotificationModule } from './notifications/notification.module';
 import { NotificationTypeModule } from './notification-types/notification-type.module';
 import { AuthModule } from './auth/auth.module';
 import { UtilModule } from './common/utils/util.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -73,12 +74,36 @@ import { UtilModule } from './common/utils/util.module';
         SESSION_SECRET: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PREFIX: Joi.string().required(),
+        DATABASE_MONGO_HOST: Joi.string().required(),
+        DATABASE_MONGO_NAME: Joi.string().required(),
+        DATABASE_MONGO_USERNAME: Joi.string().required(),
+        DATABASE_MONGO_PASSWORD: Joi.string().required(),
+        DATABASE_MONGO_PORT: Joi.number().port().required(),
       }),
       isGlobal: true,
     }),
     CacheModule.register({
       // 5분
       ttl: 1000 * 60 * 5,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const host = configService.get<string>(ENV_KEYS.DATABASE_MONGO_HOST);
+        const name = configService.get<string>(ENV_KEYS.DATABASE_MONGO_NAME);
+        const username = configService.get<string>(ENV_KEYS.DATABASE_MONGO_USERNAME);
+        const password = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PASSWORD);
+        const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
+
+        const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
+        
+        return {
+          uri,
+          retryAttempts: 0,
+        }
+      }
+
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -149,7 +174,7 @@ import { UtilModule } from './common/utils/util.module';
     ReviewPlaceLikeModule,
     RoomUserModule,
     // RoomModule,
-    // ChatModule,
+    ChatModule,
     NotificationModule,
     NotificationTypeModule
   ],

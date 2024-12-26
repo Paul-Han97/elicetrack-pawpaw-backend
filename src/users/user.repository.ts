@@ -10,8 +10,9 @@ export class UserRepository
 {
   async findUserCredentialByEmail(username: string): Promise<User> {
     const reuslt = await this.createQueryBuilder('user')
-      .select(['user.id', 'credential.username', 'credential.password'])
+      .select(['user.id', 'credential.username', 'credential.password', 'role.type'])
       .leftJoinAndSelect('user.credential', 'credential')
+      .leftJoinAndSelect('user.role', 'role')
       .where('credential.username = :username', { username })
       .getOne();
     return reuslt;

@@ -9,7 +9,7 @@ import { ResponseData } from 'src/common/types/response.type';
 import { UtilService } from 'src/common/utils/util.service';
 import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 import { UserRepository } from 'src/users/user.repository';
-import { LoginDto, LoginResponseDto } from './dto/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
 
 @Injectable()
@@ -39,8 +39,13 @@ export class AuthService implements IAuthService {
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);
 
     const resData: ResponseData = {
-      message: SUCCESS_MESSAGE.FIND,
-      data: LoginResponseDto,
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        user: {
+          id: user.id,
+          role: user.role.type,
+        }
+      },
     };
     return resData;
   }

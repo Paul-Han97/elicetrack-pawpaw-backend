@@ -6,11 +6,15 @@ import {
   Param,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -20,6 +24,8 @@ import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Auth } from 'src/common/guards/auth.decorator';
 
 @Controller('users')
 export class UserController {
@@ -27,6 +33,18 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
+
+  @ApiOperation({
+    summary: '닉네임 중복을 확인 합니다.',
+    description: `
+        - 닉네임 중복을 확인 합니다.`,
+  })
+  @ApiQuery({
+    name: 'nickname',
+    description: '사용자의 닉네임',
+  })
+  @Get('duplicate-nickname')
+  async duplicateNickname(@Query('nickname') nickname: string) {}
 
   @ApiOperation({
     summary: '사용자와 반려동물의 정보를 조회 합니다.',
@@ -77,9 +95,12 @@ export class UserController {
     description: `
     - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.`,
   })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @Put(':id')
   @ApiOkResponse()
   async updateUser(
+    @UploadedFile() image: Express.Multer.File,
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {}
