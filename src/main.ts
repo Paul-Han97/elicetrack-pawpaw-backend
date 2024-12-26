@@ -1,15 +1,15 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RedisStore } from 'connect-redis';
 import * as session from 'express-session';
 import IoRedis from 'ioredis';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { ConfigService } from '@nestjs/config';
 import { ENV_KEYS } from './common/constants';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,9 +18,15 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new LoggingInterceptor(),new ResponseInterceptor());
-  
-  const redisClient = new IoRedis(configService.get<string>(ENV_KEYS.REDIS_HOST));
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new ResponseInterceptor(),
+  );
+  app.setGlobalPrefix('api');
+
+  const redisClient = new IoRedis(
+    configService.get<string>(ENV_KEYS.REDIS_HOST),
+  );
   const redisStore = new RedisStore({
     client: redisClient,
     prefix: configService.get<string>(ENV_KEYS.REDIS_PREFIX),
@@ -34,7 +40,7 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        // 1000 * 60 * 60 
+        // 1000 * 60 * 60
         maxAge: 3_600_000,
       },
     }),
