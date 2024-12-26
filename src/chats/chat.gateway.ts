@@ -14,12 +14,12 @@ import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
 import { ChatService } from './chat.service';
 import { IChatService } from './interfaces/chat.service.interface';
 
-type RoomList = [{
+type Room = {
   roomId: string,
   userList: [{
     id: string,
   }]
-}]
+}
 
 @WebSocketGateway({
   namespace: 'chats',
@@ -33,7 +33,7 @@ export class ChatGateway
     private readonly chatService: IChatService,
   ) {}
 
-  private readonly roomList: RoomList;
+  private readonly roomList:Array<Room> = [];
 
   @WebSocketServer()
   private readonly server: Server;
@@ -41,7 +41,7 @@ export class ChatGateway
   async afterInit(server: Server) {}
 
   async handleConnection(client: Socket) {
-    client.emit('recieve-message', {
+    client.emit('receive-message', {
       body: {
         message: `client id: ${client.id} 연결`,
       },
@@ -49,7 +49,7 @@ export class ChatGateway
   }
 
   async handleDisconnect(client: any) {
-    client.emit('recieve-message', {
+    client.emit('receive-message', {
       body: {
         message: `client id: ${client.id} 끊김`,
       },
@@ -63,9 +63,9 @@ export class ChatGateway
   ) {
     console.log('client id:', client.id);
     await client.join(roomId);
-    client.emit('recieve-message', {
+    client.emit('receive-message', {
       body: {
-        message: `client.id: ${client.id}님이 room id: ${roomId} 연결`,
+        message: `${client.id} 님이 ${roomId} 를 생성 하였습니다.`,
       },
     });
     this.roomList.push({
@@ -84,12 +84,13 @@ export class ChatGateway
     for(const room of this.roomList) {
       if(room.roomId === roomId) {
         room.userList.push({id: client.id});
+        console.log(room);
       }
     }
-
-    client.emit('recieve-message', {
+    console.log(this.roomList)
+    client.emit('receive-message', {
       body: {
-        message: `client.id: ${client.id}님이 room id: ${roomId} 연결`,
+        message: `${client.id} 님이 ${roomId} 로 연결 되었습니다.`,
       },
     });
     console.log('client.rooms', client.rooms);
@@ -113,7 +114,7 @@ export class ChatGateway
 
   @SubscribeMessage('get-room-list')
   async getRoomList(@ConnectedSocket() client: Socket){
-    client.emit('recieve-message', this.roomList);
+    client.emit('receive-message', this.roomList);
   }
 
   /**
