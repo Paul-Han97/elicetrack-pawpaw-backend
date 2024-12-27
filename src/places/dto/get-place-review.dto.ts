@@ -14,7 +14,7 @@ export class GetPlaceReviewDto {
   @ApiProperty({
     description: '좋아요 선택 여부',
   })
-  isLike: boolean;
+  isLikeClicked: boolean;
 
   @ApiProperty({
     description: '리뷰의 작성 날짜',
