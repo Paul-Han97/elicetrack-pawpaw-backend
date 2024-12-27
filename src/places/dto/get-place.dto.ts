@@ -31,7 +31,7 @@ class ReviewList {
   @ApiProperty({
     description: '리뷰의 좋아요 상태',
   })
-  isLikeCliked: boolean;
+  isLikeClicked: boolean;
 }
 
 export class GetPlaceResponseDto {

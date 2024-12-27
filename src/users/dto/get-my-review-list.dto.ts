@@ -24,5 +24,5 @@ export class GetMyReviewListDto {
   @ApiProperty({
     description: '사용자가 리뷰 좋아요를 클릭 했는지 여부',
   })
-  isLikeCliked: boolean;
+  isLikeClicked: boolean;
 }

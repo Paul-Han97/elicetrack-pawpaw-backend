@@ -23,7 +23,7 @@ class Author {
   @ApiProperty({
     description: '작성자가 해당 게시글의 좋아요 버튼을 클릭 했는지 여부'
   })
-  isLikeCliked: boolean;
+  isLikeClicked: boolean;
 }
 
 class CommentList {
