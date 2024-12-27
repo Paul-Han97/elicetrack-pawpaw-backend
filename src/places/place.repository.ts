@@ -2,8 +2,6 @@ import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
-import { Review } from 'src/reviews/entities/review.entity';
-import { ReviewPlaceLike } from 'src/review-place-likes/entities/review-place-like.entity';
 
 @CustomRepository(Place)
 export class PlaceRepository
@@ -55,44 +53,6 @@ export class PlaceRepository
       .innerJoinAndSelect('place.placeLocation', 'placeLocation')
       .innerJoinAndSelect('placeLocation.location', 'location')
       .where('place.id = :id', { id })
-      .getOne();
-  }
-
-  async createReview(
-    id: number,
-    userId: number,
-    title: string,
-    content: string,
-    isLikeClicked: boolean,
-  ) {
-    const review = await this.createQueryBuilder()
-      .insert()
-      .into(Review)
-      .values({
-        title,
-        content,
-        user: { id: userId },
-        place: { id },
-      })
-      .execute();
-
-    const reviewId = review.identifiers[0].id;
-
-    await this.createQueryBuilder()
-      .insert()
-      .into(ReviewPlaceLike)
-      .values({
-        isLikeClicked,
-        place: { id },
-        review: { id: reviewId },
-      })
-      .execute();
-
-    return await this.createQueryBuilder('review')
-      .leftJoinAndSelect('review.user', 'user')
-      .leftJoinAndSelect('review.place', 'place')
-      .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
-      .where('review.id = :id', { id: reviewId })
       .getOne();
   }
 }

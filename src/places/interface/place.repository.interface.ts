@@ -7,12 +7,4 @@ export interface IPlaceRepository extends Repository<Place> {
   findNearbyPlaces(lat: number, lon: number, radius: number): Promise<Place[]>;
 
   findByPlace(id: number): Promise<Place | null>;
-
-  createReview(
-    id: number,
-    userId: number,
-    title: string,
-    content: string,
-    isLikeClicked: boolean,
-  );
 }

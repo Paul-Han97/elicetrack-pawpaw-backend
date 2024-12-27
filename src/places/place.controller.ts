@@ -18,6 +18,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Request } from 'express';
+import { Auth } from 'src/common/guards/auth.decorator';
 import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 import {
   CreatePlaceReviewDto,
@@ -113,24 +114,19 @@ export class PlaceController {
   @ApiCreatedResponse({
     type: CreatePlaceReviewResponseDto,
   })
-  // @Auth()
-  @UseInterceptors(TransactionInterceptor)
+  @Auth()
   @Post(':id/reviews')
   async createPlaceReview(
     @Req() req: Request,
     @Param('id') id: number,
-    // sessionid로 유저 정보 가져오고
-    // create를 reviewId를해줘야 함
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
   ) {
-    const userId = req.session?.user?.id;
-    const result = await this.placeService.createPlaceReview(
-      id,
-      userId,
-      createPlaceReviewDto,
-    );
-    console.log('만들어졌냐 리뷰?', result);
-    return { data: result };
+    createPlaceReviewDto.userId = req.session.user.id;
+    createPlaceReviewDto.id = id;
+
+    const result =
+      await this.placeService.createPlaceReview(createPlaceReviewDto);
+    return result;
   }
 
   @ApiOperation({
