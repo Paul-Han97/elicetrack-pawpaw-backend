@@ -1,10 +1,6 @@
 import { ResponseData } from 'src/common/types/response.type';
-import { Place } from '../entities/place.entity';
+import { CreatePlaceReviewDto } from '../dto/create-place-review.dto';
 import { GetPlaceResponseDto } from '../dto/get-place.dto';
-import {
-  CreatePlaceReviewDto,
-  CreatePlaceReviewResponseDto,
-} from '../dto/create-place-review.dto';
 
 export interface IPlaceService {
   saveEntities(): Promise<void>;
@@ -18,8 +14,6 @@ export interface IPlaceService {
   getPlace(id: number): Promise<GetPlaceResponseDto>;
 
   createPlaceReview(
-    id: number,
-    userId: number,
     createPlaceReviewDto: CreatePlaceReviewDto,
-  ): Promise<CreatePlaceReviewResponseDto>;
+  ): Promise<ResponseData>;
 }

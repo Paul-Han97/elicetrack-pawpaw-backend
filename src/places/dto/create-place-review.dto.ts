@@ -15,6 +15,10 @@ export class CreatePlaceReviewDto {
     description: '좋아요 선택 여부',
   })
   isLikeClicked: boolean;
+
+  id: number;
+
+  userId: number;
 }
 
 export class CreatePlaceReviewResponseDto {

@@ -1,27 +1,31 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import axios from 'axios';
 import * as dayjs from 'dayjs';
 import { ENV_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
+import { ResponseData } from 'src/common/types/response.type';
 import { Location } from 'src/locations/entities/location.entity';
 import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
 import { LocationRepository } from 'src/locations/location.repository';
 import { PlaceLocation } from 'src/place-locations/entities/place-location.entity';
 import { IPlaceLocationRepository } from 'src/place-locations/interface/place-location.repository.interface';
 import { PlaceLocationRepository } from 'src/place-locations/place-location.repository';
+import { ReviewPlaceLike } from 'src/review-place-likes/entities/review-place-like.entity';
+import { IReviewPlaceLikeRepository } from 'src/review-place-likes/interfaces/review-place-like.repository.interface';
+import { ReviewPlaceLikeRepository } from 'src/review-place-likes/review-place-like.repository';
+import { Review } from 'src/reviews/entities/review.entity';
+import { IReviewRepository } from 'src/reviews/interfaces/review.repository.interface';
+import { ReviewRepository } from 'src/reviews/review.repository';
+import { User } from 'src/users/entities/user.entity';
+import { DataSource, EntityManager } from 'typeorm';
+import { CreatePlaceReviewDto } from './dto/create-place-review.dto';
+import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
-import { ResponseData } from 'src/common/types/response.type';
-import { GetPlaceResponseDto } from './dto/get-place.dto';
-import {
-  CreatePlaceReviewDto,
-  CreatePlaceReviewResponseDto,
-} from './dto/create-place-review.dto';
-import { ReviewRepository } from 'src/reviews/review.repository';
-import { IReviewRepository } from 'src/reviews/interfaces/review.repository.interface';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -36,7 +40,13 @@ export class PlaceService implements IPlaceService {
     private readonly locationRepository: ILocationRepository,
     @Inject(ReviewRepository)
     private readonly reviewRepository: IReviewRepository,
+    @Inject(ReviewPlaceLikeRepository)
+    private readonly reviewPlaceLikeRepository: IReviewPlaceLikeRepository,
+
     private readonly configService: ConfigService,
+
+    @Inject(getDataSourceToken())
+    private readonly dataSource: DataSource,
   ) {}
 
   //공공 데이터 api 호출
@@ -202,23 +212,51 @@ export class PlaceService implements IPlaceService {
   }
 
   async createPlaceReview(
-    id: number,
-    userId: number,
     createPlaceReviewDto: CreatePlaceReviewDto,
-  ): Promise<CreatePlaceReviewResponseDto> {
+  ): Promise<ResponseData> {
     const { title, content, isLikeClicked } = createPlaceReviewDto;
 
-    const review = await this.placeRepository.createReview(
-      id,
-      userId,
-      title,
-      content,
-      isLikeClicked,
+    console.log(createPlaceReviewDto.userId);
+
+    const user = new User();
+    user.id = createPlaceReviewDto.userId;
+
+    const place = new Place();
+    place.id = createPlaceReviewDto.id;
+
+    const review = new Review();
+    review.title = title;
+    review.content = content;
+    review.user = user;
+    review.place = place;
+
+    const reviewId = await this.dataSource.transaction<number>(
+      async (manager: EntityManager): Promise<number> => {
+        const reviewRepository = manager.withRepository(this.reviewRepository);
+        const reviewPlaceLikeRepository = manager.withRepository(
+          this.reviewPlaceLikeRepository,
+        );
+
+        const savedReview = await reviewRepository.save(review);
+
+        if (isLikeClicked) {
+          const reviewPlaceLike = new ReviewPlaceLike();
+          reviewPlaceLike.isLikeClicked = isLikeClicked;
+          reviewPlaceLike.place = place;
+          reviewPlaceLike.review = savedReview;
+          await reviewPlaceLikeRepository.save(reviewPlaceLike);
+        }
+
+        return savedReview.id;
+      },
     );
 
-    return {
-      placeId: review.place.id,
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: { reviewId },
     };
+
+    return resData;
   }
 
   // TODO user.image // title, content, isLikeClicked
