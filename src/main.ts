@@ -24,6 +24,11 @@ async function bootstrap() {
   );
   app.setGlobalPrefix('api');
 
+  app.enableCors({
+    origin: true,
+    credentials: true
+  })
+
   const redisClient = new IoRedis(
     configService.get<string>(ENV_KEYS.REDIS_HOST),
   );

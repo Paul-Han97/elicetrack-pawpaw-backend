@@ -14,6 +14,18 @@ class ImageList {
   url: string;
 }
 
+class Author {
+  @ApiProperty({
+    description: '게시글 작성자 ID'
+  })
+  id: number;
+
+  @ApiProperty({
+    description: '작성자가 해당 게시글의 좋아요 버튼을 클릭 했는지 여부'
+  })
+  isLikeCliked: boolean;
+}
+
 class CommentList {
   @ApiProperty({
     description: '댓글 작성자의 닉네임',
@@ -61,6 +73,12 @@ export class GetBoardResponseDto {
     description: '게시글 작성 날짜',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: '게시글 작성자',
+    type: Author,
+  })
+  author: Author;
 
   @ApiProperty({
     description: '이미지 리스트',

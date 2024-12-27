@@ -5,7 +5,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 @Entity()
 export class ReviewPlaceLike extends CommonEntity {
   @Column()
-  isLike: boolean;
+  isLikeCliked: boolean;
 
   @ManyToOne(() => Place)
   @JoinColumn({ referencedColumnName: 'id' })

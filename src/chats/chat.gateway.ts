@@ -23,6 +23,10 @@ type Room = {
 
 @WebSocketGateway({
   namespace: 'chats',
+  cors: {
+    origin: true,
+    credentials: true
+  }
 })
 @UseGuards(WsAuthGuard)
 export class ChatGateway

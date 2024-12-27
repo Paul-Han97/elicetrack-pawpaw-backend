@@ -14,7 +14,7 @@ export class CreatePlaceReviewDto {
   @ApiProperty({
     description: '좋아요 선택 여부',
   })
-  isLike: boolean;
+  isLikeCliked: boolean;
 }
 
 export class CreatePlaceReviewResponseDto {
