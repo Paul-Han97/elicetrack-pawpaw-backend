@@ -79,6 +79,8 @@ import { MongooseModule } from '@nestjs/mongoose';
         DATABASE_MONGO_USERNAME: Joi.string().required(),
         DATABASE_MONGO_PASSWORD: Joi.string().required(),
         DATABASE_MONGO_PORT: Joi.number().port().required(),
+        PUBLIC_PET_API_KEY: Joi.string().required(),
+        PUBLIC_PET_API_END_POINT: Joi.string().required(),
       }),
       isGlobal: true,
     }),
@@ -92,18 +94,21 @@ import { MongooseModule } from '@nestjs/mongoose';
       useFactory: async (configService: ConfigService) => {
         const host = configService.get<string>(ENV_KEYS.DATABASE_MONGO_HOST);
         const name = configService.get<string>(ENV_KEYS.DATABASE_MONGO_NAME);
-        const username = configService.get<string>(ENV_KEYS.DATABASE_MONGO_USERNAME);
-        const password = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PASSWORD);
+        const username = configService.get<string>(
+          ENV_KEYS.DATABASE_MONGO_USERNAME,
+        );
+        const password = configService.get<string>(
+          ENV_KEYS.DATABASE_MONGO_PASSWORD,
+        );
         const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
 
         const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
-        
+
         return {
           uri,
           retryAttempts: 0,
-        }
-      }
-
+        };
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -140,14 +145,15 @@ import { MongooseModule } from '@nestjs/mongoose';
           Notification,
           NotificationType,
           Review,
-          ReviewPlaceLike
+          ReviewPlaceLike,
         ],
         migrations: [MYSQL_MIGRATION_PATH],
         migrationsTableName: 'migrations',
-        synchronize: true,
+        synchronize: false,
         retryAttempts: 1,
         logger: 'file',
         logging: true,
+        legacySpatialSupport: false,
       }),
     }),
     UtilModule,
@@ -176,7 +182,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     // RoomModule,
     ChatModule,
     NotificationModule,
-    NotificationTypeModule
+    NotificationTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
