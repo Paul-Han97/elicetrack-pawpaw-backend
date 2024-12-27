@@ -6,7 +6,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 @Entity()
 export class UserBoardLike extends CommonEntity {
   @Column()
-  isLike: boolean;
+  isLikeClicked: boolean;
 
   @ManyToOne(() => User)
   @JoinColumn({ referencedColumnName: 'id' })

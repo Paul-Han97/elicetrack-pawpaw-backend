@@ -33,7 +33,7 @@ export class GetBoardListResponseDto {
   @ApiProperty({
     description: '사용자가 게시글의 좋아요를 클릭 했는지 여부',
   })
-  isLike: boolean;
+  isLikeClicked: boolean;
 
   @ApiProperty({
     description: '이미지 리스트',

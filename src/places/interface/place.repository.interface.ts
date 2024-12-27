@@ -1,4 +1,18 @@
 import { Repository } from 'typeorm';
 import { Place } from '../entities/place.entity';
 
-export interface IPlaceRepository extends Repository<Place> {}
+export interface IPlaceRepository extends Repository<Place> {
+  saveEntities(entities: Place[]): Promise<void>;
+
+  findNearbyPlaces(lat: number, lon: number, radius: number): Promise<Place[]>;
+
+  findByPlace(id: number): Promise<Place | null>;
+
+  createReview(
+    id: number,
+    userId: number,
+    title: string,
+    content: string,
+    isLikeClicked: boolean,
+  );
+}
