@@ -8,6 +8,8 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -15,6 +17,8 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
+import { Request } from 'express';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 import {
   CreatePlaceReviewDto,
   CreatePlaceReviewResponseDto,
@@ -49,9 +53,33 @@ export class PlaceController {
     type: GetNearbyPlaceListResponseDto,
   })
   @Get('nearby-place-list')
+  @UseInterceptors(TransactionInterceptor)
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
-  ) {}
+  ) {
+    const { latitude, longitude, radius } = getNearbyPlaceListQueryDto;
+
+    const places = await this.placeService.getNearbyPlaces(
+      latitude,
+      longitude,
+      radius,
+    );
+
+    return places;
+  }
+
+  @ApiOperation({
+    summary: '공공 데이터를 DB에 저장',
+    description: '공공 데이터 API에서 데이터를 가져와 DB에 저장합니다.',
+  })
+  @ApiOkResponse({
+    description: '데이터 저장이 완료되었습니다.',
+  })
+  @Post('save-entities')
+  async savePublicData() {
+    const result = await this.placeService.saveEntities();
+    return result;
+  }
 
   @ApiOperation({
     summary: '시설물의 정보를 조회 합니다.',
@@ -66,7 +94,11 @@ export class PlaceController {
     type: GetPlaceResponseDto,
   })
   @Get(':id')
-  async getPlace(@Param('id') id: number) {}
+  async getPlace(@Param('id') id: number) {
+    const place = await this.placeService.getPlace(id);
+    console.log('삽입할 Place 엔티티:', place);
+    return { data: place };
+  }
 
   @ApiOperation({
     summary: '시설물에 리뷰를 작성 합니다.',
@@ -81,11 +113,25 @@ export class PlaceController {
   @ApiCreatedResponse({
     type: CreatePlaceReviewResponseDto,
   })
+  // @Auth()
+  @UseInterceptors(TransactionInterceptor)
   @Post(':id/reviews')
   async createPlaceReview(
+    @Req() req: Request,
     @Param('id') id: number,
+    // sessionid로 유저 정보 가져오고
+    // create를 reviewId를해줘야 함
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
-  ) {}
+  ) {
+    const userId = req.session?.user?.id;
+    const result = await this.placeService.createPlaceReview(
+      id,
+      userId,
+      createPlaceReviewDto,
+    );
+    console.log('만들어졌냐 리뷰?', result);
+    return { data: result };
+  }
 
   @ApiOperation({
     summary: '리뷰를 조회 합니다.',
