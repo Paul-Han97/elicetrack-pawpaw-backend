@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class GetNearbyPlaceListQueryDto {
   @ApiProperty({
@@ -24,7 +25,7 @@ export class GetNearbyPlaceListQueryDto {
 
 export class GetNearbyPlaceListResponseDto {
   @ApiProperty({
-    description: '시설의 ID'
+    description: '시설의 ID',
   })
   id: number;
 
