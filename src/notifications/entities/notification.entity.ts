@@ -8,6 +8,9 @@ export class Notification extends CommonEntity {
   @Column()
   isRead: boolean;
 
+  @Column()
+  chatId: number;
+
   @ManyToOne(() => User)
   @JoinColumn({ referencedColumnName: 'id' })
   user: User;
