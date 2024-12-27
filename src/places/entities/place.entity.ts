@@ -6,46 +6,74 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class Place extends CommonEntity {
-  @Column()
+  @Column({
+    nullable: true,
+  })
   name: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   category: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   postalCode: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   roadNameAddress: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   postalAddress: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   contact: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   closingDays: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   openingHour: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   hasParkingArea: boolean;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   price: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   allowSize: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   restrictions: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   description: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   additionalFees: string;
 
   @Column({ type: 'datetime' })

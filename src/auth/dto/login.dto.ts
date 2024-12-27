@@ -1,5 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsEmail, IsStrongPassword } from 'class-validator';
+
+class UserResponse {
+  @ApiProperty({
+    description: '사용자의 ID',
+  })
+  id: number;
+
+  @ApiProperty({
+    description: '사용자의 권한',
+  })
+  role: string;
+
+  @ApiProperty({
+    description: '사용자의 별명',
+  })
+  nickname: string;
+}
 
 export class LoginDto {
   @ApiProperty({
@@ -18,6 +36,8 @@ export class LoginDto {
 export class LoginResponseDto {
   @ApiProperty({
     description: '사용자의 ID',
+    type: UserResponse,
   })
-  userId: number;
+  @Type(() => UserResponse)
+  user: UserResponse;
 }

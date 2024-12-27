@@ -4,6 +4,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 export class Room {
   @Prop({
     required: true,
+    unique: true,
+  })
+  id: number;
+
+  @Prop({
+    required: true,
   })
   socketId: string;
 

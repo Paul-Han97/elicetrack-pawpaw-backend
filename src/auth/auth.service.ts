@@ -44,6 +44,7 @@ export class AuthService implements IAuthService {
         user: {
           id: user.id,
           role: user.role.type,
+          nickname: user.nickname,
         }
       },
     };

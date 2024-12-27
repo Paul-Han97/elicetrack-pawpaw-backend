@@ -161,7 +161,7 @@ export class BoardController {
     name: 'commentId',
     description: '댓글의 ID',
   })
-  @Put(':id')
+  @Put(':id/comments/:commentId')
   async updateBoardComment(
     @Param('id') id: number,
     @Param('commentId') commentId: number,
@@ -196,7 +196,7 @@ export class BoardController {
     name: 'commentId',
     description: '댓글의 ID',
   })
-  @Delete(':id')
+  @Delete(':id/comments/:commentId')
   async deleteBoardComment(
     @Param('id') id: number,
     @Param('commentId') commentId: number,
