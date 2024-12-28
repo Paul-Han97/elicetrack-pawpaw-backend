@@ -2,6 +2,7 @@ import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
+import { Review } from 'src/reviews/entities/review.entity';
 
 @CustomRepository(Place)
 export class PlaceRepository
@@ -53,6 +54,16 @@ export class PlaceRepository
       .innerJoinAndSelect('place.placeLocation', 'placeLocation')
       .innerJoinAndSelect('placeLocation.location', 'location')
       .where('place.id = :id', { id })
+      .getOne();
+  }
+
+  async findReviewWithDetails(reviewId: number, placeId: number) {
+    return await this.createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.place', 'place')
+      .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
+      .where('review.id = :reviewId', { reviewId })
+      .andWhere('review.place.id = :placeId', { placeId })
       .getOne();
   }
 }
