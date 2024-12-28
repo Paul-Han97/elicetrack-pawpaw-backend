@@ -11,7 +11,7 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
   ApiCreatedResponse,
@@ -115,7 +115,7 @@ export class BoardController {
     type: CreateBoardResponseDto,
   })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('imageList'))
+  @UseInterceptors(AnyFilesInterceptor())
   @Post()
   async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
@@ -140,6 +140,8 @@ export class BoardController {
   @ApiOkResponse({
     type: UpdateBoardResponseDto,
   })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(AnyFilesInterceptor())
   @Put(':id')
   async updateBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
