@@ -26,6 +26,7 @@ import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
+import { GetPlaceReviewDto } from './dto/get-place-review.dto';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -112,7 +113,6 @@ export class PlaceService implements IPlaceService {
     const place = new Place();
     const addr1 = item.addr1?.trim() ?? '';
     const addr2 = item.addr2?.trim() ?? '';
-    console.log('API 데이터:', item);
 
     place.name = item.title ?? null;
     place.postalCode = item.zipcode ?? null;
@@ -259,11 +259,63 @@ export class PlaceService implements IPlaceService {
     return resData;
   }
 
-  // TODO user.image // title, content, isLikeClicked
-  async getPlaceReview() {}
+  async getPlaceReview(
+    getPlaceReviewDto: GetPlaceReviewDto,
+  ): Promise<ResponseData> {
+    const { id, reviewId, userId } = getPlaceReviewDto;
+
+    const review = await this.reviewRepository.findOne({
+      where: {
+        id: reviewId,
+        place: { id },
+      },
+      relations: ['user', 'place', 'reviewPlaceLike'],
+    });
+
+    if (!review) {
+      throw new NotFoundException(
+        `ID ${reviewId}에 해당되는 리뷰를 찾을 수 없습니다.`,
+      );
+    }
+
+    const isAuthor = review.user.id === userId;
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        reviewId: review.id,
+        author: {
+          id: review.user.id,
+          imageUrl: review.user.userImage || null,
+        },
+        placeId: review.place.id,
+        title: review.title,
+        content: review.content,
+        isLikeClicked:
+          review.reviewPlaceLike?.some((like) => like.isLikeClicked) || false,
+        createdAt: review.createdAt,
+        isAuthor,
+      },
+    };
+
+    return resData;
+  }
 
   // TODO user.image // title, content, isLikeClicked
-  async updateReview() {}
+  async updateReview(
+    id: number,
+    userId: number,
+    title: string,
+    content: string,
+    isLikeClicked: boolean,
+    reviewId: number,
+  ) {
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {},
+    };
+    return resData;
+  }
 
   // TODO 리뷰 삭제 userid있어야함
   async deleteReview() {}
