@@ -57,6 +57,7 @@ import { UserLocation } from './user-locations/entities/user-location.entity';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
+import { ImageModule } from './images/image.module';
 
 @Module({
   imports: [
@@ -158,6 +159,7 @@ import { UserModule } from './users/user.module';
     AuthModule,
     UserModule,
     BoardModule,
+    ImageModule,
     BoardImageModule,
     PetImageModule,
     UserImageModule,
