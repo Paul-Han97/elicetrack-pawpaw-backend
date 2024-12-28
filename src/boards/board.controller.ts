@@ -24,7 +24,7 @@ import { UpdateBoardCommentDto } from 'src/boards/dto/update-board-comment.dto';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
-import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
+import { GetBoardListResponseDto } from './dto/get-board-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
