@@ -149,9 +149,9 @@ export class PlaceService implements IPlaceService {
       const locations = entities.map((e) => e.location);
 
       await Promise.all([
-        this.placeRepository.save(places),
-        this.placeLocationRepository.save(placeLocations),
-        this.locationRepository.save(locations),
+        this.placeRepository.save(places, { reload: false }),
+        this.placeLocationRepository.save(placeLocations, { reload: false }),
+        this.locationRepository.save(locations, { reload: false }),
       ]);
 
       this.logger.log('모든 엔터티가 성공적으로 저장되었습니다.');
@@ -244,7 +244,7 @@ export class PlaceService implements IPlaceService {
           reviewPlaceLike.isLikeClicked = isLikeClicked;
           reviewPlaceLike.place = place;
           reviewPlaceLike.review = savedReview;
-          await reviewPlaceLikeRepository.save(reviewPlaceLike);
+          await reviewPlaceLikeRepository.save(reviewPlaceLike, { reload: false });
         }
 
         return savedReview.id;
