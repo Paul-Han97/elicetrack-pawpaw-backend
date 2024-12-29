@@ -7,11 +7,6 @@ export class GetPlaceReviewDto {
   id: number;
 
   @ApiProperty({
-    description: '유저의 ID',
-  })
-  userId: number;
-
-  @ApiProperty({
     description: '리뷰의 ID',
   })
   reviewId: number;
