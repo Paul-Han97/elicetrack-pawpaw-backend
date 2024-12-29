@@ -65,10 +65,17 @@ import { UserModule } from './users/user.module';
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        stream: pino.destination({
-          dest: './pawpawLogs.log',
-          sync: false,
-        }),
+        stream:
+          process.env.NODE_ENV === 'production'
+            ? pino.destination({
+                dest: './pawpawLogs.log',
+                sync: false,
+              })
+            : undefined,
+        transport:
+          process.env.NODE_EV === 'production'
+            ? undefined
+            : { target: 'pino-pretty' },
         redact: {
           remove: true,
           paths: [
@@ -84,8 +91,8 @@ import { UserModule } from './users/user.module';
             'req.headers["accept"]',
             'remoteAddress',
             'remotePort',
-          ]
-        }
+          ],
+        },
       },
     }),
     ConfigModule.forRoot({
