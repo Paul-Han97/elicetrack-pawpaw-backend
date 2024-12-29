@@ -56,14 +56,4 @@ export class PlaceRepository
       .where('place.id = :id', { id })
       .getOne();
   }
-
-  async findReviewWithDetails(reviewId: number, placeId: number) {
-    return await this.createQueryBuilder('review')
-      .leftJoinAndSelect('review.user', 'user')
-      .leftJoinAndSelect('review.place', 'place')
-      .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
-      .where('review.id = :reviewId', { reviewId })
-      .andWhere('review.place.id = :placeId', { placeId })
-      .getOne();
-  }
 }
