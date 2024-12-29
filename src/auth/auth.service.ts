@@ -9,7 +9,7 @@ import { ResponseData } from 'src/common/types/response.type';
 import { UtilService } from 'src/common/utils/util.service';
 import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 import { UserRepository } from 'src/users/user.repository';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class AuthService implements IAuthService {
     private readonly utilService: UtilService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<ResponseData> {
+  async login(loginDto: LoginDto): Promise<ResponseData<LoginResponseDto>> {
     const { email, password } = loginDto;
 
     const user = await this.userRepository.findUserCredentialByEmail(email);
@@ -38,16 +38,17 @@ export class AuthService implements IAuthService {
     if (!isMathces)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);
 
-    const resData: ResponseData = {
+    const resData: ResponseData<LoginResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
         user: {
           id: user.id,
           role: user.role.type,
-          nickname: user.nickname,
+          canWalkingMate: user.canWalkingMate,
         }
       },
     };
+    
     return resData;
   }
 }

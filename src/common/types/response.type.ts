@@ -1,12 +1,12 @@
-export type ResponseBody = {
+export class ResponseBody {
   body: {
     status: string;
     message: string;
     data: any;
   };
-};
+}
 
-export type ResponseData = {
+export class ResponseData<T = {}> {
   message: string;
-  data: any;
-};
+  data: T;
+}

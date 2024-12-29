@@ -43,7 +43,7 @@ export class GetMyPageResponseDto {
   @ApiProperty({
     description: '사용자의 산책메이트 기능 ON/OFF 여부'
   })
-  walkMate: boolean;
+  canWalkingMate: boolean;
 
   @ApiProperty({
     description: '반려동물 목록',

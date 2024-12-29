@@ -8,7 +8,7 @@ export class UpdateUserDto {
     description: '산책메이트 ON/OFF 여부',
     required: false,
   })
-  walkMate: boolean;
+  canWalkingMate: boolean;
 
   @ApiProperty({
     description: '사용자의 닉네임',
