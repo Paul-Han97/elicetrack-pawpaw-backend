@@ -182,12 +182,24 @@ export class PlaceController {
   @ApiOkResponse({
     type: UpdatePlaceReviewResponseDto,
   })
+  @Auth()
   @Put(':id/reviews/:reviewId')
   async updateReview(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('reviewId') reviewId: number,
     @Body() updatePlaceReviewDto: UpdatePlaceReviewDto,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+
+    updatePlaceReviewDto.id = id;
+    updatePlaceReviewDto.reviewId = reviewId;
+    updatePlaceReviewDto.userId = userId;
+
+    const result = await this.placeService.updateReview(updatePlaceReviewDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '리뷰를 삭제 합니다.',
