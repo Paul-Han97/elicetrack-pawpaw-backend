@@ -2,6 +2,7 @@ import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
+import { Review } from 'src/reviews/entities/review.entity';
 
 @CustomRepository(Place)
 export class PlaceRepository

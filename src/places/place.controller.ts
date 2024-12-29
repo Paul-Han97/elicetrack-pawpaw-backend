@@ -29,7 +29,10 @@ import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
 } from './dto/get-nearby-place-list.dto';
-import { GetPlaceReviewDto } from './dto/get-place-review.dto';
+import {
+  GetPlaceReviewDto,
+  GetPlaceReviewResponseDto,
+} from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import {
   UpdatePlaceReviewDto,
@@ -132,8 +135,9 @@ export class PlaceController {
   @ApiOperation({
     summary: '리뷰를 조회 합니다.',
     description: `
+    - 장소의 id를 파리미터로 받습니다.
     - 리뷰의 id를 파라미터로 받습니다.
-    - 리뷰의 제목과 내용 그리고 좋아요 상태를 작성할 수 있습니다.`,
+    - 리뷰의 제목과 내용 그리고 좋아요 상태를 조회할 수 있습니다.`,
   })
   @ApiParam({
     name: 'id',
@@ -144,13 +148,22 @@ export class PlaceController {
     description: '리뷰의 ID',
   })
   @ApiOkResponse({
-    type: GetPlaceReviewDto,
+    type: GetPlaceReviewResponseDto,
   })
   @Get(':id/reviews/:reviewId')
   async getPlaceReview(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('reviewId') reviewId: number,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+    const result = await this.placeService.getPlaceReview({
+      id,
+      userId,
+      reviewId,
+    });
+    return result;
+  }
 
   @ApiOperation({
     summary: '작성한 리뷰를 수정 합니다.',
@@ -169,12 +182,24 @@ export class PlaceController {
   @ApiOkResponse({
     type: UpdatePlaceReviewResponseDto,
   })
+  @Auth()
   @Put(':id/reviews/:reviewId')
   async updateReview(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('reviewId') reviewId: number,
     @Body() updatePlaceReviewDto: UpdatePlaceReviewDto,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+
+    updatePlaceReviewDto.id = id;
+    updatePlaceReviewDto.reviewId = reviewId;
+    updatePlaceReviewDto.userId = userId;
+
+    const result = await this.placeService.updateReview(updatePlaceReviewDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '리뷰를 삭제 합니다.',
