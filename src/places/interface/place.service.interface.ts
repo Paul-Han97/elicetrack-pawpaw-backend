@@ -1,6 +1,7 @@
 import { ResponseData } from 'src/common/types/response.type';
-import { CreatePlaceReviewDto } from '../dto/create-place-review.dto';
+import { CreatePlaceReviewDto, CreatePlaceReviewResponseDto } from '../dto/create-place-review.dto';
 import { GetPlaceResponseDto } from '../dto/get-place.dto';
+import { Place } from '../entities/place.entity';
 
 export interface IPlaceService {
   saveEntities(): Promise<void>;
@@ -9,11 +10,11 @@ export interface IPlaceService {
     lat: number,
     lon: number,
     radius: number,
-  ): Promise<ResponseData>;
+  ): Promise<ResponseData<Place[]>>;
 
   getPlace(id: number): Promise<GetPlaceResponseDto>;
 
   createPlaceReview(
     createPlaceReviewDto: CreatePlaceReviewDto,
-  ): Promise<ResponseData>;
+  ): Promise<ResponseData<CreatePlaceReviewResponseDto>>;
 }

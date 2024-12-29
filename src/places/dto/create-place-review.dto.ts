@@ -23,7 +23,7 @@ export class CreatePlaceReviewDto {
 
 export class CreatePlaceReviewResponseDto {
   @ApiProperty({
-    description: '장소의 ID',
+    description: '리뷰의 ID',
   })
-  placeId: number;
+  reviewId: number;
 }

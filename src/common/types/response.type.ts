@@ -6,7 +6,7 @@ export type ResponseBody = {
   };
 };
 
-export type ResponseData = {
+export type ResponseData<T = {}> = {
   message: string;
-  data: any;
+  data: T;
 };
