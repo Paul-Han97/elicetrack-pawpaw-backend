@@ -14,9 +14,9 @@ class UserResponse {
   role: string;
 
   @ApiProperty({
-    description: '사용자의 별명',
+    description: '산책메이트 기능 상태'
   })
-  nickname: string;
+  canWalkingMate: boolean;
 }
 
 export class LoginDto {

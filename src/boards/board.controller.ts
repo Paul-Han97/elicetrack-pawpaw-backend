@@ -11,7 +11,7 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
   ApiCreatedResponse,
@@ -24,7 +24,7 @@ import { UpdateBoardCommentDto } from 'src/boards/dto/update-board-comment.dto';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
-import { GetBoardListResponseDto } from './dto/get-baord-list.dto';
+import { GetBoardListResponseDto } from './dto/get-board-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
@@ -115,7 +115,7 @@ export class BoardController {
     type: CreateBoardResponseDto,
   })
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('imageList'))
+  @UseInterceptors(AnyFilesInterceptor())
   @Post()
   async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
@@ -140,6 +140,8 @@ export class BoardController {
   @ApiOkResponse({
     type: UpdateBoardResponseDto,
   })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(AnyFilesInterceptor())
   @Put(':id')
   async updateBoard(
     @UploadedFiles() imageList: Express.Multer.File[],

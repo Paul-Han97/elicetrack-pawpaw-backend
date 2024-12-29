@@ -25,7 +25,10 @@ import { IReviewRepository } from 'src/reviews/interfaces/review.repository.inte
 import { ReviewRepository } from 'src/reviews/review.repository';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
-import { CreatePlaceReviewDto } from './dto/create-place-review.dto';
+import {
+  CreatePlaceReviewDto,
+  CreatePlaceReviewResponseDto,
+} from './dto/create-place-review.dto';
 import { GetPlaceReviewDto } from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
@@ -156,9 +159,9 @@ export class PlaceService implements IPlaceService {
       const locations = entities.map((e) => e.location);
 
       await Promise.all([
-        this.placeRepository.save(places),
-        this.placeLocationRepository.save(placeLocations),
-        this.locationRepository.save(locations),
+        this.placeRepository.save(places, { reload: false }),
+        this.placeLocationRepository.save(placeLocations, { reload: false }),
+        this.locationRepository.save(locations, { reload: false }),
       ]);
 
       this.logger.log('모든 엔터티가 성공적으로 저장되었습니다.');
@@ -174,7 +177,7 @@ export class PlaceService implements IPlaceService {
     lat: number,
     lon: number,
     radius: number,
-  ): Promise<ResponseData> {
+  ): Promise<ResponseData<Place[]>> {
     this.logger.log('주변 반경 시설 조회.');
 
     const result = await this.placeRepository.findNearbyPlaces(
@@ -183,7 +186,7 @@ export class PlaceService implements IPlaceService {
       radius,
     );
 
-    const resData: ResponseData = {
+    const resData: ResponseData<Place[]> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: result,
     };
@@ -220,7 +223,7 @@ export class PlaceService implements IPlaceService {
 
   async createPlaceReview(
     createPlaceReviewDto: CreatePlaceReviewDto,
-  ): Promise<ResponseData> {
+  ): Promise<ResponseData<CreatePlaceReviewResponseDto>> {
     const { title, content, isLikeClicked } = createPlaceReviewDto;
 
     const user = new User();
@@ -249,14 +252,16 @@ export class PlaceService implements IPlaceService {
           reviewPlaceLike.isLikeClicked = isLikeClicked;
           reviewPlaceLike.place = place;
           reviewPlaceLike.review = savedReview;
-          await reviewPlaceLikeRepository.save(reviewPlaceLike);
+          await reviewPlaceLikeRepository.save(reviewPlaceLike, {
+            reload: false,
+          });
         }
 
         return savedReview.id;
       },
     );
 
-    const resData: ResponseData = {
+    const resData: ResponseData<CreatePlaceReviewResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: { reviewId },
     };
