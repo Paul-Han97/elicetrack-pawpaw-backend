@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
+import { LoggerModule } from 'nestjs-pino';
+import * as pino from 'pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -23,6 +25,7 @@ import { Credential } from './credentials/entities/credential.entity';
 import { Gender } from './genders/entities/gender.entity';
 import { GenderModule } from './genders/gender.module';
 import { Image } from './images/entities/image.entity';
+import { ImageModule } from './images/image.module';
 import { Location } from './locations/entities/location.entity';
 import { LocationModule } from './locations/location.module';
 import { LoginMethod } from './login-methods/entities/login-method.entity';
@@ -57,10 +60,34 @@ import { UserLocation } from './user-locations/entities/user-location.entity';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
-import { ImageModule } from './images/image.module';
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        stream: pino.destination({
+          dest: './pawpawLogs.log',
+          sync: false,
+        }),
+        redact: {
+          remove: true,
+          paths: [
+            'req.headers["sec-ch-ua-platform"]',
+            'req.headers["connection"]',
+            'req.headers["user-agent"]',
+            'req.headers["sec-ch-ua"]',
+            'req.headers["sec-ch-ua-mobile"]',
+            'req.headers["sec-fetch-dest"]',
+            'req.headers["referer"]',
+            'req.headers["accept-encoding"]',
+            'req.headers["accept-language"]',
+            'req.headers["accept"]',
+            'remoteAddress',
+            'remotePort',
+          ]
+        }
+      },
+    }),
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       validationSchema: Joi.object({

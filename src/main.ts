@@ -10,12 +10,14 @@ import { ENV_KEYS } from './common/constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const configService = app.get<ConfigService>(ConfigService);
 
+  app.useLogger(app.get(Logger));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(
@@ -32,6 +34,7 @@ async function bootstrap() {
   const redisClient = new IoRedis(
     configService.get<string>(ENV_KEYS.REDIS_HOST),
   );
+
   const redisStore = new RedisStore({
     client: redisClient,
     prefix: configService.get<string>(ENV_KEYS.REDIS_PREFIX),
