@@ -26,8 +26,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: true,
-    credentials: true
-  })
+    credentials: true,
+  });
 
   const redisClient = new IoRedis(
     configService.get<string>(ENV_KEYS.REDIS_HOST),

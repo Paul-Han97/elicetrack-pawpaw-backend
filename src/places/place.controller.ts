@@ -24,7 +24,7 @@ import {
   CreatePlaceReviewDto,
   CreatePlaceReviewResponseDto,
 } from './dto/create-place-review.dto';
-import { DeleteReviewResponseDto } from './dto/delete-one.dto';
+
 import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
@@ -40,6 +40,10 @@ import {
 } from './dto/update-place-review.dto';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceService } from './place.service';
+import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
 
 @Controller('places')
 export class PlaceController {
@@ -150,16 +154,14 @@ export class PlaceController {
   @ApiOkResponse({
     type: GetPlaceReviewResponseDto,
   })
+  @Auth()
   @Get(':id/reviews/:reviewId')
   async getPlaceReview(
-    @Req() req: Request,
     @Param('id') id: number,
     @Param('reviewId') reviewId: number,
   ) {
-    const userId = req.session.user.id;
     const result = await this.placeService.getPlaceReview({
       id,
-      userId,
       reviewId,
     });
     return result;
@@ -196,7 +198,8 @@ export class PlaceController {
     updatePlaceReviewDto.reviewId = reviewId;
     updatePlaceReviewDto.userId = userId;
 
-    const result = await this.placeService.updateReview(updatePlaceReviewDto);
+    const result =
+      await this.placeService.updatePlaceReview(updatePlaceReviewDto);
 
     return result;
   }
@@ -215,11 +218,22 @@ export class PlaceController {
     description: '리뷰의 id',
   })
   @ApiOkResponse({
-    type: DeleteReviewResponseDto,
+    type: DeletePlaceReviewResponseDto,
   })
   @Delete(':id/reviews/:reviewId')
   async deleteReview(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('reviewId') reviewId: number,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+    const deletePlaceReviewDto = new DeletePlaceReviewDto();
+    deletePlaceReviewDto.id = id;
+    deletePlaceReviewDto.reviewId = reviewId;
+    deletePlaceReviewDto.userId = userId;
+
+    const result = this.placeService.deletePlaceReview(deletePlaceReviewDto);
+
+    return result;
+  }
 }

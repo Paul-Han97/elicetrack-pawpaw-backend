@@ -29,7 +29,10 @@ import {
   CreatePlaceReviewDto,
   CreatePlaceReviewResponseDto,
 } from './dto/create-place-review.dto';
-import { GetPlaceReviewDto } from './dto/get-place-review.dto';
+import {
+  GetPlaceReviewDto,
+  GetPlaceReviewResponseDto,
+} from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
 import { UpdatePlaceReviewDto } from './dto/update-place-review.dto';
@@ -37,6 +40,10 @@ import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
+import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -271,8 +278,8 @@ export class PlaceService implements IPlaceService {
 
   async getPlaceReview(
     getPlaceReviewDto: GetPlaceReviewDto,
-  ): Promise<ResponseData> {
-    const { id, reviewId, userId } = getPlaceReviewDto;
+  ): Promise<ResponseData<GetPlaceReviewResponseDto>> {
+    const { id, reviewId } = getPlaceReviewDto;
 
     const review = await this.reviewRepository.findOne({
       where: {
@@ -286,30 +293,27 @@ export class PlaceService implements IPlaceService {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
-    const isAuthor = review.user.id === userId;
-
-    const resData: ResponseData = {
+    const resData: ResponseData<GetPlaceReviewResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
         reviewId: review.id,
         author: {
           id: review.user.id,
-          imageUrl: review.user.userImage || null,
+          imageUrl: review.user.userImage[0].image.url,
         },
-        placeId: review.place.id,
+        id: review.place.id,
         title: review.title,
         content: review.content,
         isLikeClicked:
           review.reviewPlaceLike?.some((like) => like.isLikeClicked) || false,
         createdAt: review.createdAt,
-        isAuthor,
       },
     };
 
     return resData;
   }
 
-  async updateReview(updatePlaceReviewDto: UpdatePlaceReviewDto) {
+  async updatePlaceReview(updatePlaceReviewDto: UpdatePlaceReviewDto) {
     const { id, userId, title, content, isLikeClicked, reviewId } =
       updatePlaceReviewDto;
 
@@ -367,9 +371,13 @@ export class PlaceService implements IPlaceService {
     });
   }
 
-  async deleteReview(id: number, userId: number, reviewId: number) {
+  async deletePlaceReview(
+    deletePlaceReviewDto: DeletePlaceReviewDto,
+  ): Promise<ResponseData<DeletePlaceReviewResponseDto>> {
+    const { id, userId, reviewId } = deletePlaceReviewDto;
+
     return await this.dataSource.transaction(
-      async (manager): Promise<ResponseData> => {
+      async (manager): Promise<ResponseData<DeletePlaceReviewResponseDto>> => {
         const reviewRepository = manager.withRepository(this.reviewRepository);
         const reviewPlaceLikeRepository = manager.withRepository(
           this.reviewPlaceLikeRepository,
@@ -396,8 +404,7 @@ export class PlaceService implements IPlaceService {
         return {
           message: SUCCESS_MESSAGE.REQUEST,
           data: {
-            placeId: id,
-            reviewId: review.id,
+            id: id,
           },
         };
       },
