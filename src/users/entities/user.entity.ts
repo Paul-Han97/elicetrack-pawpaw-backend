@@ -21,7 +21,7 @@ export class User extends CommonEntity {
   nickname: string;
 
   @Column()
-  walkMate: string;
+  canWalkingMate: boolean;
 
   @ManyToOne(() => Role)
   @JoinColumn({ referencedColumnName: 'id' })
