@@ -2,6 +2,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -11,6 +12,8 @@ import { ResponseBody, ResponseData } from '../types/response.type';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(ResponseInterceptor.name);
+
   intercept(
     context: ExecutionContext,
     next: CallHandler<any>,
@@ -27,6 +30,8 @@ export class ResponseInterceptor implements NestInterceptor {
             data: resData.data,
           },
         };
+
+        this.logger.log('request: %o', body);
 
         return body;
       }),

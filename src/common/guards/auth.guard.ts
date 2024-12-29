@@ -30,7 +30,7 @@ export class AuthGuard implements CanActivate {
       this.logger.log(`AuthGuard 종료`);
       return true;
     } catch (e) {
-      this.logger.error(`error catch: ${e}`);
+      this.logger.error(`error catch`, e);
       throw e;
     }
   }
