@@ -1,9 +1,15 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import axios from 'axios';
 import * as dayjs from 'dayjs';
-import { ENV_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
+import { ENV_KEYS, ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
 import { Location } from 'src/locations/entities/location.entity';
 import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
@@ -20,13 +26,14 @@ import { ReviewRepository } from 'src/reviews/review.repository';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { CreatePlaceReviewDto } from './dto/create-place-review.dto';
+import { GetPlaceReviewDto } from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
+import { UpdatePlaceReviewDto } from './dto/update-place-review.dto';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
-import { GetPlaceReviewDto } from './dto/get-place-review.dto';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -216,8 +223,6 @@ export class PlaceService implements IPlaceService {
   ): Promise<ResponseData> {
     const { title, content, isLikeClicked } = createPlaceReviewDto;
 
-    console.log(createPlaceReviewDto.userId);
-
     const user = new User();
     user.id = createPlaceReviewDto.userId;
 
@@ -273,9 +278,7 @@ export class PlaceService implements IPlaceService {
     });
 
     if (!review) {
-      throw new NotFoundException(
-        `ID ${reviewId}에 해당되는 리뷰를 찾을 수 없습니다.`,
-      );
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
     const isAuthor = review.user.id === userId;
@@ -301,22 +304,98 @@ export class PlaceService implements IPlaceService {
     return resData;
   }
 
-  // TODO user.image // title, content, isLikeClicked
-  async updateReview(
-    id: number,
-    userId: number,
-    title: string,
-    content: string,
-    isLikeClicked: boolean,
-    reviewId: number,
-  ) {
-    const resData: ResponseData = {
-      message: SUCCESS_MESSAGE.REQUEST,
-      data: {},
-    };
-    return resData;
+  async updateReview(updatePlaceReviewDto: UpdatePlaceReviewDto) {
+    const { id, userId, title, content, isLikeClicked, reviewId } =
+      updatePlaceReviewDto;
+
+    return await this.dataSource.transaction(async (manager) => {
+      const reviewRepository = manager.withRepository(this.reviewRepository);
+      const reviewPlaceLikeRepository = manager.withRepository(
+        this.reviewPlaceLikeRepository,
+      );
+
+      const review = await reviewRepository
+        .createQueryBuilder('review')
+        .select([
+          'review.id',
+          'review.title',
+          'review.content',
+          'user.id',
+          'reviewPlaceLike.id',
+        ])
+        .leftJoinAndSelect('review.user', 'user')
+        .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
+        .where('review.id = :reviewId', { reviewId })
+        .andWhere('review.placeId = :placeId', { placeId: id })
+        .andWhere('review.userId =:userId', { userId: userId })
+        .getOne();
+      if (!review) {
+        throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+      }
+
+      review.title = title;
+      review.content = content;
+      await reviewRepository.save(review, { reload: false });
+
+      const likeRecord = review.reviewPlaceLike;
+
+      if (!isLikeClicked) {
+        await reviewPlaceLikeRepository.remove(likeRecord);
+      } else if (isLikeClicked && likeRecord.length === 0) {
+        const reviewPlaceLike = new ReviewPlaceLike();
+        reviewPlaceLike.isLikeClicked = true;
+        reviewPlaceLike.place = { id } as Place;
+        reviewPlaceLike.review = { id: reviewId } as Review;
+
+        await reviewPlaceLikeRepository.save(reviewPlaceLike, {
+          reload: false,
+        });
+      }
+
+      return {
+        message: SUCCESS_MESSAGE.REQUEST,
+        data: {
+          placeId: id,
+          reviewId: review.id,
+        },
+      };
+    });
   }
 
-  // TODO 리뷰 삭제 userid있어야함
-  async deleteReview() {}
+  async deleteReview(id: number, userId: number, reviewId: number) {
+    return await this.dataSource.transaction(
+      async (manager): Promise<ResponseData> => {
+        const reviewRepository = manager.withRepository(this.reviewRepository);
+        const reviewPlaceLikeRepository = manager.withRepository(
+          this.reviewPlaceLikeRepository,
+        );
+        const review = await reviewRepository
+          .createQueryBuilder('review')
+          .select(['review.id', 'reviewPlaceLike.id'])
+          .leftJoinAndSelect('review.user', 'user')
+          .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
+          .where('review.id = :reviewId', { reviewId })
+          .andWhere('review.placeId = :placeId', { placeId: id })
+          .andWhere('review.userId =:userId', { userId: userId })
+          .getOne();
+
+        if (!review) {
+          throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+        }
+
+        const likeRecord = review.reviewPlaceLike;
+        await reviewPlaceLikeRepository.remove(likeRecord);
+
+        await reviewRepository.remove(review);
+
+        return {
+          message: SUCCESS_MESSAGE.REQUEST,
+          data: {
+            placeId: id,
+            reviewId: review.id,
+          },
+        };
+      },
+    );
+  }
 }
