@@ -3,10 +3,20 @@ import {
   CreatePlaceReviewDto,
   CreatePlaceReviewResponseDto,
 } from '../dto/create-place-review.dto';
+import {
+  GetPlaceReviewDto,
+  GetPlaceReviewResponseDto,
+} from '../dto/get-place-review.dto';
 import { GetPlaceResponseDto } from '../dto/get-place.dto';
-import { GetPlaceReviewDto } from '../dto/get-place-review.dto';
-import { UpdatePlaceReviewDto } from '../dto/update-place-review.dto';
+import {
+  UpdatePlaceReviewDto,
+  UpdatePlaceReviewResponseDto,
+} from '../dto/update-place-review.dto';
 import { Place } from '../entities/place.entity';
+import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from '../dto/delete-review.dto';
 
 export interface IPlaceService {
   saveEntities(): Promise<void>;
@@ -23,7 +33,15 @@ export interface IPlaceService {
     createPlaceReviewDto: CreatePlaceReviewDto,
   ): Promise<ResponseData<CreatePlaceReviewResponseDto>>;
 
-  getPlaceReview(getPlaceReviewDto: GetPlaceReviewDto): Promise<ResponseData>;
+  getPlaceReview(
+    getPlaceReviewDto: GetPlaceReviewDto,
+  ): Promise<ResponseData<GetPlaceReviewResponseDto>>;
 
-  updateReview(updatePlaceReviewDto: UpdatePlaceReviewDto);
+  updatePlaceReview(
+    updatePlaceReviewDto: UpdatePlaceReviewDto,
+  ): Promise<ResponseData<UpdatePlaceReviewResponseDto>>;
+
+  deletePlaceReview(
+    deletePlaceReviewDto: DeletePlaceReviewDto,
+  ): Promise<ResponseData<DeletePlaceReviewResponseDto>>;
 }
