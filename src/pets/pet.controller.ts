@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Inject,
   Param,
   Post,
@@ -70,5 +71,6 @@ export class PetController {
     name: 'id',
     description: '반려동물의 ID',
   })
+  @Delete(':id')
   async deletePet(@Param('id') id: number) {}
 }
