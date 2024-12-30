@@ -4,12 +4,17 @@ import { User } from './entities/user.entity';
 import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ReviewRepository } from 'src/reviews/review.repository';
+import { IReviewRepository } from 'src/reviews/interfaces/review.repository.interface';
 
 @Injectable()
 export class UserService implements IUserService {
   constructor(
     @Inject(UserRepository)
     private readonly userRepository: IUserRepository,
+    @Inject(ReviewRepository)
+    private readonly reviewRepository: IReviewRepository,
   ) {}
 
   async checkDuplicateNickname(nickname: string): Promise<User | undefined> {
@@ -24,4 +29,6 @@ export class UserService implements IUserService {
 
     return;
   }
+
+  async getMyReviewList(paginationDto: PaginationDto) {}
 }
