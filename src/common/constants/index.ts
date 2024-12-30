@@ -74,7 +74,16 @@ export const enum ENV_KEYS {
   EMAIL_PORT = "EMAIL_PORT",
   EMAIL_USERNAME = "EMAIL_USERNAME",
   EMAIL_PASSWORD = "EMAIL_PASSWORD",
+  PASSWORD_STRING = "PASSWORD_STRING",
+  PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
 }
+
+export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
+        <span style="display: block; text-align:center;">포포</span>
+        <span style="display: block; text-align:center;">인증코드</span>
+        <span style="display: block; text-align:center; margin-top: 10px; font-size: larger; font-weight: bold; letter-spacing: 5px;">`
+
+export const EMAIL_TEMPLATE_CLOSER = `</span></div>`;
 
 export const CUSTOM_REPOSITORY = 'CUSTOM_REPOSITORY';
 
