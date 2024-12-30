@@ -17,15 +17,17 @@ import {
   DeletePlaceReviewDto,
   DeletePlaceReviewResponseDto,
 } from '../dto/delete-review.dto';
+import {
+  GetNearbyPlaceListQueryDto,
+  GetNearbyPlaceListResponseDto,
+} from '../dto/get-nearby-place-list.dto';
 
 export interface IPlaceService {
   saveEntities(): Promise<void>;
 
   getNearbyPlaces(
-    lat: number,
-    lon: number,
-    radius: number,
-  ): Promise<ResponseData<Place[]>>;
+    getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,
+  ): Promise<ResponseData<GetNearbyPlaceListResponseDto[]>>;
 
   getPlace(id: number): Promise<GetPlaceResponseDto>;
 
