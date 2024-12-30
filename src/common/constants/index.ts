@@ -95,9 +95,19 @@ export enum GENDER_TYPE {
   FEMALE = 'FEMALE',
 }
 
+export enum GENDER_TYPE_INDEX {
+  MALE = 1,
+  FEMALE,
+}
+
 export enum ROLE_TYPE {
   USER = 'USER',
   ADMIN = 'ADMIN',
+}
+
+export enum ROLE_TYPE_INDEX {
+  USER = 1,
+  ADMIN,
 }
 
 export enum LOGIN_METHOD_TYPE {
@@ -106,10 +116,22 @@ export enum LOGIN_METHOD_TYPE {
   KAKAO = 'KAKAO',
 }
 
+export enum LOGIN_METHOD_TYPE_INDEX {
+  BASIC = 1,
+  GOOGLE,
+  KAKAO,
+}
+
 export enum PET_SIZE_TYPE {
   SMALL = 'SMALL',
   MEDIUM = 'MEDIUM',
   LARGE = 'LARGE',
+}
+
+export enum PET_SIZE_TYPE_INDEX {
+  SMALL = 1,
+  MEDIUM,
+  LARGE,
 }
 
 export enum BOARD_CATEGORY_TYPE {
@@ -119,9 +141,21 @@ export enum BOARD_CATEGORY_TYPE {
   LIFE = 'LIFE',
 }
 
+export enum BOARD_CATEGORY_TYPE_INDEX {
+  PROUD_PETS = 1,
+  CONSULTATION,
+  PROTECT,
+  LIFE,
+}
+
 export enum NOTIFICATION_TYPE {
   RECEIVE_MESSAGE = 'RECEIVE_MESSAGE',
   INVITE = 'INVITE',
+}
+
+export enum NOTIFICATION_TYPE_INDEX {
+  RECEIVE_MESSAGE = 1,
+  INVITE,
 }
 
 export enum PLACE_CATEGORY_TYPE {
