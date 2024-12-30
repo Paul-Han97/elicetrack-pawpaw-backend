@@ -60,6 +60,7 @@ import { UserLocation } from './user-locations/entities/user-location.entity';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -135,9 +136,9 @@ import { UserModule } from './users/user.module';
           ENV_KEYS.DATABASE_MONGO_PASSWORD,
         );
         const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
-
+        
         const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
-
+        
         return {
           uri,
           retryAttempts: 0,
@@ -187,6 +188,24 @@ import { UserModule } from './users/user.module';
         logger: 'file',
         logging: true,
         legacySpatialSupport: false,
+      }),
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>(ENV_KEYS.EMAIL_HOST),
+          port: configService.get<number>(ENV_KEYS.EMAIL_PORT),
+          secure: false,
+          auth: {
+            user: configService.get<string>(ENV_KEYS.EMAIL_USERNAME),
+            pass: configService.get<string>(ENV_KEYS.EMAIL_PASSWORD),
+          },
+        },
+        defaults: {
+          from: `"포포" <${configService.get<string>(ENV_KEYS.EMAIL_USERNAME)}>`,
+        },
       }),
     }),
     UtilModule,

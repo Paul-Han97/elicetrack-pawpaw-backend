@@ -87,7 +87,9 @@ export class AuthController {
   @Post('send-verification-email')
   async sendVerificationEmail(
     @Body() sendVerificationEmailDto: SendVerificationEmailDto,
-  ) {}
+  ) {
+    return await this.authService.sendVerificationEmail(sendVerificationEmailDto);
+  }
 
   @ApiOperation({
     summary: '전송된 인증코드를 확인 합니다.',

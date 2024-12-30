@@ -39,6 +39,7 @@ export const enum ERROR_MESSAGE {
   EMAIL_PASSWORD_NOT_MATCH = '이메일 또는 패스워드가 일치하지 않습니다.',
   UNAUTHORIZED = '로그인이 필요 합니다.',
   NOT_FOUND = '해당하는 리소스를 찾을 수 없습니다.',
+  FAILED_SEND_EMAIL = "이메일 전송이 실패 했습니다.",
 }
 
 export const enum SUCCESS_MESSAGE {
@@ -69,6 +70,10 @@ export const enum ENV_KEYS {
   AWS_S3_ACCESS = "AWS_S3_ACCESS",
   AWS_S3_SECRET = "AWS_S3_SECRET",
   AWS_S3_BUCKET_NAME = "AWS_S3_BUCKET_NAME",
+  EMAIL_HOST = "EMAIL_HOST",
+  EMAIL_PORT = "EMAIL_PORT",
+  EMAIL_USERNAME = "EMAIL_USERNAME",
+  EMAIL_PASSWORD = "EMAIL_PASSWORD",
 }
 
 export const CUSTOM_REPOSITORY = 'CUSTOM_REPOSITORY';
