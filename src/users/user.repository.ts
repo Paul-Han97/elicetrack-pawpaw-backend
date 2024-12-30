@@ -1,8 +1,8 @@
 import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
+import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
 import { User } from './entities/user.entity';
 import { IUserRepository } from './interfaces/user.repository.interface';
-import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 
 @CustomRepository(User)
 export class UserRepository
@@ -25,7 +25,10 @@ export class UserRepository
     return reuslt;
   }
 
-  async findByNickName(nickname: string): Promise<User | undefined> {
+  async findByNickName(
+    duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
+  ): Promise<User> {
+    const { nickname } = duplicateNicknameQueryDto;
     const result = await this.createQueryBuilder('user')
       .where('user.nickname = :nickname', { nickname })
       .getOne();
