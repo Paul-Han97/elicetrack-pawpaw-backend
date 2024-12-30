@@ -1,6 +1,5 @@
 import { Repository } from 'typeorm';
 import { Place } from '../entities/place.entity';
-import { GetNearbyPlaceListResponseDto } from '../dto/get-nearby-place-list.dto';
 
 export interface IPlaceRepository extends Repository<Place> {
   saveEntities(entities: Place[]): Promise<void>;
@@ -13,4 +12,6 @@ export interface IPlaceRepository extends Repository<Place> {
   ): Promise<Place[]>;
 
   findByPlace(id: number): Promise<Place | null>;
+
+  getPlaceWithReviews(id: number): Promise<Place | null>;
 }
