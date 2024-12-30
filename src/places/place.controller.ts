@@ -79,7 +79,6 @@ export class PlaceController {
   @ApiOkResponse({
     description: '데이터 저장이 완료되었습니다.',
   })
-  @Post('save-entities')
   async savePublicData() {
     const result = await this.placeService.saveEntities();
     return result;
