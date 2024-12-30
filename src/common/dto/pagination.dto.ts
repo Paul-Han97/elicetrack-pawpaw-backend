@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { Max, Min } from 'class-validator';
 
 export class PaginationDto {
@@ -9,8 +10,9 @@ export class PaginationDto {
     - 최솟값 : 1
     - 최댓값 : 7`,
     default: 7,
-    required: false
+    required: false,
   })
+  @Type(() => Number)
   @Min(1)
   @Max(7)
   take: number;
@@ -21,8 +23,9 @@ export class PaginationDto {
     - 기본값 : 1
     - 최솟값 : 1`,
     default: 1,
-    required: false
+    required: false,
   })
+  @Type(() => Number)
   @Min(1)
   perPage: number;
 }
