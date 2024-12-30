@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { Review } from 'src/reviews/entities/review.entity';
+import { GetNearbyPlaceListResponseDto } from './dto/get-nearby-place-list.dto';
 
 @CustomRepository(Place)
 export class PlaceRepository
@@ -24,25 +25,28 @@ export class PlaceRepository
       throw new Error(`실패입니다 임시예요:${e.message}`);
     }
   }
+
   async findNearbyPlaces(
     lon: number,
     lat: number,
     radius: number,
+    category?: string,
   ): Promise<Place[]> {
     try {
       return await this.createQueryBuilder('place')
 
-        .innerJoin('place.placeLocation', 'placeLocation')
-        .innerJoin('placeLocation.location', 'location')
+        .leftJoinAndSelect('place.placeLocation', 'placeLocation')
+        .leftJoinAndSelect('placeLocation.location', 'location')
         .where(
           'ST_Distance_Sphere(location.point, POINT(:lon, :lat)) < :radius',
-
           {
             lon,
             lat,
             radius,
           },
         )
+        .andWhere(category ? 'place.category = :category' : '1=1', { category })
+
         .getMany();
     } catch (e) {
       throw new Error(`근처 장소 조회 실패: ${e.message}`);
