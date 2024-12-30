@@ -88,7 +88,7 @@ export class PlaceService implements IPlaceService {
     while (hasMoreData) {
       const apiUrl = `${baseUrl}/petTourSyncList?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&MobileOS=ETC&MobileApp=AppTest&_type=json`;
       try {
-        console.log(`API 요청: ${apiUrl}`);
+      this.logger.log(`API 요청: ${apiUrl}`);
         const response = await axios.get(apiUrl);
 
         const items = response.data.response?.body?.items?.item;
@@ -106,7 +106,7 @@ export class PlaceService implements IPlaceService {
           .filter((entity) => entity !== null);
 
         if (entities.length === 0) {
-          console.warn('유효한 데이터가 없어 저장을 건너뜁니다.');
+          this.logger.warn('유효한 데이터가 없어 저장을 건너뜁니다.');
           pageNo++;
           continue;
         }
@@ -152,7 +152,6 @@ export class PlaceService implements IPlaceService {
     };
   }
 
-  // 변환된 데이터를 각 레포에 저장
   async saveEntitiesToDB(
     entities: {
       place: Place;
@@ -227,35 +226,50 @@ export class PlaceService implements IPlaceService {
     return resData;
   }
 
-  // 시설물 id기반 조회
-  async getPlace(id: number): Promise<GetPlaceResponseDto> {
-    const place = await this.placeRepository.findByPlace(id);
+  async getPlace(id: number): Promise<ResponseData<GetPlaceResponseDto>> {
+    const place = await this.placeRepository.getPlaceWithReviews(id);
+
     if (!place) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
-    // const reviews = await this.reviewRepository.find({
-    //   where: { place: { id } },
-    //   select: ['id'],
-    // });
+    const getPlaceResponseDto = new GetPlaceResponseDto();
+    getPlaceResponseDto.id = place.id;
+    getPlaceResponseDto.name = place.name ?? null;
+    getPlaceResponseDto.roadNameAddress = place.roadNameAddress ?? null;
+    getPlaceResponseDto.postalAddress = place.postalAddress ?? null;
+    getPlaceResponseDto.postalCode = place.postalCode ?? null;
+    getPlaceResponseDto.openingHour = place.openingHour ?? null;
+    getPlaceResponseDto.closingDays = place.closingDays ?? null;
+    getPlaceResponseDto.hasParkingArea = place.hasParkingArea ?? null;
+    getPlaceResponseDto.contact = place.contact ?? null;
+    getPlaceResponseDto.price = place.price ?? null;
+    getPlaceResponseDto.allowSize = place.allowSize ?? null;
+    getPlaceResponseDto.restrictions = place.restrictions ?? null;
+    getPlaceResponseDto.description = place.description ?? null;
+    getPlaceResponseDto.additionalFees = place.additionalFees ?? null;
+    getPlaceResponseDto.reviewList = [];
 
-    return {
-      id: place.id,
-      name: place.name ?? null,
-      roadNameAddress: place.roadNameAddress ?? null,
-      postalAddress: place.postalAddress ?? null,
-      postalCode: place.postalCode ?? null,
-      openingHour: place.openingHour ?? null,
-      closingDays: place.closingDays ?? null,
-      hasParkingArea: place.hasParkingArea ?? null,
-      contact: place.contact ?? null,
-      price: place.price ?? null,
-      allowSize: place.allowSize ?? null,
-      restrictions: place.restrictions ?? null,
-      description: place.description ?? null,
-      additionalFees: place.additionalFees ?? null,
-      reviewList: [],
+    const reviewList = getPlaceResponseDto.reviewList;
+
+    place.review.forEach((review) => {
+      reviewList.push({
+        id: review.id,
+        userId: review.user?.id ?? null,
+        nickname: review.user?.nickname ?? null,
+        imageUrl: review.user?.userImage?.[0]?.image?.url ?? null,
+        title: review.title ?? null,
+        content: review.content ?? null,
+        isLikeClicked: review.reviewPlaceLike?.length > 0,
+      });
+    });
+
+    const resData: ResponseData<GetPlaceResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: getPlaceResponseDto,
     };
+
+    return resData;
   }
 
   async createPlaceReview(
