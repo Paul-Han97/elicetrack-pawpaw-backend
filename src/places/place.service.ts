@@ -40,7 +40,7 @@ import {
   GetPlaceReviewDto,
   GetPlaceReviewResponseDto,
 } from './dto/get-place-review.dto';
-import { GetPlaceResponseDto, ReviewList } from './dto/get-place.dto';
+import { GetPlaceResponseDto } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
 import { UpdatePlaceReviewDto } from './dto/update-place-review.dto';
 import { Place } from './entities/place.entity';
@@ -227,47 +227,52 @@ export class PlaceService implements IPlaceService {
   }
 
   async getPlace(id: number): Promise<ResponseData<GetPlaceResponseDto>> {
-    const place = await this.placeRepository.findByPlace(id);
+    const place = await this.placeRepository
+      .createQueryBuilder('place')
+      .leftJoinAndSelect('place.review', 'review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .where('place.id = :id', { id })
+      .getOne();
+
     if (!place) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
-    const reviews = await this.reviewRepository.find({
-      where: { place: { id } },
-      relations: ['user', 'reviewPlaceLike', 'user.userImage'],
-      select: ['id', 'title', 'content', 'createdAt'],
-    });
+    const getPlaceResponseDto = new GetPlaceResponseDto();
+    getPlaceResponseDto.id = place.id;
+    getPlaceResponseDto.name = place.name ?? null;
+    getPlaceResponseDto.roadNameAddress = place.roadNameAddress ?? null;
+    getPlaceResponseDto.postalAddress = place.postalAddress ?? null;
+    getPlaceResponseDto.postalCode = place.postalCode ?? null;
+    getPlaceResponseDto.openingHour = place.openingHour ?? null;
+    getPlaceResponseDto.closingDays = place.closingDays ?? null;
+    getPlaceResponseDto.hasParkingArea = place.hasParkingArea ?? null;
+    getPlaceResponseDto.contact = place.contact ?? null;
+    getPlaceResponseDto.price = place.price ?? null;
+    getPlaceResponseDto.allowSize = place.allowSize ?? null;
+    getPlaceResponseDto.restrictions = place.restrictions ?? null;
+    getPlaceResponseDto.description = place.description ?? null;
+    getPlaceResponseDto.additionalFees = place.additionalFees ?? null;
+    getPlaceResponseDto.reviewList = [];
 
-    const reviewList: ReviewList[] = reviews.map((review) => ({
-      id: review.id,
-      userId: review.user?.id ?? null,
-      nickname: review.user?.nickname ?? null,
-      imageUrl: review.user?.userImage?.[0]?.image?.url ?? null,
-      title: review.title ?? null,
-      content: review.content ?? null,
-      createdAt: review.createdAt ?? null,
-      isLikeClicked: review.reviewPlaceLike.length > 0,
-    }));
+    const reviewList = getPlaceResponseDto.reviewList;
+
+    place.review.forEach((review) => {
+      reviewList.push({
+        id: review.id,
+        userId: review.user?.id ?? null,
+        nickname: review.user?.nickname ?? null,
+        imageUrl: review.user?.userImage?.[0]?.image?.url ?? null,
+        title: review.title ?? null,
+        content: review.content ?? null,
+        isLikeClicked: review.reviewPlaceLike?.length > 0,
+      });
+    });
 
     const resData: ResponseData<GetPlaceResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
-      data: {
-        id: place.id,
-        name: place.name ?? null,
-        roadNameAddress: place.roadNameAddress ?? null,
-        postalAddress: place.postalAddress ?? null,
-        postalCode: place.postalCode ?? null,
-        openingHour: place.openingHour ?? null,
-        closingDays: place.closingDays ?? null,
-        hasParkingArea: place.hasParkingArea ?? null,
-        contact: place.contact ?? null,
-        price: place.price ?? null,
-        allowSize: place.allowSize ?? null,
-        restrictions: place.restrictions ?? null,
-        description: place.description ?? null,
-        additionalFees: place.additionalFees ?? null,
-        reviewList: reviewList,
-      },
+      data: getPlaceResponseDto,
     };
 
     return resData;
