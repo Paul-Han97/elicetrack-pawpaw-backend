@@ -26,13 +26,14 @@ import {
 } from './dto/create-place-review.dto';
 
 import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
+import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
 } from './dto/get-nearby-place-list.dto';
-import {
-  GetPlaceReviewDto,
-  GetPlaceReviewResponseDto,
-} from './dto/get-place-review.dto';
+import { GetPlaceReviewResponseDto } from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import {
   UpdatePlaceReviewDto,
@@ -40,10 +41,6 @@ import {
 } from './dto/update-place-review.dto';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceService } from './place.service';
-import {
-  DeletePlaceReviewDto,
-  DeletePlaceReviewResponseDto,
-} from './dto/delete-review.dto';
 
 @Controller('places')
 export class PlaceController {
