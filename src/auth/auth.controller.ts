@@ -17,7 +17,7 @@ import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
-import { ValidateVerficationDto } from './dto/validate-verifcation-code.dto';
+import { ValidateVerificationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
 
 @Controller('auth')
@@ -73,7 +73,6 @@ export class AuthController {
   @Post('register')
   async register(
     @UploadedFile() image: Express.Multer.File,
-    @Req() req: Request,
     @Body() registerDto: RegisterDto,
   ) {}
 
@@ -88,7 +87,9 @@ export class AuthController {
   async sendVerificationEmail(
     @Body() sendVerificationEmailDto: SendVerificationEmailDto,
   ) {
-    return await this.authService.sendVerificationEmail(sendVerificationEmailDto);
+    return await this.authService.sendVerificationEmail(
+      sendVerificationEmailDto,
+    );
   }
 
   @ApiOperation({
@@ -101,8 +102,12 @@ export class AuthController {
   @HttpCode(HTTP_STATUS.OK)
   @Post('validate-verification-code')
   async validateVerificationCode(
-    @Body() validateVerficationDto: ValidateVerficationDto,
-  ) {}
+    @Body() validateVerificationDto: ValidateVerificationDto,
+  ) {
+    return await this.authService.validateVerificationCode(
+      validateVerificationDto,
+    );
+  }
 
   @ApiOperation({
     summary: '사용자에게 임시 비밀번호 발급 메일을 전송 합니다.',
@@ -115,5 +120,7 @@ export class AuthController {
   @Post('send-temporary-password-email')
   async sendTemporaryPasswordEmail(
     @Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto,
-  ) {}
+  ) {
+    return await this.authService.sendTemporaryPasswordEmail(sendTemporaryPasswordEmailDto);
+  }
 }
