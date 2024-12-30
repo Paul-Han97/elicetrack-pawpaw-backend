@@ -124,8 +124,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
       isGlobal: true,
     }),
     CacheModule.register({
-      // 5분
-      ttl: 1000 * 60 * 5,
+      ttl: 300, // 5분
+      isGlobal: true,
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
