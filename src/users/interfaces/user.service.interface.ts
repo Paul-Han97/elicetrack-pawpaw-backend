@@ -1,5 +1,8 @@
-import { User } from '../entities/user.entity';
+import { ResponseData } from 'src/common/types/response.type';
+import { DuplicateNicknameQueryDto } from '../dto/duplicate-nickname.dto';
 
 export interface IUserService {
-  checkDuplicateNickname(nickname: string): Promise<User | undefined>;
+  checkDuplicateNickname(
+    duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
+  ): Promise<ResponseData>;
 }
