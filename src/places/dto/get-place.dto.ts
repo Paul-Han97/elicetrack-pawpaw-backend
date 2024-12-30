@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
-class ReviewList {
+export class ReviewList {
   @ApiProperty({
     description: '리뷰의 ID',
   })
