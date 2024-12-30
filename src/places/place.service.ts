@@ -1,10 +1,4 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -35,6 +29,14 @@ import {
   CreatePlaceReviewResponseDto,
 } from './dto/create-place-review.dto';
 import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
+import {
+  GetNearbyPlaceListQueryDto,
+  GetNearbyPlaceListResponseDto,
+} from './dto/get-nearby-place-list.dto';
+import {
   GetPlaceReviewDto,
   GetPlaceReviewResponseDto,
 } from './dto/get-place-review.dto';
@@ -45,14 +47,6 @@ import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
-import {
-  DeletePlaceReviewDto,
-  DeletePlaceReviewResponseDto,
-} from './dto/delete-review.dto';
-import {
-  GetNearbyPlaceListQueryDto,
-  GetNearbyPlaceListResponseDto,
-} from './dto/get-nearby-place-list.dto';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -200,20 +194,10 @@ export class PlaceService implements IPlaceService {
     );
     if (!result.length) {
       return {
-        message: '근처에 해당 카테고리가 없습니다.',
-        data: [],
+        message: ERROR_MESSAGE.NOT_FOUND,
+        data: null,
       };
     }
-
-    const point = result[0].placeLocation[0].location.point;
-    const POINT_NAME = 'POINT(';
-    const testPoint = point.slice(POINT_NAME.length, point.length - 1);
-    const numPoint = testPoint.split(' ').map(Number);
-
-    const longitude = numPoint[0];
-    const latitude = numPoint[1];
-
-    console.log('testPointtestPoint', numPoint, longitude, latitude);
 
     const resData: ResponseData<GetNearbyPlaceListResponseDto[]> = {
       message: SUCCESS_MESSAGE.REQUEST,
@@ -247,9 +231,7 @@ export class PlaceService implements IPlaceService {
   async getPlace(id: number): Promise<GetPlaceResponseDto> {
     const place = await this.placeRepository.findByPlace(id);
     if (!place) {
-      throw new NotFoundException(
-        `ID ${id}에 해당하는 시설물이 존재하지 않습니다.`,
-      );
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
     return {
