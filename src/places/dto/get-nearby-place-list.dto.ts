@@ -1,9 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import {
+  PLACE_CATEGORY_KOR_TYPE,
+  PLACE_CATEGORY_TYPE,
+} from 'src/common/constants';
 
 export class GetNearbyPlaceListQueryDto {
   @ApiProperty({
-    description: '시설물의 카테고리',
+    description: '시설물의 카테고리(선택)',
+    required: false,
+    enum: PLACE_CATEGORY_TYPE,
   })
   category: string;
 
@@ -43,4 +48,11 @@ export class GetNearbyPlaceListResponseDto {
     description: '시설의 이름',
   })
   name: string;
+
+  @ApiProperty({
+    description: '시설의 카테고리',
+    required: false,
+    enum: PLACE_CATEGORY_KOR_TYPE,
+  })
+  category: string;
 }

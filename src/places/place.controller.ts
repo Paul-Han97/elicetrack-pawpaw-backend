@@ -26,13 +26,14 @@ import {
 } from './dto/create-place-review.dto';
 
 import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
+import {
   GetNearbyPlaceListQueryDto,
   GetNearbyPlaceListResponseDto,
 } from './dto/get-nearby-place-list.dto';
-import {
-  GetPlaceReviewDto,
-  GetPlaceReviewResponseDto,
-} from './dto/get-place-review.dto';
+import { GetPlaceReviewResponseDto } from './dto/get-place-review.dto';
 import { GetPlaceResponseDto } from './dto/get-place.dto';
 import {
   UpdatePlaceReviewDto,
@@ -40,10 +41,6 @@ import {
 } from './dto/update-place-review.dto';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceService } from './place.service';
-import {
-  DeletePlaceReviewDto,
-  DeletePlaceReviewResponseDto,
-} from './dto/delete-review.dto';
 
 @Controller('places')
 export class PlaceController {
@@ -65,12 +62,8 @@ export class PlaceController {
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {
-    const { latitude, longitude, radius } = getNearbyPlaceListQueryDto;
-
     const places = await this.placeService.getNearbyPlaces(
-      latitude,
-      longitude,
-      radius,
+      getNearbyPlaceListQueryDto,
     );
 
     return places;
@@ -83,7 +76,6 @@ export class PlaceController {
   @ApiOkResponse({
     description: '데이터 저장이 완료되었습니다.',
   })
-  @Post('save-entities')
   async savePublicData() {
     const result = await this.placeService.saveEntities();
     return result;
