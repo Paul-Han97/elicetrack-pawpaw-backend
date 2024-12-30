@@ -20,7 +20,9 @@ export class User extends CommonEntity {
   @Column()
   nickname: string;
 
-  @Column()
+  @Column({
+    default: false,
+  })
   canWalkingMate: boolean;
 
   @ManyToOne(() => Role)
