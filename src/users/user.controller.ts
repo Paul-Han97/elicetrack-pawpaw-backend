@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
   ApiOkResponse,
@@ -24,8 +25,6 @@ import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Auth } from 'src/common/guards/auth.decorator';
 
 @Controller('users')
 export class UserController {
@@ -44,7 +43,11 @@ export class UserController {
     description: '사용자의 닉네임',
   })
   @Get('duplicate-nickname')
-  async duplicateNickname(@Query('nickname') nickname: string) {}
+  async duplicateNickname(@Query('nickname') nickname: string) {
+    await this.userService.checkDuplicateNickname(nickname);
+
+    return { message: '사용가능 닉네임' };
+  }
 
   @ApiOperation({
     summary: '사용자와 반려동물의 정보를 조회 합니다.',
