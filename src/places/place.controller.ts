@@ -95,9 +95,9 @@ export class PlaceController {
   })
   @Get(':id')
   async getPlace(@Param('id') id: number) {
-    const place = await this.placeService.getPlace(id);
-    console.log('삽입할 Place 엔티티:', place);
-    return { data: place };
+    const result = await this.placeService.getPlace(id);
+    
+    return { data: result };
   }
 
   @ApiOperation({
