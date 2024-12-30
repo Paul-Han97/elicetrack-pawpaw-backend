@@ -97,7 +97,11 @@ export class UserController {
   async getMyReviewList(
     @Query() paginationDto: PaginationDto,
     @Param('id') id: number,
-  ) {}
+  ) {
+    const result = await this.userService.getMyReviewList(id, paginationDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자의 정보를 수정 합니다.',

@@ -234,6 +234,11 @@ export class PlaceService implements IPlaceService {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
+    // const reviews = await this.reviewRepository.find({
+    //   where: { place: { id } },
+    //   select: ['id'],
+    // });
+
     return {
       id: place.id,
       name: place.name ?? null,
