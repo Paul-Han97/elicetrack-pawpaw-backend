@@ -1,9 +1,11 @@
 import { Repository } from 'typeorm';
+import { DuplicateNicknameQueryDto } from '../dto/duplicate-nickname.dto';
 import { User } from '../entities/user.entity';
-import { GetMyReviewListDto } from '../dto/get-my-review-list.dto';
 
 export interface IUserRepository extends Repository<User> {
   findUserCredentialByEmail(username: string): Promise<User>;
 
-  findByNickName(nickname: string): Promise<User | undefined>;
+  findByNickName(
+    duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
+  ): Promise<User>;
 }
