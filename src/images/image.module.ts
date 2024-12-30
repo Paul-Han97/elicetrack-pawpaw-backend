@@ -8,5 +8,6 @@ import { ImageRepository } from './image.repository';
   imports: [TypeOrmCustomModule.forCustomRepository([ImageRepository])],
   controllers: [ImageController],
   providers: [ImageService],
+  exports: [ImageService]
 })
 export class ImageModule {}

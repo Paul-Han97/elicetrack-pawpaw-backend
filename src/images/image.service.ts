@@ -77,7 +77,7 @@ export class ImageService implements IImageService {
 
   async deleteImageFromS3(deleteImageDto: DeleteImageDto): Promise<void> {
     await Promise.all(
-      deleteImageDto.filename.map((filename) => {
+      deleteImageDto.filenameList.map((filename) => {
         const command = new DeleteObjectCommand({
           Bucket: this.s3BucketName,
           Key: filename
