@@ -65,12 +65,8 @@ export class PlaceController {
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {
-    const { latitude, longitude, radius } = getNearbyPlaceListQueryDto;
-
     const places = await this.placeService.getNearbyPlaces(
-      latitude,
-      longitude,
-      radius,
+      getNearbyPlaceListQueryDto,
     );
 
     return places;
