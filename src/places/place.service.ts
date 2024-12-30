@@ -88,7 +88,7 @@ export class PlaceService implements IPlaceService {
     while (hasMoreData) {
       const apiUrl = `${baseUrl}/petTourSyncList?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=${numOfRows}&pageNo=${pageNo}&MobileOS=ETC&MobileApp=AppTest&_type=json`;
       try {
-        console.log(`API 요청: ${apiUrl}`);
+      this.logger.log(`API 요청: ${apiUrl}`);
         const response = await axios.get(apiUrl);
 
         const items = response.data.response?.body?.items?.item;
@@ -106,7 +106,7 @@ export class PlaceService implements IPlaceService {
           .filter((entity) => entity !== null);
 
         if (entities.length === 0) {
-          console.warn('유효한 데이터가 없어 저장을 건너뜁니다.');
+          this.logger.warn('유효한 데이터가 없어 저장을 건너뜁니다.');
           pageNo++;
           continue;
         }
@@ -227,13 +227,7 @@ export class PlaceService implements IPlaceService {
   }
 
   async getPlace(id: number): Promise<ResponseData<GetPlaceResponseDto>> {
-    const place = await this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoinAndSelect('place.review', 'review')
-      .leftJoinAndSelect('review.user', 'user')
-      .leftJoinAndSelect('user.userImage', 'userImage')
-      .where('place.id = :id', { id })
-      .getOne();
+    const place = await this.placeRepository.getPlaceWithReviews(id);
 
     if (!place) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
