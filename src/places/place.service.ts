@@ -76,7 +76,6 @@ export class PlaceService implements IPlaceService {
     private readonly dataSource: DataSource,
   ) {}
 
-  //공공 데이터 api 호출
   // TODO : cron으로
   async saveEntities() {
     const baseUrl = this.configService.get<string>(
@@ -129,8 +128,6 @@ export class PlaceService implements IPlaceService {
     }
   }
 
-  // TODO : 함수 밖으로 빼 버려
-  // 데이터를 각각의 엔티티로 변환
   mapToPlaceEntity(item: PlaceDto): {
     place: Place;
     placeLocation: PlaceLocation;
@@ -188,7 +185,6 @@ export class PlaceService implements IPlaceService {
     }
   }
 
-  // 주변 반경 조회
   async getNearbyPlaces(
     getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,
   ): Promise<ResponseData<GetNearbyPlaceListResponseDto[]>> {
