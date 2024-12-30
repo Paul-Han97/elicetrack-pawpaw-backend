@@ -19,6 +19,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ResponseData } from 'src/common/types/response.type';
+import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from './dto/get-my-board-list.dto';
 import { GetMyPageResponseDto } from './dto/get-my-page.dto';
 import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
@@ -43,10 +45,14 @@ export class UserController {
     description: '사용자의 닉네임',
   })
   @Get('duplicate-nickname')
-  async duplicateNickname(@Query('nickname') nickname: string) {
-    await this.userService.checkDuplicateNickname(nickname);
+  async duplicateNickname(
+    @Query() duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
+  ): Promise<ResponseData> {
+    const result = await this.userService.checkDuplicateNickname(
+      duplicateNicknameQueryDto,
+    );
 
-    return { message: '사용가능 닉네임' };
+    return result;
   }
 
   @ApiOperation({
