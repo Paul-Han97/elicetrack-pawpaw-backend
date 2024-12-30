@@ -1,15 +1,14 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import axios from 'axios';
 import * as dayjs from 'dayjs';
-import { ENV_KEYS, ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
+import {
+  ENV_KEYS,
+  ERROR_MESSAGE,
+  PLACE_CATEGORY_KOR_TYPE,
+  SUCCESS_MESSAGE,
+} from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
 import { Location } from 'src/locations/entities/location.entity';
 import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
@@ -30,6 +29,14 @@ import {
   CreatePlaceReviewResponseDto,
 } from './dto/create-place-review.dto';
 import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from './dto/delete-review.dto';
+import {
+  GetNearbyPlaceListQueryDto,
+  GetNearbyPlaceListResponseDto,
+} from './dto/get-nearby-place-list.dto';
+import {
   GetPlaceReviewDto,
   GetPlaceReviewResponseDto,
 } from './dto/get-place-review.dto';
@@ -40,10 +47,6 @@ import { Place } from './entities/place.entity';
 import { IPlaceRepository } from './interface/place.repository.interface';
 import { IPlaceService } from './interface/place.service.interface';
 import { PlaceRepository } from './place.repository';
-import {
-  DeletePlaceReviewDto,
-  DeletePlaceReviewResponseDto,
-} from './dto/delete-review.dto';
 
 @Injectable()
 export class PlaceService implements IPlaceService {
@@ -67,7 +70,6 @@ export class PlaceService implements IPlaceService {
     private readonly dataSource: DataSource,
   ) {}
 
-  //공공 데이터 api 호출
   // TODO : cron으로
   async saveEntities() {
     const baseUrl = this.configService.get<string>(
@@ -120,8 +122,6 @@ export class PlaceService implements IPlaceService {
     }
   }
 
-  // TODO : 함수 밖으로 빼 버려
-  // 데이터를 각각의 엔티티로 변환
   mapToPlaceEntity(item: PlaceDto): {
     place: Place;
     placeLocation: PlaceLocation;
@@ -179,24 +179,51 @@ export class PlaceService implements IPlaceService {
     }
   }
 
-  // 주변 반경 조회
   async getNearbyPlaces(
-    lat: number,
-    lon: number,
-    radius: number,
-  ): Promise<ResponseData<Place[]>> {
+    getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,
+  ): Promise<ResponseData<GetNearbyPlaceListResponseDto[]>> {
     this.logger.log('주변 반경 시설 조회.');
 
-    const result = await this.placeRepository.findNearbyPlaces(
-      lon,
-      lat,
-      radius,
-    );
+    const category = PLACE_CATEGORY_KOR_TYPE[getNearbyPlaceQueryDto.category];
 
-    const resData: ResponseData<Place[]> = {
+    const result = await this.placeRepository.findNearbyPlaces(
+      getNearbyPlaceQueryDto.longitude,
+      getNearbyPlaceQueryDto.latitude,
+      getNearbyPlaceQueryDto.radius,
+      category,
+    );
+    if (!result.length) {
+      return {
+        message: ERROR_MESSAGE.NOT_FOUND,
+        data: null,
+      };
+    }
+
+    const resData: ResponseData<GetNearbyPlaceListResponseDto[]> = {
       message: SUCCESS_MESSAGE.REQUEST,
-      data: result,
+
+      data: result
+        .filter(
+          (place) =>
+            place.placeLocation?.[0]?.location?.point && place.category,
+        )
+        .map((place) => {
+          const point = place.placeLocation[0].location.point;
+          const POINT_NAME = 'POINT(';
+          const slicePoint = point.slice(POINT_NAME.length, point.length - 1);
+          const numPoint = slicePoint.split(' ').map(Number);
+          const longitude = numPoint[0];
+          const latitude = numPoint[1];
+          return {
+            id: place.id,
+            category: place.category,
+            name: place.name,
+            latitude: latitude,
+            longitude: longitude,
+          };
+        }),
     };
+
     return resData;
   }
 
@@ -204,9 +231,7 @@ export class PlaceService implements IPlaceService {
   async getPlace(id: number): Promise<GetPlaceResponseDto> {
     const place = await this.placeRepository.findByPlace(id);
     if (!place) {
-      throw new NotFoundException(
-        `ID ${id}에 해당하는 시설물이 존재하지 않습니다.`,
-      );
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
     return {

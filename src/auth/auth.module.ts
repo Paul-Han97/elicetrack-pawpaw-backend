@@ -5,9 +5,12 @@ import { UserService } from 'src/users/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CredentialRepository } from 'src/credentials/credential.repository';
+import { ReviewRepository } from 'src/reviews/review.repository';
 
 @Module({
-  imports: [TypeOrmCustomModule.forCustomRepository([UserRepository, CredentialRepository])],
+  imports: [
+    TypeOrmCustomModule.forCustomRepository([UserRepository, CredentialRepository, ReviewRepository]),
+  ],
   controllers: [AuthController],
   providers: [AuthService, UserService],
 })

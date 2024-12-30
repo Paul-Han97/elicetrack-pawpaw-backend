@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
   ApiOkResponse,
@@ -18,14 +19,14 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ResponseData } from 'src/common/types/response.type';
+import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from './dto/get-my-board-list.dto';
 import { GetMyPageResponseDto } from './dto/get-my-page.dto';
 import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Auth } from 'src/common/guards/auth.decorator';
 
 @Controller('users')
 export class UserController {
@@ -44,7 +45,15 @@ export class UserController {
     description: '사용자의 닉네임',
   })
   @Get('duplicate-nickname')
-  async duplicateNickname(@Query('nickname') nickname: string) {}
+  async duplicateNickname(
+    @Query() duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
+  ): Promise<ResponseData> {
+    const result = await this.userService.checkDuplicateNickname(
+      duplicateNicknameQueryDto,
+    );
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자와 반려동물의 정보를 조회 합니다.',
