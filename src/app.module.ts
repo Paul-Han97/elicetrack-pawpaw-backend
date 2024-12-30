@@ -120,11 +120,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
         EMAIL_PORT: Joi.number().port().required(),
         EMAIL_USERNAME: Joi.string().required(),
         EMAIL_PASSWORD: Joi.string().required(),
+        PASSWORD_STRING: Joi.string().required(),
+        PASSWORD_SPECIAL: Joi.string().required(),
       }),
       isGlobal: true,
     }),
     CacheModule.register({
-      ttl: 300, // 5분
+      ttl: 300_000, // 5분
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
