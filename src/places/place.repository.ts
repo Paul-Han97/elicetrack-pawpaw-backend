@@ -1,3 +1,5 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { ERROR_MESSAGE } from 'src/common/constants';
 import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
 import { Place } from './entities/place.entity';
@@ -20,7 +22,7 @@ export class PlaceRepository
         )
         .execute();
     } catch (e) {
-      throw new Error(`실패입니다 임시예요:${e.message}`);
+      throw new BadRequestException(ERROR_MESSAGE.NOT_VALID_REQUEST);
     }
   }
 
@@ -47,7 +49,7 @@ export class PlaceRepository
 
         .getMany();
     } catch (e) {
-      throw new Error(`근처 장소 조회 실패: ${e.message}`);
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
   }
 
@@ -57,5 +59,18 @@ export class PlaceRepository
       .innerJoinAndSelect('placeLocation.location', 'location')
       .where('place.id = :id', { id })
       .getOne();
+  }
+
+  async getPlaceWithReviews(id: number): Promise<Place | null> {
+    try {
+      return this.createQueryBuilder('place')
+        .leftJoinAndSelect('place.review', 'review')
+        .leftJoinAndSelect('review.user', 'user')
+        .leftJoinAndSelect('user.userImage', 'userImage')
+        .where('place.id = :id', { id })
+        .getOne();
+    } catch (e) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
   }
 }
