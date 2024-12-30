@@ -29,7 +29,7 @@ export interface IPlaceService {
     getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,
   ): Promise<ResponseData<GetNearbyPlaceListResponseDto[]>>;
 
-  getPlace(id: number): Promise<GetPlaceResponseDto>;
+  getPlace(id: number): Promise<ResponseData<GetPlaceResponseDto>> 
 
   createPlaceReview(
     createPlaceReviewDto: CreatePlaceReviewDto,
