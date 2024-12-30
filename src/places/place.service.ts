@@ -40,7 +40,7 @@ import {
   GetPlaceReviewDto,
   GetPlaceReviewResponseDto,
 } from './dto/get-place-review.dto';
-import { GetPlaceResponseDto } from './dto/get-place.dto';
+import { GetPlaceResponseDto, ReviewList } from './dto/get-place.dto';
 import { PlaceDto } from './dto/place.dto';
 import { UpdatePlaceReviewDto } from './dto/update-place-review.dto';
 import { Place } from './entities/place.entity';
@@ -152,7 +152,6 @@ export class PlaceService implements IPlaceService {
     };
   }
 
-  // 변환된 데이터를 각 레포에 저장
   async saveEntitiesToDB(
     entities: {
       place: Place;
@@ -227,35 +226,51 @@ export class PlaceService implements IPlaceService {
     return resData;
   }
 
-  // 시설물 id기반 조회
-  async getPlace(id: number): Promise<GetPlaceResponseDto> {
+  async getPlace(id: number): Promise<ResponseData<GetPlaceResponseDto>> {
     const place = await this.placeRepository.findByPlace(id);
     if (!place) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
-    // const reviews = await this.reviewRepository.find({
-    //   where: { place: { id } },
-    //   select: ['id'],
-    // });
+    const reviews = await this.reviewRepository.find({
+      where: { place: { id } },
+      relations: ['user', 'reviewPlaceLike', 'user.userImage'],
+      select: ['id', 'title', 'content', 'createdAt'],
+    });
 
-    return {
-      id: place.id,
-      name: place.name ?? null,
-      roadNameAddress: place.roadNameAddress ?? null,
-      postalAddress: place.postalAddress ?? null,
-      postalCode: place.postalCode ?? null,
-      openingHour: place.openingHour ?? null,
-      closingDays: place.closingDays ?? null,
-      hasParkingArea: place.hasParkingArea ?? null,
-      contact: place.contact ?? null,
-      price: place.price ?? null,
-      allowSize: place.allowSize ?? null,
-      restrictions: place.restrictions ?? null,
-      description: place.description ?? null,
-      additionalFees: place.additionalFees ?? null,
-      reviewList: [],
+    const reviewList: ReviewList[] = reviews.map((review) => ({
+      id: review.id,
+      userId: review.user?.id ?? null,
+      nickname: review.user?.nickname ?? null,
+      imageUrl: review.user?.userImage?.[0]?.image?.url ?? null,
+      title: review.title ?? null,
+      content: review.content ?? null,
+      createdAt: review.createdAt ?? null,
+      isLikeClicked: review.reviewPlaceLike.length > 0,
+    }));
+
+    const resData: ResponseData<GetPlaceResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        id: place.id,
+        name: place.name ?? null,
+        roadNameAddress: place.roadNameAddress ?? null,
+        postalAddress: place.postalAddress ?? null,
+        postalCode: place.postalCode ?? null,
+        openingHour: place.openingHour ?? null,
+        closingDays: place.closingDays ?? null,
+        hasParkingArea: place.hasParkingArea ?? null,
+        contact: place.contact ?? null,
+        price: place.price ?? null,
+        allowSize: place.allowSize ?? null,
+        restrictions: place.restrictions ?? null,
+        description: place.description ?? null,
+        additionalFees: place.additionalFees ?? null,
+        reviewList: reviewList,
+      },
     };
+
+    return resData;
   }
 
   async createPlaceReview(
