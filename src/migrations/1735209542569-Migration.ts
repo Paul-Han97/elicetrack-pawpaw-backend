@@ -5,8 +5,8 @@ export class Migration1735209542569 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`INSERT INTO \`gender\` (\`type\`) VALUES ('MALE')`);
         await queryRunner.query(`INSERT INTO \`gender\` (\`type\`) VALUES ('FEMALE')`);
-        await queryRunner.query(`INSERT INTO \`role\` (\`type\`) VALUES ('ADMIN')`);
         await queryRunner.query(`INSERT INTO \`role\` (\`type\`) VALUES ('USER')`);
+        await queryRunner.query(`INSERT INTO \`role\` (\`type\`) VALUES ('ADMIN')`);
         await queryRunner.query(`INSERT INTO \`login_method\` (\`type\`) VALUES ('BASIC')`);
         await queryRunner.query(`INSERT INTO \`login_method\` (\`type\`) VALUES ('GOOGLE')`);
         await queryRunner.query(`INSERT INTO \`pet_size\` (\`type\`) VALUES ('SMALL')`);

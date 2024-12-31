@@ -2,14 +2,16 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpStatus,
   Inject,
+  ParseFilePipeBuilder,
   Post,
   Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
 import { Request } from 'express';
 import { HTTP_STATUS } from 'src/common/constants';
 import { AuthService } from './auth.service';
@@ -35,11 +37,14 @@ export class AuthController {
     - 최소 길이: 8
     - 소문자: 1개 이상
     - 대문자: 1개 이상
-      - 숫자: 1개 이상
-      - 특수문자: 1개 이상`,
+    - 숫자: 1개 이상
+    - 특수문자: 1개 이상`,
   })
   @ApiOkResponse({
     type: LoginResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: '계정 정보가 일치하지 않을 때'
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('login')
@@ -65,16 +70,32 @@ export class AuthController {
       - 대문자: 1개 이상
       - 숫자: 1개 이상
       - 특수문자: 1개 이상
-    - name: 최소 1글자 최대 30글자를 충족해야 한다.
-    - nickname: 최소 1글자 최대 30글자를 충족해야 한다.`,
+    - name: 최소 1글자 최대 30글자를 충족해야 합니다.
+    - nickname: 최소 1글자 최대 30글자를 충족해야 합니다.`,
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @ApiUnprocessableEntityResponse({
+    description: '파일 유효성 에러'
+  })
   @Post('register')
   async register(
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({
+          maxSize: 10240, // 10MB
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          fileIsRequired: false,
+        }),
+    )
+    image: Express.Multer.File,
     @Body() registerDto: RegisterDto,
-  ) {}
+  ) {
+    registerDto.image = image;
+    return await this.authService.register(registerDto);
+  }
 
   @ApiOperation({
     summary: '사용자의 이메일로 인증 코드를 전송 합니다.',
@@ -97,7 +118,13 @@ export class AuthController {
     description: `
     - 이메일을 이용하여 서버 캐시에 저장된 인증코드를 조회 합니다.
     - 서버 캐시에 저장되있는 인증코드와 전송된 인증코드를 비교하여
-    true를 반환하면 해당 캐시 데이터는 삭제 됩니다.`,
+    true를 반환하면 5분간 서버 캐시에 인증된 이메일로 기록됩니다.`,
+  })
+  @ApiNotFoundResponse({
+    description: '서버 캐시에 저장된 인증코드가 없을 때'
+  })
+  @ApiBadRequestResponse({
+    description: '인증코드가 유효하지 않을 때'
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('validate-verification-code')
@@ -112,15 +139,20 @@ export class AuthController {
   @ApiOperation({
     summary: '사용자에게 임시 비밀번호 발급 메일을 전송 합니다.',
     description: `
-    - 사용자에게 임시 비밀번호를 발급 합니다.
+    - 이메일 인증이 완료된 사용자에게 임시 비밀번호를 발급 합니다.
     - 발급된 비밀번호로 사용자의 비밀번호가 변경 됩니다.
     - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`,
+  })
+  @ApiBadRequestResponse({
+    description: '인증된 이메일이 아닐 때'
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('send-temporary-password-email')
   async sendTemporaryPasswordEmail(
     @Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto,
   ) {
-    return await this.authService.sendTemporaryPasswordEmail(sendTemporaryPasswordEmailDto);
+    return await this.authService.sendTemporaryPasswordEmail(
+      sendTemporaryPasswordEmailDto,
+    );
   }
 }

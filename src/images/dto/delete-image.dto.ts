@@ -1,7 +1,7 @@
 export class DeleteImageDto {
-    filename: string[];
+    filenameList: string[];
 
     constructor() {
-        this.filename = [];
+        this.filenameList = [];
     }
 }
