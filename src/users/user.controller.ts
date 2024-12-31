@@ -83,7 +83,11 @@ export class UserController {
   async getMyBoardList(
     @Query() paginationDto: PaginationDto,
     @Param('id') id: number,
-  ) {}
+  ) {
+    const result = await this.userService.getMyBoardList(id, paginationDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자가 작성한 리뷰 목록을 조회 합니다.',
