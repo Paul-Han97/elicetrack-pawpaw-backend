@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBadRequestResponse,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
@@ -27,6 +28,7 @@ import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
+import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
 
 @Controller('users')
 export class UserController {
@@ -34,15 +36,25 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
+  
+  @ApiOperation({
+    summary: '이메일 중복을 확인 합니다.',
+    description: `
+    - 이메일 중복을 확인 합니다.`,
+  })
+  @ApiBadRequestResponse({
+    description: '계정이 이미 존재할 때'
+  })
+  @Get('duplicate-email')
+  async duplicateEmail(@Query() duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData> {
+    const result = await this.userService.checkDuplicateEmail(duplicateEmailQueryDto)
+    return result;
+  }
 
   @ApiOperation({
     summary: '닉네임 중복을 확인 합니다.',
     description: `
         - 닉네임 중복을 확인 합니다.`,
-  })
-  @ApiQuery({
-    name: 'nickname',
-    description: '사용자의 닉네임',
   })
   @Get('duplicate-nickname')
   async duplicateNickname(

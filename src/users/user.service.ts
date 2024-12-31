@@ -17,6 +17,7 @@ import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
+import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -28,6 +29,22 @@ export class UserService implements IUserService {
     @Inject(BoardRepository)
     private readonly boardRepository: IBoardRepository,
   ) {}
+
+  async checkDuplicateEmail(duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData> {
+    const { email } = duplicateEmailQueryDto;
+    const user = await this.userRepository.findUserCredentialByEmail(email);
+
+    if (user) {
+      throw new BadRequestException(ERROR_MESSAGE.ACCOUNT_ALREADY_EXIST);
+    }
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null
+    };
+
+    return resData;
+  }
 
   async checkDuplicateNickname(
     duplicateNicknameQueryDto: DuplicateNicknameQueryDto,

@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { ERROR_MESSAGE } from 'src/common/constants';
 import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
+import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -42,5 +43,22 @@ export class BoardRepository
         `${ERROR_MESSAGE.NOT_VALID_REQUEST}: ${e.message}`,
       );
     }
+  }
+
+  async findPopularList(count: number): Promise<[GetPopularListResponseDto]> {
+    const result = await this.query(
+      `
+SELECT A.id, A.title, A.content, D.url, COUNT(B.isLikeClicked) isLikeCount
+  FROM board A
+  LEFT OUTER JOIN user_board_like B ON B.boardId = A.id
+  LEFT OUTER JOIN board_image C ON C.boardId = A.id
+  LEFT OUTER JOIN image D ON D.id = C.imageId 
+GROUP BY A.id, A.title, A.content, D.url
+ORDER BY isLikeCount DESC
+		,id DESC
+LIMIT ?`,
+      [Number(count)],
+    );
+    return result;
   }
 }
