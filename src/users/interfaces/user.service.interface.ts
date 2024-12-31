@@ -15,12 +15,17 @@ export interface IUserService {
   getMyReviewList(
     userId: number,
     paginationDto: PaginationDto,
-  ): Promise<ResponseData<{ reviews: GetMyReviewListDto[]; total: number }>>;
+  ): Promise<
+    ResponseData<{ reviews: GetMyReviewListDto[]; nextCursor: number | null }>
+  >;
 
   getMyBoardList(
     userId: number,
     paginationDto: PaginationDto,
   ): Promise<
-    ResponseData<{ boards: GetMyBoardListResponseDto[]; total: number }>
+    ResponseData<{
+      boards: GetMyBoardListResponseDto[];
+      nextCursor: number | null;
+    }>
   >;
 }
