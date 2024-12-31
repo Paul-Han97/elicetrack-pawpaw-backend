@@ -4,10 +4,11 @@ import { ReviewRepository } from 'src/reviews/review.repository';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
+import { BoardRepository } from 'src/boards/board.repository';
 
 @Module({
   imports: [
-    TypeOrmCustomModule.forCustomRepository([UserRepository, ReviewRepository]),
+    TypeOrmCustomModule.forCustomRepository([UserRepository, ReviewRepository,BoardRepository]),
   ],
   controllers: [UserController],
   providers: [UserService],
