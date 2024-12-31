@@ -11,7 +11,7 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
   ApiCreatedResponse,
