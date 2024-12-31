@@ -51,25 +51,24 @@ export class UserService implements IUserService {
   async getMyReviewList(
     userId: number,
     paginationDto: PaginationDto,
-  ): Promise<ResponseData<{ reviews: GetMyReviewListDto[]; total: number }>> {
-    const take = Number(paginationDto.take || 7);
-    const perPage = Number(paginationDto.perPage || 1);
-    const skip = (perPage - 1) * take;
-
-    const [reviews, total] = await this.reviewRepository.findMyReviewList(
+  ): Promise<
+    ResponseData<{ reviews: GetMyReviewListDto[]; nextCursor: number | null }>
+  > {
+    const [reviews] = await this.reviewRepository.findMyReviewList(
       userId,
-      take,
-      skip,
+      paginationDto,
     );
 
     if (reviews.length === 0) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
-    const responseData: ResponseData<{
-      reviews: GetMyReviewListDto[];
-      total: number;
-    }> = {
+    const nextCursor =
+      reviews.length === paginationDto.take
+        ? reviews[reviews.length - 1].id
+        : null;
+
+    return {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
         reviews: reviews.map((review) => ({
@@ -81,37 +80,34 @@ export class UserService implements IUserService {
             (like) => like.review === review,
           ),
         })),
-        total,
+        nextCursor,
       },
     };
-
-    return responseData;
   }
 
   async getMyBoardList(
     userId: number,
     paginationDto: PaginationDto,
   ): Promise<
-    ResponseData<{ boards: GetMyBoardListResponseDto[]; total: number }>
+    ResponseData<{
+      boards: GetMyBoardListResponseDto[];
+      nextCursor: number | null;
+    }>
   > {
-    const take = Number(paginationDto.take || 7);
-    const perPage = Number(paginationDto.perPage || 1);
-    const skip = (perPage - 1) * take;
-
-    const [boards, total] = await this.boardRepository.findMyBoardList(
+    const [boards] = await this.boardRepository.findMyBoardList(
       userId,
-      take,
-      skip,
+      paginationDto,
     );
 
     if (boards.length === 0) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
+    const nextCursor =
+      boards.length === paginationDto.take
+        ? boards[boards.length - 1].id
+        : null;
 
-    const responseData: ResponseData<{
-      boards: GetMyBoardListResponseDto[];
-      total: number;
-    }> = {
+    return {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
         boards: boards.map((board) => ({
@@ -126,11 +122,8 @@ export class UserService implements IUserService {
           })),
           isLikeClicked: board.userBoardLike.some((like) => like.isLikeClicked),
         })),
-        total,
+        nextCursor,
       },
     };
-
-    console.log('myBoardList :', responseData);
-    return responseData;
   }
 }
