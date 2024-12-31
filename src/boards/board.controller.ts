@@ -27,7 +27,7 @@ import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { GetBoardListResponseDto } from './dto/get-board-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
-import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
+import { GetPopularListQueryDto, GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
 
@@ -45,15 +45,13 @@ export class BoardController {
     - 각 게시글의 좋아요 수를 수집하여 가장 수가 많은 게시글을 반환 합니다.
     `,
   })
-  @ApiQuery({
-    name: 'count',
-    description: '가져올 게시글 개수',
-  })
   @ApiOkResponse({
     type: [GetPopularListResponseDto],
   })
   @Get('popular-list')
-  async getPopularList(@Query() count: number) {}
+  async getPopularList(@Query() getPopularListQueryDto: GetPopularListQueryDto) {
+    return await this.boardService.getPopularList(getPopularListQueryDto);
+  }
 
   @ApiOperation({
     summary: '최신 글 목록 조회',
