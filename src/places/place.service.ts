@@ -340,14 +340,14 @@ export class PlaceService implements IPlaceService {
     const resData: ResponseData<GetPlaceReviewResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
-        reviewId: review.id,
+        id: review.place.id ?? null,
+        reviewId: review.id ?? null,
         author: {
-          id: review.user.id,
-          imageUrl: review.user.userImage[0].image.url,
+          id: review.user.id ?? null,
+          imageUrl: review.user.userImage?.[0]?.image?.url ?? null,
         },
-        id: review.place.id,
-        title: review.title,
-        content: review.content,
+        title: review.title ?? null,
+        content: review.content ?? null,
         isLikeClicked:
           review.reviewPlaceLike?.some((like) => like.isLikeClicked) || false,
         createdAt: review.createdAt,
