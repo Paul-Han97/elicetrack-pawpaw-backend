@@ -79,6 +79,8 @@ export const enum ENV_KEYS {
   PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
 }
 
+export const LOGIN_COOKIE = 'connect.sid';
+
 export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
         <span style="display: block; text-align:center;">포포</span>
         <span style="display: block; text-align:center;">인증코드</span>
