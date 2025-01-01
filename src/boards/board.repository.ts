@@ -6,12 +6,33 @@ import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 
 @CustomRepository(Board)
 export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
+  async findLatestList(count: number): Promise<GetLatestListResponseDto[]> {
+    const result = await this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.boardImage', 'boardImage')
+      .leftJoinAndSelect('boardImage.image', 'image')
+      .where('boardImage.isPrimary = true')
+      .orderBy('board.id', 'DESC')
+      .limit(count)
+      .getMany();
+
+    const data = result.map<GetLatestListResponseDto>((board) => {
+      return {
+        id: board.id,
+        title: board.title,
+        imageUrl: board.boardImage[0].image.url
+      }
+    })
+
+    return data;
+  }
+
   async findMyBoardList(
     userId: number,
     paginationDto:PaginationDto

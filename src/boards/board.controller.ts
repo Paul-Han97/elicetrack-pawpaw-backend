@@ -26,10 +26,10 @@ import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { GetBoardListResponseDto } from './dto/get-board-list.dto';
 import { GetBoardResponseDto } from './dto/get-board.dto';
-import { GetLatestListResponseDto } from './dto/get-latest-list-response.dto';
 import { GetPopularListQueryDto, GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
+import { GetLatestListQueryDto, GetLatestListResponseDto } from './dto/get-latest-list.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -66,7 +66,9 @@ export class BoardController {
     type: [GetLatestListResponseDto],
   })
   @Get('latest-list')
-  async getLatestList(@Query() count: number) {}
+  async getLatestList(@Query() getLatestListQueryDto: GetLatestListQueryDto) {
+    return await this.boardService.getLatestList(getLatestListQueryDto);
+  }
 
   @ApiOperation({
     summary: '게시글 목록 조회',
