@@ -1,12 +1,16 @@
 import { BadRequestException } from '@nestjs/common';
-import { ERROR_MESSAGE } from 'src/common/constants';
+import { BOARD_CATEGORY_TYPE_INDEX, ERROR_MESSAGE } from 'src/common/constants';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
+import {
+  GetBoardListQueryDto,
+  GetBoardListResponseDto,
+} from './dto/get-board-list.dto';
+import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 
 @CustomRepository(Board)
 export class BoardRepository
@@ -26,16 +30,16 @@ export class BoardRepository
       return {
         id: board.id,
         title: board.title,
-        imageUrl: board.boardImage[0].image.url
-      }
-    })
+        imageUrl: board.boardImage[0].image.url,
+      };
+    });
 
     return data;
   }
 
   async findMyBoardList(
     userId: number,
-    paginationDto:PaginationDto
+    paginationDto: PaginationDto,
   ): Promise<[Board[], number]> {
     try {
       const queryBuilder = await this.createQueryBuilder('board')
@@ -49,7 +53,9 @@ export class BoardRepository
         .take(paginationDto.take);
 
       if (paginationDto.cursor) {
-        queryBuilder.andWhere('board.id > :cursor', { cursor:paginationDto.cursor });
+        queryBuilder.andWhere('board.id > :cursor', {
+          cursor: paginationDto.cursor,
+        });
       }
 
       const result = await queryBuilder.getManyAndCount();
@@ -81,5 +87,54 @@ LIMIT ?`,
       [Number(count)],
     );
     return result;
+  }
+
+  async findBoardList(
+    getBoardListQueryDto: GetBoardListQueryDto,
+  ): Promise<GetBoardListResponseDto> {
+    const { category, cursor, take } = getBoardListQueryDto;
+
+    const categoryId = BOARD_CATEGORY_TYPE_INDEX[category];
+
+    const queryBuilder = this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.boardCategory', 'boardCategory')
+      .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
+      .leftJoinAndSelect('board.boardImage', 'boardImage')
+      .leftJoinAndSelect('boardImage.image', 'image')
+      .where('boardImage.isPrimary = true')
+      .orderBy('board.id', 'DESC')
+      .take(take);
+
+    if (category) {
+      queryBuilder.andWhere('boardCategory.id = :categoryId', { categoryId });
+    }
+
+    if (cursor) {
+      queryBuilder.andWhere('board.id < :cursor', { cursor });
+    }
+
+    const [result, total] = await queryBuilder.getManyAndCount();
+
+    const boardList = result.map((board) => {
+      return {
+        category: board.boardCategory.korName,
+        title: board.title,
+        content: board.content,
+        isLikeClicked: board.userBoardLike[0].isLikeClicked ?? null,
+        imageList: [
+          {
+            isPrimary: board.boardImage[0]?.isPrimary ?? null,
+            url: board.boardImage[0]?.image.url ?? null,
+          },
+        ],
+      };
+    });
+
+    const data: GetBoardListResponseDto = {
+      boardList,
+      total,
+    };
+
+    return data;
   }
 }

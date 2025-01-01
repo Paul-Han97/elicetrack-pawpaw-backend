@@ -1,8 +1,9 @@
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Repository } from 'typeorm';
-import { Board } from '../entities/board.entity';
-import { GetPopularListResponseDto } from '../dto/get-popular-list.dto';
+import { GetBoardListQueryDto, GetBoardListResponseDto } from '../dto/get-board-list.dto';
 import { GetLatestListResponseDto } from '../dto/get-latest-list.dto';
+import { GetPopularListResponseDto } from '../dto/get-popular-list.dto';
+import { Board } from '../entities/board.entity';
 
 export interface IBoardRepository extends Repository<Board> {
   findMyBoardList(
@@ -13,4 +14,6 @@ export interface IBoardRepository extends Repository<Board> {
   findPopularList(count: number): Promise<[GetPopularListResponseDto]>;
 
   findLatestList(count: number): Promise<GetLatestListResponseDto[]>;
+
+  findBoardList(getBoardListQueryDto: GetBoardListQueryDto): Promise<GetBoardListResponseDto>;
 }

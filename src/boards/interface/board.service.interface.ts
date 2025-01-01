@@ -1,4 +1,6 @@
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseData } from 'src/common/types/response.type';
+import { GetBoardListQueryDto, GetBoardListResponseDto } from '../dto/get-board-list.dto';
 import {
   GetLatestListQueryDto,
   GetLatestListResponseDto,
@@ -16,4 +18,6 @@ export interface IBoardService {
   getLatestList(
     getLatestListQueryDto: GetLatestListQueryDto,
   ): Promise<ResponseData<GetLatestListResponseDto[]>>;
+
+  getBoardList(getBoardListQueryDto: GetBoardListQueryDto): Promise<ResponseData<GetBoardListResponseDto>>;
 }

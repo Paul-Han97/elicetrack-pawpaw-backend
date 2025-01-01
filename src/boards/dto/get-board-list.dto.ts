@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
+import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 class ImageList {
   @ApiProperty({
@@ -14,7 +16,7 @@ class ImageList {
   url: string;
 }
 
-export class GetBoardListResponseDto {
+class BoardList {
   @ApiProperty({
     description: '게시글의 카테고리',
   })
@@ -36,11 +38,38 @@ export class GetBoardListResponseDto {
   isLikeClicked: boolean;
 
   @ApiProperty({
-    description: '이미지 리스트',
+    description: '이미지 목록',
     isArray: true,
     type: ImageList,
   })
   @ValidateNested({ each: true })
   @Type(() => ImageList)
-  imageList: ImageList;
+  imageList: ImageList[];
+}
+
+export class GetBoardListQueryDto extends PaginationDto {
+  @ApiProperty({
+    enum: BOARD_CATEGORY_TYPE,
+    description: `
+      - 게시글의 카테고리
+      - 기본값 : 전체`,
+    required: false,
+  })
+  category: string;
+}
+
+export class GetBoardListResponseDto {
+  @ApiProperty({
+    description: '게시글 목록',
+    isArray: true,
+    type: BoardList,
+  })
+  @ValidateNested({ each: true })
+  @Type(() => BoardList)
+  boardList: BoardList[];
+
+  @ApiProperty({
+    description: '조회된 게시글 수',
+  })
+  total: number;
 }
