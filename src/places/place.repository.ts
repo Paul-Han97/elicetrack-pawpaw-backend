@@ -66,7 +66,9 @@ export class PlaceRepository
       return this.createQueryBuilder('place')
         .leftJoinAndSelect('place.review', 'review')
         .leftJoinAndSelect('review.user', 'user')
+        .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
         .leftJoinAndSelect('user.userImage', 'userImage')
+        .leftJoinAndSelect('userImage.image', 'image')
         .where('place.id = :id', { id })
         .getOne();
     } catch (e) {
