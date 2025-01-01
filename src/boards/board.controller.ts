@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -30,6 +31,8 @@ import { GetPopularListQueryDto, GetPopularListResponseDto } from './dto/get-pop
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
 import { GetLatestListQueryDto, GetLatestListResponseDto } from './dto/get-latest-list.dto';
+import { Request } from 'express';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('boards')
 export class BoardController {
@@ -88,7 +91,10 @@ export class BoardController {
     type: [GetBoardListResponseDto],
   })
   @Get()
-  async getBoardList(@Query() getBoardListQueryDto: GetBoardListQueryDto) {
+  async getBoardList(@Req() req: Request, @Query() getBoardListQueryDto: GetBoardListQueryDto) {
+    const user = req.session.user;
+    getBoardListQueryDto.userId = user?.id ?? null;
+
     return await this.boardService.getBoardList(getBoardListQueryDto);
   }
 

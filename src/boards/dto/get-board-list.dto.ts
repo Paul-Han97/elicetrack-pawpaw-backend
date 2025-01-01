@@ -16,11 +16,36 @@ class ImageList {
   url: string;
 }
 
+class Author {
+  @ApiProperty({
+    description: '작성자의 ID',
+  })
+  id: number;
+
+  @ApiProperty({
+    description: '작성자의 닉네임',
+  })
+  nickname: string;
+}
+
 class BoardList {
+  @ApiProperty({
+    description: '게시글의 제목',
+  })
+  id: number;
+
   @ApiProperty({
     description: '게시글의 카테고리',
   })
   category: string;
+
+  @ApiProperty({
+    description: '게시글 작성자',
+    type: Author,
+  })
+  @ValidateNested()
+  @Type(() => Author)
+  author: Author;
 
   @ApiProperty({
     description: '게시글의 제목',
@@ -56,6 +81,8 @@ export class GetBoardListQueryDto extends PaginationDto {
     required: false,
   })
   category: string;
+
+  userId: number;
 }
 
 export class GetBoardListResponseDto {
@@ -72,4 +99,8 @@ export class GetBoardListResponseDto {
     description: '조회된 게시글 수',
   })
   total: number;
+
+  constructor() {
+    this.boardList = [];
+  }
 }

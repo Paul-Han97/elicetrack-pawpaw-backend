@@ -92,13 +92,15 @@ LIMIT ?`,
   async findBoardList(
     getBoardListQueryDto: GetBoardListQueryDto,
   ): Promise<GetBoardListResponseDto> {
-    const { category, cursor, take } = getBoardListQueryDto;
+    const { userId, category, cursor, take } = getBoardListQueryDto;
 
     const categoryId = BOARD_CATEGORY_TYPE_INDEX[category];
 
     const queryBuilder = this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.user', 'user')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
       .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
+      .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
       .where('boardImage.isPrimary = true')
@@ -112,29 +114,33 @@ LIMIT ?`,
     if (cursor) {
       queryBuilder.andWhere('board.id < :cursor', { cursor });
     }
-
+    
     const [result, total] = await queryBuilder.getManyAndCount();
+    
+    const getBoardListResponseDto = new GetBoardListResponseDto();
 
-    const boardList = result.map((board) => {
-      return {
+    for (const board of result) {
+      getBoardListResponseDto.boardList.push({
+        id: board.id,
         category: board.boardCategory.korName,
         title: board.title,
         content: board.content,
-        isLikeClicked: board.userBoardLike[0].isLikeClicked ?? null,
+        isLikeClicked: board.userBoardLike.filter((userBoardLike) => (userBoardLike.user.id === userId)).length > 0,
+        author: {
+          id: board.user.id,
+          nickname: board.user.nickname,
+        },
         imageList: [
           {
             isPrimary: board.boardImage[0]?.isPrimary ?? null,
             url: board.boardImage[0]?.image.url ?? null,
           },
         ],
-      };
-    });
+      });
+    }
 
-    const data: GetBoardListResponseDto = {
-      boardList,
-      total,
-    };
+    getBoardListResponseDto.total = total;
 
-    return data;
+    return getBoardListResponseDto;
   }
 }
