@@ -1,5 +1,9 @@
 import { ResponseData } from 'src/common/types/response.type';
 import {
+  CreateBoardDto,
+  CreateBoardResponseDto,
+} from '../dto/create-board.dto';
+import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
 } from '../dto/get-board-list.dto';
@@ -29,4 +33,8 @@ export interface IBoardService {
   getBoard(
     getBoardDto: GetBoardDto,
   ): Promise<ResponseData<GetBoardResponseDto>>;
+
+  createBoard(
+    createBoardDto: CreateBoardDto,
+  ): Promise<ResponseData<CreateBoardResponseDto>>;
 }

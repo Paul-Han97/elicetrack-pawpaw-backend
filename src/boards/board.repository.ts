@@ -45,6 +45,7 @@ export class BoardRepository
     const result = await this.createQueryBuilder('board')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
+      .leftJoinAndSelect('board.boardCategory', 'boardCategory')
       .where('boardImage.isPrimary = true')
       .orderBy('board.id', 'DESC')
       .limit(count)
@@ -55,6 +56,7 @@ export class BoardRepository
         id: board.id,
         title: board.title,
         imageUrl: board.boardImage[0].image.url,
+        category: board.boardCategory.korName
       };
     });
 
@@ -99,11 +101,12 @@ export class BoardRepository
   async findPopularList(count: number): Promise<[GetPopularListResponseDto]> {
     const result = await this.query(
       `
-SELECT A.id, A.title, A.content, D.url, COUNT(B.isLikeClicked) isLikeCount
+SELECT A.id, A.title, A.content, D.url, E.korName, COUNT(B.isLikeClicked) isLikeCount
   FROM board A
   LEFT OUTER JOIN user_board_like B ON B.boardId = A.id
   LEFT OUTER JOIN board_image C ON C.boardId = A.id
   LEFT OUTER JOIN image D ON D.id = C.imageId 
+  LEFT OUTER JOIN board_category E ON E.id = A.boardCategoryId
 GROUP BY A.id, A.title, A.content, D.url
 ORDER BY isLikeCount DESC
 		,id DESC

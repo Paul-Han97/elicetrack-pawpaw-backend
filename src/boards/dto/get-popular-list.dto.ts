@@ -27,4 +27,9 @@ export class GetPopularListResponseDto {
     description: '게시글의 이미지 URL',
   })
   imageUrl: string;
+
+  @ApiProperty({
+    description: '게시글의 카테고리',
+  })
+  category: string;
 }

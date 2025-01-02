@@ -33,6 +33,7 @@ import { IBoardService } from './interface/board.service.interface';
 import { GetLatestListQueryDto, GetLatestListResponseDto } from './dto/get-latest-list.dto';
 import { Request } from 'express';
 import { User } from 'src/users/entities/user.entity';
+import { Auth } from 'src/common/guards/auth.decorator';
 
 @Controller('boards')
 export class BoardController {
@@ -135,11 +136,19 @@ export class BoardController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(AnyFilesInterceptor())
+  @Auth()
   @Post()
   async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
+    @Req() req: Request,
     @Body() createBoardDto: CreateBoardDto,
-  ) {}
+  ) {
+    const userId = req.session?.user?.id ?? null;
+    createBoardDto.imageList = imageList;
+    createBoardDto.userId = userId;
+
+    return await this.boardService.createBoard(createBoardDto);
+  }
 
   @ApiOperation({
     summary: '게시글을 수정 합니다.',
