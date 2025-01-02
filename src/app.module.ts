@@ -61,6 +61,7 @@ import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -214,6 +215,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       }),
     }),
+    ScheduleModule.forRoot(),
     UtilModule,
     AuthModule,
     UserModule,
