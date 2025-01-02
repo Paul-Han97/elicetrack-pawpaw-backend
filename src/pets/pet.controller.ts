@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,6 +22,8 @@ import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { IPetService } from './interfaces/pet.service.interface';
 import { PetService } from './pet.service';
+import { Request } from 'express';
+import { Auth } from 'src/common/guards/auth.decorator';
 
 @Controller('pets')
 export class PetController {
@@ -37,11 +40,23 @@ export class PetController {
   @ApiOkResponse()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @Auth()
   @Post()
   async createPet(
     @UploadedFile() image: Express.Multer.File,
+    @Req() req:Request,
     @Body() createPetDto: CreatePetDto,
-  ) {}
+  ) {
+
+    const userId = req.session.user.id
+    createPetDto.userId = userId
+    createPetDto.image=image
+    
+    const result = await this.petService.createPet(createPetDto)
+
+    return result
+
+  }
 
   @ApiOperation({
     summary: '반려동물의 정보를 수정 합니다.',

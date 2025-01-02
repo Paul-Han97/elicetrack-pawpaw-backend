@@ -21,7 +21,7 @@ export class GetPlaceReviewResponseDto {
   @ApiProperty({
     description: '리뷰 작성자의 정보',
   })
-  author: { id: number; imageUrl: string };
+  author: { id: number; imageUrl: string; nickname:string};
 
   @ApiProperty({
     description: '리뷰가 작성된 장소의 ID',

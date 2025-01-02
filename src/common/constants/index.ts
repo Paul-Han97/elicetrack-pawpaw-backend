@@ -81,6 +81,9 @@ export const enum ENV_KEYS {
 
 export const LOGIN_COOKIE = 'connect.sid';
 
+export const PLACE_API ='PLACE_API'
+
+
 export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
         <span style="display: block; text-align:center;">포포</span>
         <span style="display: block; text-align:center;">인증코드</span>
