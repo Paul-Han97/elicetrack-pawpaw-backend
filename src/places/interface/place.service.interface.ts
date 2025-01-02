@@ -4,6 +4,14 @@ import {
   CreatePlaceReviewResponseDto,
 } from '../dto/create-place-review.dto';
 import {
+  DeletePlaceReviewDto,
+  DeletePlaceReviewResponseDto,
+} from '../dto/delete-review.dto';
+import {
+  GetNearbyPlaceListQueryDto,
+  GetNearbyPlaceListResponseDto,
+} from '../dto/get-nearby-place-list.dto';
+import {
   GetPlaceReviewDto,
   GetPlaceReviewResponseDto,
 } from '../dto/get-place-review.dto';
@@ -12,18 +20,9 @@ import {
   UpdatePlaceReviewDto,
   UpdatePlaceReviewResponseDto,
 } from '../dto/update-place-review.dto';
-import { Place } from '../entities/place.entity';
-import {
-  DeletePlaceReviewDto,
-  DeletePlaceReviewResponseDto,
-} from '../dto/delete-review.dto';
-import {
-  GetNearbyPlaceListQueryDto,
-  GetNearbyPlaceListResponseDto,
-} from '../dto/get-nearby-place-list.dto';
 
 export interface IPlaceService {
-  saveEntities(): Promise<void>;
+  
 
   getNearbyPlaces(
     getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,

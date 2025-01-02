@@ -1,9 +1,13 @@
 import { ResponseData } from 'src/common/types/response.type';
 import { CreatePetDto, CreatePetResponseDto } from '../dto/create-pet.dto';
+import { UpdatePetDto, UpdatePetResponseDto } from '../dto/update-pet.dto';
 
 export interface IPetService {
   createPet(
     createPetDto: CreatePetDto,
-    image?: Express.Multer.File,
   ): Promise<ResponseData<CreatePetResponseDto>>;
+
+  updatePet(
+    updatePetDto: UpdatePetDto,
+  ): Promise<ResponseData<UpdatePetResponseDto>>;
 }
