@@ -36,44 +36,13 @@ export class CreatePetDto {
     enum: PET_SIZE_TYPE,
   })
   size: PET_SIZE_TYPE;
+
+  userId:number
 }
 
 export class CreatePetResponseDto {
   @ApiProperty({
     description: '반려동물 ID',
   })
-  petId: number;
-
-  @ApiProperty({
-    description: '반려동물 이름',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: '반려동물 나이',
-  })
-  age: number;
-
-  @ApiProperty({
-    description: '반려동물 성격',
-  })
-  description: string;
-
-  @ApiProperty({
-    description: '반려동물 성별',
-    enum: GENDER_TYPE,
-  })
-  gender: GENDER_TYPE;
-
-  @ApiProperty({
-    description: '반려동물 크기',
-    enum: PET_SIZE_TYPE,
-  })
-  size: PET_SIZE_TYPE;
-
-  @ApiProperty({
-    description: '반려동물 이미지 URL',
-    required: false,
-  })
-  image?: string;
+  id: number;
 }
