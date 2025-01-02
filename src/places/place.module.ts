@@ -7,6 +7,7 @@ import { PlaceLocationRepository } from 'src/place-locations/place-location.repo
 import { LocationRepository } from 'src/locations/location.repository';
 import { ReviewRepository } from 'src/reviews/review.repository';
 import { ReviewPlaceLikeRepository } from 'src/review-place-likes/review-place-like.repository';
+import { PlaceCronHandler } from './place-cron.handler';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { ReviewPlaceLikeRepository } from 'src/review-place-likes/review-place-l
     ]),
   ],
   controllers: [PlaceController],
-  providers: [PlaceService],
+  providers: [PlaceService,PlaceCronHandler],
 })
 export class PlaceModule {}
