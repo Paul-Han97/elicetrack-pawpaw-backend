@@ -22,5 +22,5 @@ export interface IBoardRepository extends Repository<Board> {
     getBoardListQueryDto: GetBoardListQueryDto,
   ): Promise<GetBoardListResponseDto>;
 
-  findBoard(id: number): Promise<Board>;
+  findBoard(id: number, userId?: number): Promise<Board>;
 }

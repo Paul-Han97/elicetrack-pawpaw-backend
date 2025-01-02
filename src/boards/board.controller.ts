@@ -34,6 +34,7 @@ import { GetLatestListQueryDto, GetLatestListResponseDto } from './dto/get-lates
 import { Request } from 'express';
 import { User } from 'src/users/entities/user.entity';
 import { Auth } from 'src/common/guards/auth.decorator';
+import { DeleteBoardDto } from './dto/delete-board.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -213,12 +214,20 @@ export class BoardController {
     - 내역이 남지 않기 때문에 삭제 이후 복구 할 수 없습니다.
     `,
   })
+  @Auth()
   @ApiParam({
     name: 'id',
     description: '게시글의 ID',
   })
   @Delete(':id')
-  async deleteBoard(@Param('id') id: number) {}
+  async deleteBoard(@Req() req: Request, @Param('id') id: number) {
+    const user = req.session?.user;
+    const deleteBoardDto = new DeleteBoardDto();
+    deleteBoardDto.id = id;
+    deleteBoardDto.userId = user?.id ?? null;
+
+    return await this.boardService.deleteBoard(deleteBoardDto);
+  }
 
   @ApiOperation({
     summary: '댓글을 삭제 합니다.',

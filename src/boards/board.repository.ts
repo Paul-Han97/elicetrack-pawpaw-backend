@@ -7,7 +7,6 @@ import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
 } from './dto/get-board-list.dto';
-import { GetBoardDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
@@ -18,8 +17,8 @@ export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
-  async findBoard(id: number): Promise<Board> {
-    const result = await this.createQueryBuilder('board')
+  async findBoard(id: number, userId?: number): Promise<Board> {
+    const query = this.createQueryBuilder('board')
       .leftJoinAndSelect('board.user', 'user')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
       .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
@@ -30,8 +29,12 @@ export class BoardRepository
       .leftJoinAndSelect('userImage.image', 'commentUserImage')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
-      .where('board.id = :id', { id })
-      .getOne();
+      .where('board.id = :id', { id });
+
+    if (userId) {
+      query.andWhere('user.id = :userId', { userId });
+    }
+    const result = await query.getOne();
 
     return result;
   }
@@ -51,7 +54,7 @@ export class BoardRepository
         id: board.id,
         title: board.title,
         imageUrl: board.boardImage[0].image.url,
-        category: board.boardCategory.korName
+        category: board.boardCategory.korName,
       };
     });
 

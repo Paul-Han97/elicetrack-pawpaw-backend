@@ -20,6 +20,7 @@ import {
   UpdateBoardDto,
   UpdateBoardResponseDto,
 } from '../dto/update-board.dto';
+import { DeleteBoardDto } from '../dto/delete-board.dto';
 
 export interface IBoardService {
   getPopularList(
@@ -45,4 +46,6 @@ export interface IBoardService {
   updateBoard(
     updateBoardDto: UpdateBoardDto,
   ): Promise<ResponseData<UpdateBoardResponseDto>>;
+
+  deleteBoard(deleteBoardDto: DeleteBoardDto): Promise<ResponseData>;
 }

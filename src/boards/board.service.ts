@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { BoardCategory } from 'src/board-categories/entities/board-category.entity';
 import { BoardImageRepository } from 'src/board-images/board-image.repository';
@@ -6,6 +6,7 @@ import { BoardImage } from 'src/board-images/entities/board-image.entity';
 import { IBoardImageRepository } from 'src/board-images/interface/board-image.repository.interface';
 import {
   BOARD_CATEGORY_TYPE_INDEX,
+  ERROR_MESSAGE,
   SUCCESS_MESSAGE,
 } from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
@@ -20,6 +21,7 @@ import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { BoardRepository } from './board.repository';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
+import { DeleteBoardDto } from './dto/delete-board.dto';
 import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
@@ -56,7 +58,6 @@ export class BoardService implements IBoardService {
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
   ) {}
-
   async createBoard(
     createBoardDto: CreateBoardDto,
   ): Promise<ResponseData<CreateBoardResponseDto>> {
@@ -88,13 +89,13 @@ export class BoardService implements IBoardService {
           newBoard.user = user;
           newBoard.createdUser = userId.toString();
 
-          const createdBoard = await boardRepository.save(newBoard);
+          const board = await boardRepository.save(newBoard);
 
           if (imageList.length === 0) {
             return;
           }
 
-          uploadImageDto.entity.id = createdBoard.id;
+          uploadImageDto.entity.id = board.id;
           uploadImageDto.entity.name = Board.name;
           uploadImageDto.imageList = imageList;
 
@@ -112,7 +113,7 @@ export class BoardService implements IBoardService {
 
             const newBoardImage = new BoardImage();
             newBoardImage.image = newImage;
-            newBoardImage.board = createdBoard;
+            newBoardImage.board = board;
             newBoardImage.createdUser = userId.toString();
             newBoardImage.isPrimary = false;
 
@@ -125,7 +126,7 @@ export class BoardService implements IBoardService {
             await boardImageRepository.save(newBoardImage);
           }
 
-          return createdBoard.id;
+          return board.id;
         },
       );
     } catch (e) {
@@ -250,7 +251,12 @@ export class BoardService implements IBoardService {
             this.boardImageRepository,
           );
 
-          const createdBoard = await boardRepository.findBoard(id);
+          const createdBoard = await boardRepository.findBoard(id, userId);
+
+          if (!createdBoard) {
+            throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+          }
+
           createdBoard.title = title;
           createdBoard.boardCategory.id = BOARD_CATEGORY_TYPE_INDEX[category];
           createdBoard.content = content;
@@ -259,7 +265,9 @@ export class BoardService implements IBoardService {
           await boardRepository.save(createdBoard);
 
           const deleteImageDto = new DeleteImageDto();
-          deleteImageDto.filenameList = createdBoard?.boardImage.map((boardImage) => boardImage.image.url);
+          deleteImageDto.filenameList = createdBoard?.boardImage.map(
+            (boardImage) => boardImage.image.url,
+          );
           await manager.query(
             `
             DELETE A, B
@@ -268,7 +276,7 @@ export class BoardService implements IBoardService {
             WHERE A.boardId = ?`,
             [Number(id)],
           );
-          
+
           await this.imageService.deleteImageFromS3(deleteImageDto);
 
           if (imageList.length === 0) {
@@ -322,6 +330,43 @@ export class BoardService implements IBoardService {
     const resData: ResponseData<UpdateBoardResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: updateBoardResponseDto,
+    };
+    return resData;
+  }
+
+  async deleteBoard(deleteBoardDto: DeleteBoardDto): Promise<ResponseData> {
+    const { id, userId } = deleteBoardDto;
+
+    const board = await this.boardRepository.findBoard(id, userId);
+
+    if (!board) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const deleteImageDto = new DeleteImageDto();
+    deleteImageDto.filenameList = board?.boardImage.map(
+      (boardImage) => boardImage.image.url,
+    );
+
+    await this.dataSource.transaction(async (manager: EntityManager) => {
+      const boardRepository = manager.withRepository(this.boardRepository);
+      this.imageService.deleteImageFromS3(deleteImageDto);
+
+      await boardRepository.query(
+        `
+        DELETE A, B
+        FROM board_image A
+        JOIN image B ON A.imageId = B.id
+        WHERE A.boardId = ?`,
+        [Number(id)],
+      );
+
+      await boardRepository.remove(board);
+    });
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
     };
     return resData;
   }
