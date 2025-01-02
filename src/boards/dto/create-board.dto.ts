@@ -26,6 +26,8 @@ export class CreateBoardDto {
     description: '게시글의 내용',
   })
   content: string;
+
+  userId: number;
 }
 
 export class CreateBoardResponseDto {

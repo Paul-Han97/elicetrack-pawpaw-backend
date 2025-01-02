@@ -18,6 +18,7 @@ import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
 import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
+import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -29,6 +30,24 @@ export class UserService implements IUserService {
     @Inject(BoardRepository)
     private readonly boardRepository: IBoardRepository,
   ) {}
+
+  async getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>> {
+    const { id } = getUserDto;
+
+    const result = await this.userRepository.findUser(id);
+
+    const getUserResponseDto = new GetUserResponseDto();
+    getUserResponseDto.email = result.credential[0].username;
+    getUserResponseDto.imageUrl = result?.userImage[0]?.image?.url ?? null;
+    getUserResponseDto.nickname = result.nickname;
+    
+    const resData: ResponseData<GetUserResponseDto> = {
+      message: SUCCESS_MESSAGE.FIND,
+      data: getUserResponseDto
+    }
+
+    return resData;
+  }
 
   async checkDuplicateEmail(duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData> {
     const { email } = duplicateEmailQueryDto;

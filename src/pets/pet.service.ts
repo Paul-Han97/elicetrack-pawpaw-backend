@@ -11,6 +11,7 @@ import { ResponseData } from 'src/common/types/response.type';
 import { Gender } from 'src/genders/entities/gender.entity';
 import { GenderRepository } from 'src/genders/gender.repository';
 import { IGenderRepository } from 'src/genders/interfaces/gender.repository.interface';
+import { DeleteImageDto } from 'src/images/dto/delete-image.dto';
 import { UploadImageDto } from 'src/images/dto/upload-image.dto';
 import { Image } from 'src/images/entities/image.entity';
 import { ImageRepository } from 'src/images/image.repository';
@@ -30,7 +31,6 @@ import { Pet } from './entities/pet.entity';
 import { IPetRepository } from './interfaces/pet.repository.interface';
 import { IPetService } from './interfaces/pet.service.interface';
 import { PetRepository } from './pet.repository';
-import { DeleteImageDto } from 'src/images/dto/delete-image.dto';
 
 @Injectable()
 export class PetService implements IPetService {
@@ -57,13 +57,12 @@ export class PetService implements IPetService {
     const { name, age, description, gender, size, userId, image } =
       createPetDto;
 
-      const tempDeleteImageDto = new DeleteImageDto();
+    const tempDeleteImageDto = new DeleteImageDto();
 
-
-    let result = new CreatePetResponseDto()
+    let result = new CreatePetResponseDto();
 
     try {
-      result= await this.dataSource.transaction<CreatePetResponseDto>(
+      result = await this.dataSource.transaction<CreatePetResponseDto>(
         async (manager: EntityManager): Promise<CreatePetResponseDto> => {
           const imageRepository = manager.withRepository(this.imageRepository);
           const petImageRepository = manager.withRepository(
@@ -105,7 +104,9 @@ export class PetService implements IPetService {
 
           const uploadedImage =
             await this.imageService.uploadImageToS3(uploadImageDto);
-            tempDeleteImageDto.filenameList.push(uploadedImage.imageList[0].filename);
+          tempDeleteImageDto.filenameList.push(
+            uploadedImage.imageList[0].filename,
+          );
 
           const newImage = new Image();
           newImage.url = uploadedImage.imageList[0].url;
@@ -124,7 +125,7 @@ export class PetService implements IPetService {
       );
     } catch (e) {
       if (tempDeleteImageDto.filenameList.length > 0) {
-        console.log(tempDeleteImageDto.filenameList)
+        console.log(tempDeleteImageDto.filenameList);
         await this.imageService.deleteImageFromS3(tempDeleteImageDto);
       }
       throw e;
@@ -136,11 +137,6 @@ export class PetService implements IPetService {
 
     return resData;
   }
-
-  async updatePet() {}
-  /*
-    수정할 때는 원래 있었던 것들을 전부 
-  */
 
   async deletePet() {}
 }

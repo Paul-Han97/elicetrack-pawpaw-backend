@@ -1,20 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { Max, Min } from 'class-validator';
+import { GetPopularListQueryDto } from './get-popular-list.dto';
 
-export class GetPopularListQueryDto {
-  @ApiProperty({
-    description: '가져올 게시글 개수',
-  })
-  @Min(1)
-  @Max(7)
-  @Type(() => Number)
-  count: number;
-}
+export class GetLatestListQueryDto extends GetPopularListQueryDto {}
 
-export class GetPopularListResponseDto {
+export class GetLatestListResponseDto {
   @ApiProperty({
-    description: 'board의 id',
+    description: '게시글의 ID',
   })
   id: number;
 
