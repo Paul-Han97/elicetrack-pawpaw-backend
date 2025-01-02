@@ -26,7 +26,7 @@ import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { GetBoardListQueryDto, GetBoardListResponseDto } from './dto/get-board-list.dto';
-import { GetBoardResponseDto } from './dto/get-board.dto';
+import { GetBoardDto, GetBoardResponseDto } from './dto/get-board.dto';
 import { GetPopularListQueryDto, GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
@@ -103,11 +103,22 @@ export class BoardController {
     description: `
     - 게시글 ID를 인자로 받아 게시글의 데이터를 조회 합니다.`,
   })
+  @ApiParam({
+    name: 'id',
+    description: '게시글의 ID'
+  })
   @ApiOkResponse({
     type: GetBoardResponseDto,
   })
   @Get(':id')
-  async getBoard(@Param() id: number) {}
+  async getBoard(@Req() req: Request, @Param('id') id: number) {
+    const user = req.session.user;
+    const getBoardDto = new GetBoardDto();
+    getBoardDto.id = id;
+    getBoardDto.userId = user?.id ?? null;
+    
+    return await this.boardService.getBoard(getBoardDto);
+  }
 
   @ApiOperation({
     summary: '게시글을 생성 합니다.',

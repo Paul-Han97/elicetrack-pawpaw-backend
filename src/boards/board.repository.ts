@@ -7,6 +7,7 @@ import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
 } from './dto/get-board-list.dto';
+import { GetBoardDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
@@ -17,6 +18,29 @@ export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
+  async findBoard(getBoardDto: GetBoardDto): Promise<Board> {
+    const { id } = getBoardDto;
+
+    console.log('id', id);
+    console.log('id', typeof id);
+
+    const result = await this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.user', 'user')
+      .leftJoinAndSelect('board.boardCategory', 'boardCategory')
+      .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
+      .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
+      .leftJoinAndSelect('board.comment', 'comment')
+      .leftJoinAndSelect('comment.user', 'commentUser')
+      .leftJoinAndSelect('commentUser.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'commentUserImage')
+      .leftJoinAndSelect('board.boardImage', 'boardImage')
+      .leftJoinAndSelect('boardImage.image', 'image')
+      .where('board.id = :id', { id })
+      .getOne();
+
+    return result;
+  }
+
   async findLatestList(count: number): Promise<GetLatestListResponseDto[]> {
     const result = await this.createQueryBuilder('board')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
@@ -114,9 +138,9 @@ LIMIT ?`,
     if (cursor) {
       queryBuilder.andWhere('board.id < :cursor', { cursor });
     }
-    
+
     const [result, total] = await queryBuilder.getManyAndCount();
-    
+
     const getBoardListResponseDto = new GetBoardListResponseDto();
 
     for (const board of result) {
@@ -125,7 +149,10 @@ LIMIT ?`,
         category: board.boardCategory.korName,
         title: board.title,
         content: board.content,
-        isLikeClicked: board.userBoardLike.filter((userBoardLike) => (userBoardLike.user.id === userId)).length > 0,
+        isLikeClicked:
+          board.userBoardLike.filter(
+            (userBoardLike) => userBoardLike.user.id === userId,
+          ).length > 0,
         author: {
           id: board.user.id,
           nickname: board.user.nickname,
