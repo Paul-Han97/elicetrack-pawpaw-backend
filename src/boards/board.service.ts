@@ -16,6 +16,7 @@ import { ImageRepository } from 'src/images/image.repository';
 import { ImageService } from 'src/images/image.service';
 import { IImageRepository } from 'src/images/interface/image.repository.interface';
 import { IImageService } from 'src/images/interface/image.service.interface';
+import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { BoardRepository } from './board.repository';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
@@ -32,10 +33,10 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from './dto/get-popular-list.dto';
+import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { IBoardService } from './interface/board.service.interface';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -95,17 +96,14 @@ export class BoardService implements IBoardService {
 
           uploadImageDto.entity.id = createdBoard.id;
           uploadImageDto.entity.name = Board.name;
+          uploadImageDto.imageList = imageList;
 
-          for (const image of imageList) {
-            uploadImageDto.imageList.push(image);
-          }
-
-          const uploadedImage =
+          const uploadedImageList =
             await this.imageService.uploadImageToS3(uploadImageDto);
 
           let isFirstImage = true;
 
-          for (const image of uploadedImage.imageList) {
+          for (const image of uploadedImageList.imageList) {
             tempDeleteImageDto.filenameList.push(image.filename);
 
             const newImage = new Image();
@@ -118,7 +116,7 @@ export class BoardService implements IBoardService {
             newBoardImage.createdUser = userId.toString();
             newBoardImage.isPrimary = false;
 
-            if(isFirstImage) {
+            if (isFirstImage) {
               newBoardImage.isPrimary = true;
               isFirstImage = false;
             }
@@ -150,9 +148,9 @@ export class BoardService implements IBoardService {
   async getBoard(
     getBoardDto: GetBoardDto,
   ): Promise<ResponseData<GetBoardResponseDto>> {
-    const { userId } = getBoardDto;
+    const { id, userId } = getBoardDto;
 
-    const result = await this.boardRepository.findBoard(getBoardDto);
+    const result = await this.boardRepository.findBoard(id);
 
     const getBoardResponseDto = new GetBoardResponseDto();
     getBoardResponseDto.nickname = result.user.nickname;
@@ -232,6 +230,99 @@ export class BoardService implements IBoardService {
       data: result,
     };
 
+    return resData;
+  }
+
+  async updateBoard(
+    updateBoardDto: UpdateBoardDto,
+  ): Promise<ResponseData<UpdateBoardResponseDto>> {
+    const { id, userId, category, content, imageList, title } = updateBoardDto;
+
+    const uploadImageDto = new UploadImageDto();
+    const tempDeleteImageDto = new DeleteImageDto();
+    let updatedId = id;
+    try {
+      updatedId = await this.dataSource.transaction<number>(
+        async (manager: EntityManager): Promise<number> => {
+          const boardRepository = manager.withRepository(this.boardRepository);
+          const imageRepository = manager.withRepository(this.imageRepository);
+          const boardImageRepository = manager.withRepository(
+            this.boardImageRepository,
+          );
+
+          const createdBoard = await boardRepository.findBoard(id);
+          createdBoard.title = title;
+          createdBoard.boardCategory.id = BOARD_CATEGORY_TYPE_INDEX[category];
+          createdBoard.content = content;
+          createdBoard.updatedUser = userId.toString();
+
+          await boardRepository.save(createdBoard);
+
+          const deleteImageDto = new DeleteImageDto();
+          deleteImageDto.filenameList = createdBoard?.boardImage.map((boardImage) => boardImage.image.url);
+          await manager.query(
+            `
+            DELETE A, B
+            FROM board_image A
+            JOIN image B ON A.imageId = B.id
+            WHERE A.boardId = ?`,
+            [Number(id)],
+          );
+          
+          await this.imageService.deleteImageFromS3(deleteImageDto);
+
+          if (imageList.length === 0) {
+            return createdBoard.id;
+          }
+
+          uploadImageDto.entity.id = createdBoard.id;
+          uploadImageDto.entity.name = Board.name;
+          uploadImageDto.imageList = imageList;
+
+          const uploadedImageList =
+            await this.imageService.uploadImageToS3(uploadImageDto);
+
+          let isFirstImage = true;
+
+          for (const image of uploadedImageList.imageList) {
+            tempDeleteImageDto.filenameList.push(image.filename);
+
+            const newImage = new Image();
+            newImage.url = image.url;
+            newImage.createdUser = userId.toString();
+
+            const newBoardImage = new BoardImage();
+            newBoardImage.image = newImage;
+            newBoardImage.board = createdBoard;
+            newBoardImage.createdUser = userId.toString();
+            newBoardImage.isPrimary = false;
+
+            if (isFirstImage) {
+              newBoardImage.isPrimary = true;
+              isFirstImage = false;
+            }
+
+            await imageRepository.save(newImage);
+            await boardImageRepository.save(newBoardImage);
+          }
+
+          return createdBoard.id;
+        },
+      );
+    } catch (e) {
+      if (tempDeleteImageDto.filenameList.length > 0) {
+        await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+      }
+      throw e;
+    }
+
+    const updateBoardResponseDto = new UpdateBoardResponseDto();
+    updateBoardResponseDto.id = updatedId;
+
+    const resData: ResponseData<UpdateBoardResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: updateBoardResponseDto,
+    };
     return resData;
   }
 }

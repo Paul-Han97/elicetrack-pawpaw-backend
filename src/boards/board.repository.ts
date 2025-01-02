@@ -18,12 +18,7 @@ export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
-  async findBoard(getBoardDto: GetBoardDto): Promise<Board> {
-    const { id } = getBoardDto;
-
-    console.log('id', id);
-    console.log('id', typeof id);
-
+  async findBoard(id: number): Promise<Board> {
     const result = await this.createQueryBuilder('board')
       .leftJoinAndSelect('board.user', 'user')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')

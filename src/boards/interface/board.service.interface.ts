@@ -16,6 +16,10 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from '../dto/get-popular-list.dto';
+import {
+  UpdateBoardDto,
+  UpdateBoardResponseDto,
+} from '../dto/update-board.dto';
 
 export interface IBoardService {
   getPopularList(
@@ -37,4 +41,8 @@ export interface IBoardService {
   createBoard(
     createBoardDto: CreateBoardDto,
   ): Promise<ResponseData<CreateBoardResponseDto>>;
+
+  updateBoard(
+    updateBoardDto: UpdateBoardDto,
+  ): Promise<ResponseData<UpdateBoardResponseDto>>;
 }

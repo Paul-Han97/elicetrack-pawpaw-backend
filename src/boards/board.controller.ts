@@ -173,9 +173,17 @@ export class BoardController {
   @Put(':id')
   async updateBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
+    @Req() req: Request,
     @Param('id') id: number,
-    @Body() UpdateBoardDto: UpdateBoardDto,
-  ) {}
+    @Body() updateBoardDto: UpdateBoardDto,
+  ) {
+    const user = req.session?.user;
+    updateBoardDto.id = id;
+    updateBoardDto.userId = user?.id ?? null;
+    updateBoardDto.imageList = imageList;
+
+    return await this.boardService.updateBoard(updateBoardDto);
+  }
 
   @ApiOperation({
     summary: '댓글을 수정 합니다.',
