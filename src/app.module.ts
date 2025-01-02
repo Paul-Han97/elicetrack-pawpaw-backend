@@ -62,6 +62,7 @@ import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -81,6 +82,9 @@ import { ScheduleModule } from '@nestjs/schedule';
         redact: {
           remove: true,
           paths: [
+
+            'req',
+            'res',
             'req.headers["sec-ch-ua-platform"]',
             'req.headers["connection"]',
             'req.headers["user-agent"]',
@@ -244,6 +248,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ChatModule,
     NotificationModule,
     NotificationTypeModule,
+    CronModule
   ],
   controllers: [AppController],
   providers: [AppService],
