@@ -62,19 +62,22 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/cron": "^2.0.1",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.1",
     "@types/jest": "^29.5.2",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.3.1",
     "@types/supertest": "^6.0.0",
+    "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "cross-env": "^7.0.3",
