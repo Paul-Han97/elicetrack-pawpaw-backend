@@ -1,7 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BOARD_CATEGORY_TYPE, BOARD_CATEGORY_TYPE_INDEX, SUCCESS_MESSAGE } from 'src/common/constants';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { BoardCategory } from 'src/board-categories/entities/board-category.entity';
+import { BoardImageRepository } from 'src/board-images/board-image.repository';
+import { BoardImage } from 'src/board-images/entities/board-image.entity';
+import { IBoardImageRepository } from 'src/board-images/interface/board-image.repository.interface';
+import {
+  BOARD_CATEGORY_TYPE_INDEX,
+  SUCCESS_MESSAGE,
+} from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
+import { DeleteImageDto } from 'src/images/dto/delete-image.dto';
+import { UploadImageDto } from 'src/images/dto/upload-image.dto';
+import { Image } from 'src/images/entities/image.entity';
+import { ImageRepository } from 'src/images/image.repository';
+import { ImageService } from 'src/images/image.service';
+import { IImageRepository } from 'src/images/interface/image.repository.interface';
+import { IImageService } from 'src/images/interface/image.service.interface';
+import { DataSource, EntityManager } from 'typeorm';
 import { BoardRepository } from './board.repository';
+import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
@@ -15,21 +32,10 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from './dto/get-popular-list.dto';
+import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { IBoardService } from './interface/board.service.interface';
-import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
-import { Board } from './entities/board.entity';
-import { BoardCategory } from 'src/board-categories/entities/board-category.entity';
-import { ImageService } from 'src/images/image.service';
-import { IImageService } from 'src/images/interface/image.service.interface';
-import { ImageRepository } from 'src/images/image.repository';
-import { IImageRepository } from 'src/images/interface/image.repository.interface';
-import { BoardImageRepository } from 'src/board-images/board-image.repository';
-import { IBoardImageRepository } from 'src/board-images/interface/board-image.repository.interface';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { DataSource, EntityManager, getManager } from 'typeorm';
-import { UploadImageDto } from 'src/images/dto/upload-image.dto';
-import { DeleteImageDto } from 'src/images/dto/delete-image.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -48,53 +54,96 @@ export class BoardService implements IBoardService {
 
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
-
   ) {}
 
-  async createBoard(createBoardDto: CreateBoardDto): Promise<ResponseData<CreateBoardResponseDto>> {
+  async createBoard(
+    createBoardDto: CreateBoardDto,
+  ): Promise<ResponseData<CreateBoardResponseDto>> {
     const { category, content, imageList, title, userId } = createBoardDto;
 
-    const boardCategory = new BoardCategory();
-    boardCategory.id = BOARD_CATEGORY_TYPE_INDEX[category];
+    const uploadImageDto = new UploadImageDto();
+    const tempDeleteImageDto = new DeleteImageDto();
+    let id = 0;
 
-    const board = new Board();
-    board.title = title;
-    board.content = content;
-    board.boardCategory = boardCategory;
-    board.createdUser = userId.toString();
+    try {
+      id = await this.dataSource.transaction<number>(
+        async (manager: EntityManager): Promise<number> => {
+          const boardRepository = manager.withRepository(this.boardRepository);
+          const imageRepository = manager.withRepository(this.imageRepository);
+          const boardImageRepository = manager.withRepository(
+            this.boardImageRepository,
+          );
 
-    await this.dataSource.transaction(async (manager: EntityManager) => {
-      const boardRepository = manager.withRepository(this.boardRepository);
-      const imageRepository = manager.withRepository(this.imageRepository);
-      const boardImageRepository = manager.withRepository(this.boardImageRepository);
+          const user = new User();
+          user.id = userId;
 
-      const savedBoard = await boardRepository.save(board);
+          const boardCategory = new BoardCategory();
+          boardCategory.id = BOARD_CATEGORY_TYPE_INDEX[category];
 
-      const uploadImageDto = new UploadImageDto();
-      uploadImageDto.entity.id = savedBoard.id;
-      uploadImageDto.entity.name = Board.name;
+          const newBoard = new Board();
+          newBoard.title = title;
+          newBoard.content = content;
+          newBoard.boardCategory = boardCategory;
+          newBoard.user = user;
+          newBoard.createdUser = userId.toString();
 
-      const tempDeleteImageDto = new DeleteImageDto();
+          const createdBoard = await boardRepository.save(newBoard);
 
-      for(const image of imageList) {
-        uploadImageDto.imageList.push(image);
+          if (imageList.length === 0) {
+            return;
+          }
+
+          uploadImageDto.entity.id = createdBoard.id;
+          uploadImageDto.entity.name = Board.name;
+
+          for (const image of imageList) {
+            uploadImageDto.imageList.push(image);
+          }
+
+          const uploadedImage =
+            await this.imageService.uploadImageToS3(uploadImageDto);
+
+          let isFirstImage = true;
+
+          for (const image of uploadedImage.imageList) {
+            tempDeleteImageDto.filenameList.push(image.filename);
+
+            const newImage = new Image();
+            newImage.url = image.url;
+            newImage.createdUser = userId.toString();
+
+            const newBoardImage = new BoardImage();
+            newBoardImage.image = newImage;
+            newBoardImage.board = createdBoard;
+            newBoardImage.createdUser = userId.toString();
+            newBoardImage.isPrimary = false;
+
+            if(isFirstImage) {
+              newBoardImage.isPrimary = true;
+              isFirstImage = false;
+            }
+
+            await imageRepository.save(newImage);
+            await boardImageRepository.save(newBoardImage);
+          }
+
+          return createdBoard.id;
+        },
+      );
+    } catch (e) {
+      if (tempDeleteImageDto.filenameList.length > 0) {
+        await this.imageService.deleteImageFromS3(tempDeleteImageDto);
       }
+      throw e;
+    }
 
-      const uploadedImage = await this.imageService.uploadImageToS3(uploadImageDto);
-      for(const filename of uploadedImage.imageList) {
-        tempDeleteImageDto.filenameList.push(filename.filename)
-      }
-
-      return null;
-    })
-    
     const createBoardResponseDto = new CreateBoardResponseDto();
-    createBoardResponseDto.id = 1;
+    createBoardResponseDto.id = id;
 
     const resData: ResponseData<CreateBoardResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: createBoardResponseDto,
-    }
+    };
     return resData;
   }
 
