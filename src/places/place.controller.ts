@@ -69,17 +69,6 @@ export class PlaceController {
     return places;
   }
 
-  @ApiOperation({
-    summary: '공공 데이터를 DB에 저장',
-    description: '공공 데이터 API에서 데이터를 가져와 DB에 저장합니다.',
-  })
-  @ApiOkResponse({
-    description: '데이터 저장이 완료되었습니다.',
-  })
-  async savePublicData() {
-    const result = await this.placeService.saveEntities();
-    return result;
-  }
 
   @ApiOperation({
     summary: '시설물의 정보를 조회 합니다.',

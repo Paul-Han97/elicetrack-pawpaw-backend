@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmCustomModule } from 'src/common/typeorm/typeorm-custom.module';
 import { LocationRepository } from 'src/locations/location.repository';
 import { PlaceLocationRepository } from 'src/place-locations/place-location.repository';
+import { PlaceRepository } from 'src/places/place.repository';
 import { ReviewPlaceLikeRepository } from 'src/review-place-likes/review-place-like.repository';
 import { ReviewRepository } from 'src/reviews/review.repository';
-import { PlaceController } from './place.controller';
-import { PlaceRepository } from './place.repository';
-import { PlaceService } from './place.service';
+import { CronService } from './cron.service';
+import { CronCtroller } from './cron.controller';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { PlaceService } from './place.service';
       ReviewPlaceLikeRepository,
     ]),
   ],
-  controllers: [PlaceController],
-  providers: [PlaceService],
+controllers:[CronCtroller],
+  providers: [CronService],
 })
-export class PlaceModule {}
+export class CronModule {}
