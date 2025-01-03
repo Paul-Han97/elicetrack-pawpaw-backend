@@ -179,14 +179,6 @@ export class UserService implements IUserService {
     };
   }
 
-  /*
-    1. user info에서 walkmate = true
-    2. 프론트한테 location을 받고 location table의 ponit 컬럼에 저장을 한다
-    3. 저장한 location.id를 UserLocation table에 location.id 컬럼에 박는다
-    4. 클라이언트가 반경으로 서치를 하면 해당 radius에 맞는 user.id(user.nickname)을 반환
-    5. UserLocation table에 user.id컬럼도 필요함
-
-  */
 
   async saveUserLocation(
     saveUserLocationDto: SaveUserLocationDto,
