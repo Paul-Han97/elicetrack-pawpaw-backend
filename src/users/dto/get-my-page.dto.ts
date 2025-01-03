@@ -4,6 +4,11 @@ import { ValidateNested } from 'class-validator';
 
 class PetList {
   @ApiProperty({
+    description: '반려동물 ID',
+  })
+  id: number;
+
+  @ApiProperty({
     description: '반려동물 이름',
   })
   name: string;
@@ -29,7 +34,7 @@ class PetList {
   size: string;
 
   @ApiProperty({
-    description: '반려동물 이미지 URL'
+    description: '반려동물 이미지 URL',
   })
   imageUrl: string;
 }
@@ -41,9 +46,14 @@ export class GetMyPageResponseDto {
   nickname: string;
 
   @ApiProperty({
-    description: '사용자의 산책메이트 기능 ON/OFF 여부'
+    description: '사용자의 산책메이트 기능 ON/OFF 여부',
   })
   canWalkingMate: boolean;
+
+  @ApiProperty({
+    description: '사용자의 프로필 이미지 URL',
+  })
+  imageUrl: string
 
   @ApiProperty({
     description: '반려동물 목록',
