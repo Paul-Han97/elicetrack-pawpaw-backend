@@ -190,6 +190,8 @@ export class AuthService implements IAuthService {
     if (!isMathces)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);
 
+
+    console.log('nickname', user.nickname)
     const resData: ResponseData<LoginResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
@@ -197,6 +199,7 @@ export class AuthService implements IAuthService {
           id: user.id,
           role: user.role.type,
           canWalkingMate: user.canWalkingMate,
+          nickname: user.nickname,
         },
       },
     };

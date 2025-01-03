@@ -25,6 +25,7 @@ export class UserRepository
     const reuslt = await this.createQueryBuilder('user')
       .select([
         'user.id',
+        'user.nickname',
         'user.canWalkingMate',
         'credential.username',
         'credential.password',
