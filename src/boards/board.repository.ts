@@ -17,6 +17,22 @@ export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
+  async findBoardComment(
+    id: number,
+    commentId: number,
+    userId?: number,
+  ): Promise<Board> {
+    const result = await this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.comment', 'comment')
+      .leftJoinAndSelect('comment.user', 'commentUser')
+      .where('board.id = :id', { id })
+      .andWhere('comment.id = :commentId', { commentId })
+      .andWhere('commentUser.id = :userId', { userId })
+      .getOne();
+
+    return result;
+  }
+
   async findBoard(id: number, userId?: number): Promise<Board> {
     const query = this.createQueryBuilder('board')
       .leftJoinAndSelect('board.user', 'user')

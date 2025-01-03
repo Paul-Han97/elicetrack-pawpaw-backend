@@ -35,10 +35,13 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from './dto/get-popular-list.dto';
+import { UpdateBoardCommentDto, UpdateBoardcommentResponseDto } from './dto/update-board-comment.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { IBoardService } from './interface/board.service.interface';
+import { CommentRepository } from 'src/comments/comment.repository';
+import { ICommentRepository } from 'src/comments/interface/comment.repository.interface';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -54,6 +57,9 @@ export class BoardService implements IBoardService {
 
     @Inject(BoardImageRepository)
     private readonly boardImageRepository: IBoardImageRepository,
+
+    @Inject(CommentRepository)
+    private readonly commentRepository: ICommentRepository,
 
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
@@ -331,6 +337,34 @@ export class BoardService implements IBoardService {
       message: SUCCESS_MESSAGE.REQUEST,
       data: updateBoardResponseDto,
     };
+    return resData;
+  }
+
+  async updateBoardComment(
+    updateBoardCommentDto: UpdateBoardCommentDto,
+  ): Promise<ResponseData<UpdateBoardResponseDto>> {
+    const { id, commentId, content, userId } = updateBoardCommentDto;
+
+    const boardComment = await this.boardRepository.findBoardComment(id, commentId, userId);
+
+    if(!boardComment) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const comment = boardComment.comment[0];
+
+    comment.updatedUser = userId.toString();
+    comment.content = content;
+
+    await this.commentRepository.save(comment);
+
+    const updateBoardCommentResponseDto = new UpdateBoardcommentResponseDto();
+    updateBoardCommentResponseDto.id = comment.id;
+
+    const resData: ResponseData<UpdateBoardResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: updateBoardCommentResponseDto
+    }
     return resData;
   }
 

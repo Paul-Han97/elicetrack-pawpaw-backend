@@ -21,20 +21,31 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { UpdateBoardCommentDto } from 'src/boards/dto/update-board-comment.dto';
+import { Request } from 'express';
+import {
+  UpdateBoardCommentDto,
+  UpdateBoardcommentResponseDto,
+} from 'src/boards/dto/update-board-comment.dto';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
+import { Auth } from 'src/common/guards/auth.decorator';
 import { BoardService } from './board.service';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
-import { GetBoardListQueryDto, GetBoardListResponseDto } from './dto/get-board-list.dto';
+import { DeleteBoardDto } from './dto/delete-board.dto';
+import {
+  GetBoardListQueryDto,
+  GetBoardListResponseDto,
+} from './dto/get-board-list.dto';
 import { GetBoardDto, GetBoardResponseDto } from './dto/get-board.dto';
-import { GetPopularListQueryDto, GetPopularListResponseDto } from './dto/get-popular-list.dto';
+import {
+  GetLatestListQueryDto,
+  GetLatestListResponseDto,
+} from './dto/get-latest-list.dto';
+import {
+  GetPopularListQueryDto,
+  GetPopularListResponseDto,
+} from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
-import { GetLatestListQueryDto, GetLatestListResponseDto } from './dto/get-latest-list.dto';
-import { Request } from 'express';
-import { User } from 'src/users/entities/user.entity';
-import { Auth } from 'src/common/guards/auth.decorator';
-import { DeleteBoardDto } from './dto/delete-board.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -54,7 +65,9 @@ export class BoardController {
     type: [GetPopularListResponseDto],
   })
   @Get('popular-list')
-  async getPopularList(@Query() getPopularListQueryDto: GetPopularListQueryDto) {
+  async getPopularList(
+    @Query() getPopularListQueryDto: GetPopularListQueryDto,
+  ) {
     return await this.boardService.getPopularList(getPopularListQueryDto);
   }
 
@@ -93,7 +106,10 @@ export class BoardController {
     type: [GetBoardListResponseDto],
   })
   @Get()
-  async getBoardList(@Req() req: Request, @Query() getBoardListQueryDto: GetBoardListQueryDto) {
+  async getBoardList(
+    @Req() req: Request,
+    @Query() getBoardListQueryDto: GetBoardListQueryDto,
+  ) {
     const user = req.session.user;
     getBoardListQueryDto.userId = user?.id ?? null;
 
@@ -107,7 +123,7 @@ export class BoardController {
   })
   @ApiParam({
     name: 'id',
-    description: '게시글의 ID'
+    description: '게시글의 ID',
   })
   @ApiOkResponse({
     type: GetBoardResponseDto,
@@ -118,7 +134,7 @@ export class BoardController {
     const getBoardDto = new GetBoardDto();
     getBoardDto.id = id;
     getBoardDto.userId = user?.id ?? null;
-    
+
     return await this.boardService.getBoard(getBoardDto);
   }
 
@@ -200,12 +216,25 @@ export class BoardController {
     name: 'commentId',
     description: '댓글의 ID',
   })
+  @Auth()
+  @ApiOkResponse({
+    type: UpdateBoardcommentResponseDto,
+  })
   @Put(':id/comments/:commentId')
   async updateBoardComment(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('commentId') commentId: number,
     @Body() updateBoardCommentDto: UpdateBoardCommentDto,
-  ) {}
+  ) {
+    const user = req.session?.user;
+
+    updateBoardCommentDto.id = id;
+    updateBoardCommentDto.commentId = commentId;
+    updateBoardCommentDto.userId = user?.id ?? null;
+
+    return await this.boardService.updateBoardComment(updateBoardCommentDto);
+  }
 
   @ApiOperation({
     summary: '게시글을 삭제 합니다.',

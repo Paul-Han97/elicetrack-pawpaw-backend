@@ -6,9 +6,10 @@ import { BoardController } from './board.controller';
 import { ImageRepository } from 'src/images/image.repository';
 import { BoardImageRepository } from 'src/board-images/board-image.repository';
 import { ImageService } from 'src/images/image.service';
+import { CommentRepository } from 'src/comments/comment.repository';
 
 @Module({
-  imports: [TypeOrmCustomModule.forCustomRepository([BoardRepository, ImageRepository, BoardImageRepository])],
+  imports: [TypeOrmCustomModule.forCustomRepository([BoardRepository, ImageRepository, BoardImageRepository, CommentRepository])],
   controllers: [BoardController],
   providers: [BoardService, ImageService],
 })

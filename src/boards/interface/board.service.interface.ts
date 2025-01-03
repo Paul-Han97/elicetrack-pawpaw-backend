@@ -3,6 +3,7 @@ import {
   CreateBoardDto,
   CreateBoardResponseDto,
 } from '../dto/create-board.dto';
+import { DeleteBoardDto } from '../dto/delete-board.dto';
 import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
@@ -16,11 +17,11 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from '../dto/get-popular-list.dto';
+import { UpdateBoardCommentDto } from '../dto/update-board-comment.dto';
 import {
   UpdateBoardDto,
   UpdateBoardResponseDto,
 } from '../dto/update-board.dto';
-import { DeleteBoardDto } from '../dto/delete-board.dto';
 
 export interface IBoardService {
   getPopularList(
@@ -45,6 +46,10 @@ export interface IBoardService {
 
   updateBoard(
     updateBoardDto: UpdateBoardDto,
+  ): Promise<ResponseData<UpdateBoardResponseDto>>;
+
+  updateBoardComment(
+    updateBoardCommentDto: UpdateBoardCommentDto,
   ): Promise<ResponseData<UpdateBoardResponseDto>>;
 
   deleteBoard(deleteBoardDto: DeleteBoardDto): Promise<ResponseData>;
