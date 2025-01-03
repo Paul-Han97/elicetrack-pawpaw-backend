@@ -10,6 +10,9 @@ import { IBoardRepository } from 'src/boards/interface/board.repository.interfac
 import { ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseData } from 'src/common/types/response.type';
+import { UtilService } from 'src/common/utils/util.service';
+import { CredentialRepository } from 'src/credentials/credential.repository';
+import { ICredentialRepository } from 'src/credentials/interfaces/credential.repository.interface';
 import { DeleteImageDto } from 'src/images/dto/delete-image.dto';
 import { UploadImageDto } from 'src/images/dto/upload-image.dto';
 import { Image } from 'src/images/entities/image.entity';
@@ -45,10 +48,6 @@ import { User } from './entities/user.entity';
 import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
-import { UtilService } from 'src/common/utils/util.service';
-import { PasswordManager } from 'src/common/utils/password-manager.util';
-import { CredentialRepository } from 'src/credentials/credential.repository';
-import { ICredentialRepository } from 'src/credentials/interfaces/credential.repository.interface';
 
 @Injectable()
 export class UserService implements IUserService {
