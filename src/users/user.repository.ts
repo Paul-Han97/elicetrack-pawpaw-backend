@@ -1,3 +1,5 @@
+import { NotFoundException } from '@nestjs/common';
+import { ERROR_MESSAGE } from 'src/common/constants';
 import { CustomRepository } from 'src/common/typeorm/typeorm-custom.decorator';
 import { Repository } from 'typeorm';
 import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
@@ -33,5 +35,29 @@ export class UserRepository
       .where('user.nickname = :nickname', { nickname })
       .getOne();
     return result;
+  }
+
+  async findNearbyUsers(
+    lon: number,
+    lat: number,
+    radius: number,
+  ): Promise<User[]> {
+    try {
+      return await this.createQueryBuilder('user')
+        .leftJoinAndSelect('user.userLocation', 'userLocation')
+        .leftJoinAndSelect('userLocation.location', 'location')
+        .where(
+          'ST_Distance_Sphere(location.point, POINT(:lon, :lat)) < :radius',
+          {
+            lon,
+            lat,
+            radius,
+          },
+        )
+        .andWhere('user.canWalkingMate = true')
+        .getMany();
+    } catch (e) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
   }
 }

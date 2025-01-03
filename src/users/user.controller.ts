@@ -4,8 +4,10 @@ import {
   Get,
   Inject,
   Param,
+  Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,19 +18,24 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+import { Request } from 'express';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { Auth } from 'src/common/guards/auth.decorator';
 import { ResponseData } from 'src/common/types/response.type';
+import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
 import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from './dto/get-my-board-list.dto';
 import { GetMyPageResponseDto } from './dto/get-my-page.dto';
 import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
+import {
+  GetNearbyUserListQueryDto,
+  SaveUserLocationDto,
+} from './dto/get-nearby-user-list.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
-import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
 
 @Controller('users')
 export class UserController {
@@ -36,18 +43,22 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
-  
+
   @ApiOperation({
     summary: '이메일 중복을 확인 합니다.',
     description: `
     - 이메일 중복을 확인 합니다.`,
   })
   @ApiBadRequestResponse({
-    description: '계정이 이미 존재할 때'
+    description: '계정이 이미 존재할 때',
   })
   @Get('duplicate-email')
-  async duplicateEmail(@Query() duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData> {
-    const result = await this.userService.checkDuplicateEmail(duplicateEmailQueryDto)
+  async duplicateEmail(
+    @Query() duplicateEmailQueryDto: DuplicateEmailQueryDto,
+  ): Promise<ResponseData> {
+    const result = await this.userService.checkDuplicateEmail(
+      duplicateEmailQueryDto,
+    );
     return result;
   }
 
@@ -133,4 +144,37 @@ export class UserController {
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {}
+
+  @ApiOperation({
+    summary: '사용자 위치 저장',
+    description: '클라이언트에서 받은 사용자의 위치 데이터를 저장합니다.',
+  })
+  @Auth()
+  @Post('location')
+  async saveUserLocation(
+    @Req() req: Request,
+
+    @Body() saveUserLocationDto: SaveUserLocationDto,
+  ) {
+    const userId = req.session.user.id;
+    saveUserLocationDto.id= userId
+    const result = this.userService.saveUserLocation(saveUserLocationDto);
+
+    return result;
+  }
+
+  @ApiOperation({
+    summary: '주변 사용자 검색',
+    description:
+      '사용자의 위치를 기반으로 반경 내 walkmate가 true인 사용자 검색.',
+  })
+  @Get('nearby-users-list')
+  @Auth()
+  async getNearbyUsers(
+    @Query() getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
+  ) {
+    const result = this.userService.getNearbyUsers(getNearbyUserListQueryDto);
+
+    return result;
+  }
 }
