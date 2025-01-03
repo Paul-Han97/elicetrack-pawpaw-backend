@@ -29,6 +29,10 @@ import {
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { Auth } from 'src/common/guards/auth.decorator';
 import { BoardService } from './board.service';
+import {
+  CreateBoardCommentDto,
+  CreateBoardCommentResponseDto,
+} from './dto/create-board-comment.dto';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { DeleteBoardDto } from './dto/delete-board.dto';
 import {
@@ -200,6 +204,33 @@ export class BoardController {
     updateBoardDto.imageList = imageList;
 
     return await this.boardService.updateBoard(updateBoardDto);
+  }
+
+  @ApiOperation({
+    summary: '댓글을 작성 합니다.',
+    description: `
+    - 게시글의 ID를 입력받아 작성 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글 ID',
+  })
+  @Auth()
+  @ApiCreatedResponse({
+    type: CreateBoardCommentResponseDto,
+  })
+  @Post(':id/comments')
+  async createBoardComment(
+    @Req() req: Request,
+    @Param('id') id: number,
+    @Body() createBoardCommentDto: CreateBoardCommentDto,
+  ) {
+    const user = req.session?.user;
+
+    createBoardCommentDto.id = id;
+    createBoardCommentDto.userId = user?.id ?? null;
+
+    return await this.boardService.createBoardComment(createBoardCommentDto);
   }
 
   @ApiOperation({

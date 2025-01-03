@@ -4,6 +4,9 @@ import { BoardCategory } from 'src/board-categories/entities/board-category.enti
 import { BoardImageRepository } from 'src/board-images/board-image.repository';
 import { BoardImage } from 'src/board-images/entities/board-image.entity';
 import { IBoardImageRepository } from 'src/board-images/interface/board-image.repository.interface';
+import { CommentRepository } from 'src/comments/comment.repository';
+import { Comment } from 'src/comments/entities/comment.entity';
+import { ICommentRepository } from 'src/comments/interface/comment.repository.interface';
 import {
   BOARD_CATEGORY_TYPE_INDEX,
   ERROR_MESSAGE,
@@ -20,6 +23,10 @@ import { IImageService } from 'src/images/interface/image.service.interface';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { BoardRepository } from './board.repository';
+import {
+  CreateBoardCommentDto,
+  CreateBoardCommentResponseDto,
+} from './dto/create-board-comment.dto';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
 import { DeleteBoardDto } from './dto/delete-board.dto';
 import {
@@ -35,13 +42,14 @@ import {
   GetPopularListQueryDto,
   GetPopularListResponseDto,
 } from './dto/get-popular-list.dto';
-import { UpdateBoardCommentDto, UpdateBoardcommentResponseDto } from './dto/update-board-comment.dto';
+import {
+  UpdateBoardCommentDto,
+  UpdateBoardcommentResponseDto,
+} from './dto/update-board-comment.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { IBoardService } from './interface/board.service.interface';
-import { CommentRepository } from 'src/comments/comment.repository';
-import { ICommentRepository } from 'src/comments/interface/comment.repository.interface';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -64,6 +72,7 @@ export class BoardService implements IBoardService {
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
   ) {}
+
   async createBoard(
     createBoardDto: CreateBoardDto,
   ): Promise<ResponseData<CreateBoardResponseDto>> {
@@ -149,6 +158,35 @@ export class BoardService implements IBoardService {
       message: SUCCESS_MESSAGE.REQUEST,
       data: createBoardResponseDto,
     };
+    return resData;
+  }
+
+  async createBoardComment(
+    createBoardCommentDto: CreateBoardCommentDto,
+  ): Promise<ResponseData<CreateBoardCommentResponseDto>> {
+    const { id, userId, content } = createBoardCommentDto;
+
+    const boardComment = await this.boardRepository.findBoard(id);
+
+    if (!boardComment) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const comment = new Comment();
+    comment.board = boardComment;
+    comment.createdUser = userId.toString();
+    comment.content = content;
+
+    await this.commentRepository.save(comment, { reload: false });
+
+    const createBoardCommentResponseDto = new CreateBoardCommentResponseDto();
+    createBoardCommentResponseDto.id = boardComment.id;
+
+    const resData: ResponseData<CreateBoardCommentResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: createBoardCommentResponseDto,
+    };
+
     return resData;
   }
 
@@ -345,9 +383,13 @@ export class BoardService implements IBoardService {
   ): Promise<ResponseData<UpdateBoardResponseDto>> {
     const { id, commentId, content, userId } = updateBoardCommentDto;
 
-    const boardComment = await this.boardRepository.findBoardComment(id, commentId, userId);
+    const boardComment = await this.boardRepository.findBoardComment(
+      id,
+      commentId,
+      userId,
+    );
 
-    if(!boardComment) {
+    if (!boardComment) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
@@ -363,8 +405,8 @@ export class BoardService implements IBoardService {
 
     const resData: ResponseData<UpdateBoardResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
-      data: updateBoardCommentResponseDto
-    }
+      data: updateBoardCommentResponseDto,
+    };
     return resData;
   }
 
