@@ -10,4 +10,6 @@ export interface IUserRepository extends Repository<User> {
   ): Promise<User>;
 
   findUser(id: number): Promise<User>;
+
+  findNearbyUsers(lon: number, lat: number, radius: number): Promise<User[]>;
 }

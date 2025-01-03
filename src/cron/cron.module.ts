@@ -6,7 +6,7 @@ import { PlaceRepository } from 'src/places/place.repository';
 import { ReviewPlaceLikeRepository } from 'src/review-place-likes/review-place-like.repository';
 import { ReviewRepository } from 'src/reviews/review.repository';
 import { CronService } from './cron.service';
-import { CronCtroller } from './cron.controller';
+import { CronController } from './cron.controller';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { CronCtroller } from './cron.controller';
       ReviewPlaceLikeRepository,
     ]),
   ],
-controllers:[CronCtroller],
+controllers:[CronController],
   providers: [CronService],
 })
 export class CronModule {}

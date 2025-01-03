@@ -199,13 +199,16 @@ export class PlaceService implements IPlaceService {
   ): Promise<ResponseData<GetPlaceReviewResponseDto>> {
     const { id, reviewId } = getPlaceReviewDto;
 
-    const review = await this.reviewRepository.findOne({
-      where: {
-        id: reviewId,
-        place: { id },
-      },
-      relations: ['user', 'place', 'reviewPlaceLike'],
-    });
+    const review = await this.reviewRepository
+      .createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.place', 'place')
+      .leftJoinAndSelect('review.reviewPlaceLike', 'reviewPlaceLike')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'image')
+      .where('review.id = :reviewId', { reviewId })
+      .andWhere('place.id = :placeId', { placeId: id })
+      .getOne();
 
     if (!review) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
@@ -218,8 +221,8 @@ export class PlaceService implements IPlaceService {
         reviewId: review.id ?? null,
         author: {
           id: review.user.id ?? null,
-          nickname:review.user.nickname ?? null,
-          imageUrl: review.user.userImage?.[0]?.image?.url ?? null,
+          nickname: review.user.nickname ?? null,
+          imageUrl: review.user.userImage[0]?.image.url ?? null,
         },
         title: review.title ?? null,
         content: review.content ?? null,

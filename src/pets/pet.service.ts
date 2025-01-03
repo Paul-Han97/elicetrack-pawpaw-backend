@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import {
+  ERROR_MESSAGE,
   GENDER_TYPE,
   GENDER_TYPE_INDEX,
   PET_SIZE_TYPE,
@@ -27,6 +28,7 @@ import { PetSizeRepository } from 'src/pet-sizes/pet-size..repository';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { CreatePetDto, CreatePetResponseDto } from './dto/create-pet.dto';
+import { UpdatePetDto, UpdatePetResponseDto } from './dto/update-pet.dto';
 import { Pet } from './entities/pet.entity';
 import { IPetRepository } from './interfaces/pet.repository.interface';
 import { IPetService } from './interfaces/pet.service.interface';
@@ -34,6 +36,7 @@ import { PetRepository } from './pet.repository';
 
 @Injectable()
 export class PetService implements IPetService {
+  private readonly logger = new Logger(PetService.name);
   constructor(
     @Inject(PetRepository)
     private readonly petRepository: IPetRepository,
@@ -138,5 +141,197 @@ export class PetService implements IPetService {
     return resData;
   }
 
-  async deletePet() {}
+  async updatePet(
+    updatePetDto: UpdatePetDto,
+  ): Promise<ResponseData<UpdatePetResponseDto>> {
+    const { id, name, age, description, gender, size, userId, image } =
+      updatePetDto;
+
+    const tempDeleteImageDto = new DeleteImageDto();
+    let result = new UpdatePetResponseDto();
+
+    try {
+      result = await this.dataSource.transaction<UpdatePetResponseDto>(
+        async (manager: EntityManager): Promise<UpdatePetResponseDto> => {
+          const imageRepository = manager.withRepository(this.imageRepository);
+          const petImageRepository = manager.withRepository(
+            this.petImageRepository,
+          );
+          const petRepository = manager.withRepository(this.petRepository);
+          const updatePetResponseDto = new UpdatePetResponseDto();
+
+          const pet = await petRepository
+            .createQueryBuilder('pet')
+            .leftJoinAndSelect('pet.gender', 'gender')
+            .leftJoinAndSelect('pet.petSize', 'petSize')
+            .leftJoinAndSelect('pet.user', 'user')
+            .leftJoinAndSelect('pet.petImage', 'petImage')
+            .leftJoinAndSelect('petImage.image', 'image')
+            .where('pet.id = :id', { id })
+            .getOne();
+
+          if (!pet) {
+            throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+          }
+
+          pet.name = name || pet.name;
+          pet.age = age || pet.age;
+          pet.description = description || pet.description;
+
+          if (gender) {
+            const genderIndex = new Gender();
+            genderIndex.id = GENDER_TYPE_INDEX[GENDER_TYPE[gender]];
+            pet.gender = genderIndex;
+          }
+
+          if (size) {
+            const petSize = new PetSize();
+            petSize.id = PET_SIZE_TYPE_INDEX[PET_SIZE_TYPE[size]];
+            pet.petSize = petSize;
+          }
+
+          pet.updatedUser = userId.toString();
+
+          const savedPet = await petRepository.save(pet);
+          updatePetResponseDto.id = savedPet.id;
+
+          if (!image) {
+            const images = pet.petImage || [];
+            tempDeleteImageDto.filenameList = images
+              .filter((petImage) => petImage?.image?.url)
+              .map((petImage) => petImage.image.url.split('/').pop() || '');
+
+            if (tempDeleteImageDto.filenameList.length > 0) {
+              await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+
+              for (const petImage of images) {
+                await petImageRepository.remove(petImage);
+                if (petImage.image) {
+                  await imageRepository.remove(petImage.image);
+                }
+              }
+            }
+          } else {
+            const images = pet.petImage || [];
+            tempDeleteImageDto.filenameList = images
+              .filter((petImage) => petImage?.image?.url)
+              .map((petImage) => petImage.image.url.split('/').pop() || '');
+
+            if (tempDeleteImageDto.filenameList.length > 0) {
+              await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+
+              for (const petImage of images) {
+                await petImageRepository.remove(petImage);
+                if (petImage.image) {
+                  await imageRepository.remove(petImage.image);
+                }
+              }
+            }
+
+            const uploadImageDto = new UploadImageDto();
+            uploadImageDto.entity.id = savedPet.id;
+            uploadImageDto.entity.name = Pet.name;
+            uploadImageDto.imageList.push(image);
+
+            const uploadedImage =
+              await this.imageService.uploadImageToS3(uploadImageDto);
+            tempDeleteImageDto.filenameList.push(
+              uploadedImage.imageList[0].filename,
+            );
+
+            const newImage = new Image();
+            newImage.url = uploadedImage.imageList[0].url;
+            newImage.createdUser = userId.toString();
+            newImage.updatedUser = userId.toString();
+
+            const petImage = new PetImage();
+            petImage.pet = savedPet;
+            petImage.image = newImage;
+            petImage.createdUser = userId.toString();
+            petImage.updatedUser = userId.toString();
+
+            await imageRepository.save(newImage);
+            await petImageRepository.save(petImage);
+          }
+
+          return updatePetResponseDto;
+        },
+      );
+    } catch (e) {
+      if (tempDeleteImageDto.filenameList.length > 0) {
+        await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+      }
+      throw e;
+    }
+
+    const resData: ResponseData<CreatePetResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: result,
+    };
+
+    return resData;
+  }
+
+  async deletePet(id: number): Promise<ResponseData> {
+    const tempDeleteImageDto = new DeleteImageDto();
+
+    try {
+      await this.dataSource.transaction(async (manager: EntityManager) => {
+        const petRepository = manager.withRepository(this.petRepository);
+        const petImageRepository = manager.withRepository(
+          this.petImageRepository,
+        );
+        const imageRepository = manager.withRepository(this.imageRepository);
+
+        const pet = await petRepository
+          .createQueryBuilder('pet')
+          .leftJoinAndSelect('pet.petImage', 'petImage')
+          .leftJoinAndSelect('petImage.image', 'image')
+          .where('pet.id = :id', { id })
+          .getOne();
+
+        if (!pet) {
+          throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+        }
+
+        const images = pet.petImage || [];
+        tempDeleteImageDto.filenameList = images
+          .filter((petImage) => petImage?.image?.url)
+          .map((petImage) => petImage.image.url.split('/').pop() || '');
+
+        if (tempDeleteImageDto.filenameList.length > 0) {
+          await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+        }
+
+        const petImageIds = images
+          .map((petImage) => petImage.id)
+          .filter(Boolean);
+        const imageIds = images
+          .map((petImage) => petImage.image?.id)
+          .filter(Boolean);
+
+        if (petImageIds.length > 0) {
+          await petImageRepository.delete(petImageIds);
+        }
+
+        if (imageIds.length > 0) {
+          await imageRepository.delete(imageIds);
+        }
+
+        await petRepository.delete(id);
+      });
+    } catch (e) {
+      if (tempDeleteImageDto.filenameList.length > 0) {
+        await this.imageService.deleteImageFromS3(tempDeleteImageDto);
+      }
+      throw e;
+    }
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: { id },
+    };
+
+    return resData;
+  }
 }

@@ -1,13 +1,20 @@
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseData } from 'src/common/types/response.type';
+import { DuplicateEmailQueryDto } from '../dto/duplicate-email.dto';
 import { DuplicateNicknameQueryDto } from '../dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from '../dto/get-my-board-list.dto';
 import { GetMyReviewListDto } from '../dto/get-my-review-list.dto';
-import { DuplicateEmailQueryDto } from '../dto/duplicate-email.dto';
+import {
+  GetNearbyUserListQueryDto,
+  GetNearbyUserListResponseDto,
+  SaveUserLocationDto,
+} from '../dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from '../dto/get-user.dto';
 
 export interface IUserService {
-  checkDuplicateEmail(duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData>;
+  checkDuplicateEmail(
+    duplicateEmailQueryDto: DuplicateEmailQueryDto,
+  ): Promise<ResponseData>;
 
   checkDuplicateNickname(
     duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
@@ -31,4 +38,12 @@ export interface IUserService {
   >;
 
   getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>>;
+
+  saveUserLocation(
+    saveUserLocationDto: SaveUserLocationDto,
+  ): Promise<ResponseData>;
+
+  getNearbyUsers(
+    getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
+  ): Promise<ResponseData<GetNearbyUserListResponseDto[]>>;
 }
