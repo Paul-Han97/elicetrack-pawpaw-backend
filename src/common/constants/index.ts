@@ -35,8 +35,12 @@ export const enum ERROR_MESSAGE {
   NOT_VALID_REQUEST = '유효한 요청이 아닙니다.',
   FORBIDDEN = '요청 권한이 없습니다.',
   ACCOUNT_ALREADY_EXIST = '계정이 이미 존재합니다.',
+  NICKNAME_ALREADY_EXIST = '이미 사용 중인 닉네임입니다.',
   VERIFICATION_CODE_NOT_MATCH = '인증코드가 일치하지 않습니다.',
   EMAIL_PASSWORD_NOT_MATCH = '이메일 또는 패스워드가 일치하지 않습니다.',
+  UNAUTHORIZED = '로그인이 필요 합니다.',
+  NOT_FOUND = '해당하는 리소스를 찾을 수 없습니다.',
+  FAILED_SEND_EMAIL = "이메일 전송이 실패 했습니다.",
 }
 
 export const enum SUCCESS_MESSAGE {
@@ -53,7 +57,39 @@ export const enum ENV_KEYS {
   DATABASE_MYSQL_PASSWORD = 'DATABASE_MYSQL_PASSWORD',
   DATABASE_MYSQL_NAME = 'DATABASE_MYSQL_NAME',
   DATABASE_MYSQL_PORT = 'DATABASE_MYSQL_PORT',
+  SESSION_SECRET = 'SESSION_SECRET',
+  REDIS_HOST = 'REDIS_HOST',
+  REDIS_PREFIX = 'REDIS_PREFIX',
+  DATABASE_MONGO_HOST = 'DATABASE_MONGO_HOST',
+  DATABASE_MONGO_NAME = 'DATABASE_MONGO_NAME',
+  DATABASE_MONGO_USERNAME = 'DATABASE_MONGO_USERNAME',
+  DATABASE_MONGO_PASSWORD = 'DATABASE_MONGO_PASSWORD',
+  DATABASE_MONGO_PORT = 'DATABASE_MONGO_PORT',
+  PUBLIC_PET_API_KEY = 'PUBLIC_PET_API_KEY',
+  PUBLIC_PET_API_END_POINT = 'PUBLIC_PET_API_END_POINT',
+  AWS_REGION = 'AWS_REGION',
+  AWS_S3_ACCESS = 'AWS_S3_ACCESS',
+  AWS_S3_SECRET = 'AWS_S3_SECRET',
+  AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME',
+  EMAIL_HOST = "EMAIL_HOST",
+  EMAIL_PORT = "EMAIL_PORT",
+  EMAIL_USERNAME = "EMAIL_USERNAME",
+  EMAIL_PASSWORD = "EMAIL_PASSWORD",
+  PASSWORD_STRING = "PASSWORD_STRING",
+  PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
 }
+
+export const LOGIN_COOKIE = 'connect.sid';
+
+export const PLACE_API ='PLACE_API'
+
+
+export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
+        <span style="display: block; text-align:center;">포포</span>
+        <span style="display: block; text-align:center;">인증코드</span>
+        <span style="display: block; text-align:center; margin-top: 10px; font-size: larger; font-weight: bold; letter-spacing: 5px;">`
+
+export const EMAIL_TEMPLATE_CLOSER = `</span></div>`;
 
 export const CUSTOM_REPOSITORY = 'CUSTOM_REPOSITORY';
 
@@ -64,9 +100,19 @@ export enum GENDER_TYPE {
   FEMALE = 'FEMALE',
 }
 
+export enum GENDER_TYPE_INDEX {
+  MALE = 1,
+  FEMALE,
+}
+
 export enum ROLE_TYPE {
   USER = 'USER',
   ADMIN = 'ADMIN',
+}
+
+export enum ROLE_TYPE_INDEX {
+  USER = 1,
+  ADMIN,
 }
 
 export enum LOGIN_METHOD_TYPE {
@@ -75,10 +121,22 @@ export enum LOGIN_METHOD_TYPE {
   KAKAO = 'KAKAO',
 }
 
+export enum LOGIN_METHOD_TYPE_INDEX {
+  BASIC = 1,
+  GOOGLE,
+  KAKAO,
+}
+
 export enum PET_SIZE_TYPE {
   SMALL = 'SMALL',
   MEDIUM = 'MEDIUM',
   LARGE = 'LARGE',
+}
+
+export enum PET_SIZE_TYPE_INDEX {
+  SMALL = 1,
+  MEDIUM,
+  LARGE,
 }
 
 export enum BOARD_CATEGORY_TYPE {
@@ -88,7 +146,51 @@ export enum BOARD_CATEGORY_TYPE {
   LIFE = 'LIFE',
 }
 
+export enum BOARD_CATEGORY_TYPE_INDEX {
+  PROUD_PETS = 1,
+  CONSULTATION,
+  PROTECT,
+  LIFE,
+}
+
 export enum NOTIFICATION_TYPE {
   RECEIVE_MESSAGE = 'RECEIVE_MESSAGE',
   INVITE = 'INVITE',
+}
+
+export enum NOTIFICATION_TYPE_INDEX {
+  RECEIVE_MESSAGE = 1,
+  INVITE,
+}
+
+export enum PLACE_CATEGORY_TYPE {
+  ANIMAL_PHARMACY = 'ANIMAL_PHARMACY',
+  CAFE = 'CAFE',
+  ANIMAL = 'ANIMAL',
+  PET_SUPPLIES = 'PET_SUPPLIES',
+  BEAUTY = 'BEAUTY',
+  CULTURAL_CENTER = 'CULTURAL_CENTER',
+  GUESTHOUSE = 'GUESTHOUSE',
+  RESTAURANT = 'RESTAURANT',
+  TOURIST_ATTRACTION = 'TOURIST_ATTRACTION',
+  PET_BOARDING = 'PET_BOARDING',
+  MUSEUM = 'MUSEUM',
+  ART_GALLERY = 'ART_GALLERY',
+  HOTEL = 'HOTEL',
+}
+
+export enum PLACE_CATEGORY_KOR_TYPE {
+  ANIMAL_PHARMACY = '동물약국',
+  CAFE = '카페',
+  ANIMAL = '동물병원',
+  PET_SUPPLIES = '반려동물용품',
+  BEAUTY = '미용',
+  CULTURAL_CENTER = '문예회관',
+  GUESTHOUSE = '펜션',
+  RESTAURANT = '식당',
+  TOURIST_ATTRACTION = '여행지',
+  PET_BOARDING = '위탁관리',
+  MUSEUM = '박물관',
+  ART_GALLERY = '미술관',
+  HOTEL = '호텔',
 }

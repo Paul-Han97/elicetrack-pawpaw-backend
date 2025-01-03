@@ -15,23 +15,22 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 @Entity()
 export class User extends CommonEntity {
   @Column()
-  email: string;
-
-  @Column()
   name: string;
 
   @Column()
   nickname: string;
 
-  @Column()
-  walkMate: string;
+  @Column({
+    default: false,
+  })
+  canWalkingMate: boolean;
 
   @ManyToOne(() => Role)
   @JoinColumn({ referencedColumnName: 'id' })
   role: Role;
 
   @OneToMany(() => Credential, (credential) => credential.user)
-  crendeital: Credential[];
+  credential: Credential[];
 
   @OneToMany(() => UserImage, (userImage) => userImage.user)
   userImage: UserImage[];

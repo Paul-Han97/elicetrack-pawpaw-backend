@@ -4,9 +4,14 @@ import { ValidateNested } from 'class-validator';
 
 class ReviewList {
   @ApiProperty({
-    description: '리뷰의 ID'
+    description: '리뷰의 ID',
   })
   id: number;
+
+  @ApiProperty({
+    description: '리뷰 작성자의 ID',
+  })
+  userId: number;
 
   @ApiProperty({
     description: '리뷰 작성자 닉네임',
@@ -31,10 +36,15 @@ class ReviewList {
   @ApiProperty({
     description: '리뷰의 좋아요 상태',
   })
-  isLike: boolean;
+  isLikeClicked: boolean;
 }
 
 export class GetPlaceResponseDto {
+  @ApiProperty({
+    description: '시설의 ID',
+  })
+  id: number;
+
   @ApiProperty({
     description: '시설명',
   })
@@ -107,5 +117,5 @@ export class GetPlaceResponseDto {
   })
   @ValidateNested({ each: true })
   @Type(() => ReviewList)
-  reviewList: ReviewList[];
+  reviewList?: ReviewList[];
 }

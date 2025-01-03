@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PasswordManager } from './password-manager.util';
+import { UuidGenerator } from './uuid-generator.util';
 
 @Injectable()
 export class UtilService {
-  constructor(private readonly passwordManager: PasswordManager) {}
+  constructor(
+    public readonly passwordManager: PasswordManager,
+    public readonly uuidGenerator: UuidGenerator,
+  ) {}
 }

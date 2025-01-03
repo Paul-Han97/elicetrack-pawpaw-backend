@@ -14,15 +14,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
   catch(exception: HttpException, host: ArgumentsHost) {
-    this.logger.log(`GlobalExceptionFilter 시작`);
-
     const context = host.switchToHttp();
     const res = context.getResponse<Response>();
 
     const isInternalServerError = !(exception instanceof HttpException);
 
     if (isInternalServerError) {
-      this.logger.error((<Error>exception).stack);
+      this.logger.error('%o', (<Error>exception).stack);
 
       const body: ResponseBody = {
         body: {
@@ -32,10 +30,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         },
       };
 
-      this.logger.log(
-        `GlobalExceptionFilter 종료`,
-        `반환 값:\n${JSON.stringify(body)}`,
-      );
+      this.logger.log(`error response: %o`, body);
 
       res.status(500).json(body);
       return;
@@ -56,10 +51,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       },
     };
 
-    this.logger.log(
-      `GlobalExceptionFilter 종료`,
-      `반환 값:\n${JSON.stringify(body)}`,
-    );
+    this.logger.log(`error response: %o`, body);
 
     res.status(statusCode).json(body);
   }

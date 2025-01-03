@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetReviewDto {
+export class CreatePlaceReviewDto {
   @ApiProperty({
     description: '리뷰의 제목',
   })
@@ -9,15 +9,21 @@ export class GetReviewDto {
   @ApiProperty({
     description: '리뷰의 내용',
   })
-  conent: string;
+  content: string;
 
   @ApiProperty({
     description: '좋아요 선택 여부',
   })
-  isLike: boolean;
+  isLikeClicked: boolean;
 
+  id: number;
+
+  userId: number;
+}
+
+export class CreatePlaceReviewResponseDto {
   @ApiProperty({
-    description: '리뷰의 작성 날짜',
+    description: '리뷰의 ID',
   })
-  createdAt: Date;
+  reviewId: number;
 }

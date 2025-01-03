@@ -6,6 +6,12 @@ import { Room } from 'src/rooms/schemas/room.schema';
 export class Chat {
   @Prop({
     required: true,
+    unique: true,
+  })
+  id: number
+
+  @Prop({
+    required: true,
   })
   senderId: number;
 

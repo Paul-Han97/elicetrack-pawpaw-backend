@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { ERROR_MESSAGE } from '../constants';
+import { Request } from 'express';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -31,14 +32,13 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const match = [];
 
-    this.logger.debug(`request.user ${request.user}`);
-    this.logger.debug(`request.user.role ${request.user.role}`);
+    const user = request.session.user;
 
     for (const role of needRoles) {
-      if (role === request.user.role) {
+      if (role === user.role) {
         match.push(role);
       }
     }
