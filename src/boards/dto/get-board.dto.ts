@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
+import { string } from 'joi';
 
 class ImageList {
   @ApiProperty({
@@ -21,12 +22,22 @@ class Author {
   id: number;
 
   @ApiProperty({
-    description: '작성자가 해당 게시글의 좋아요 버튼을 클릭 했는지 여부'
+    description: '작성자의 닉네임'
   })
-  isLikeClicked: boolean;
+  nickname: string;
+
+  constructor(){
+    this.id = 0;
+    this.nickname = '';
+  }
 }
 
 class CommentList {
+  @ApiProperty({
+    description: '댓글의 ID',
+  })
+  id: number;
+
   @ApiProperty({
     description: '댓글 작성자의 닉네임',
   })
@@ -81,13 +92,18 @@ export class GetBoardResponseDto {
   author: Author;
 
   @ApiProperty({
+    description: '사용자가 게시글의 좋아요를 클릭 했는지 여부'
+  })
+  isLikeClicked: boolean;
+
+  @ApiProperty({
     description: '이미지 리스트',
     isArray: true,
     type: ImageList,
   })
   @ValidateNested({ each: true })
   @Type(() => ImageList)
-  imageList: ImageList;
+  imageList: ImageList[];
 
   @ApiProperty({
     description: '게시글의 댓글 목록',
@@ -96,5 +112,16 @@ export class GetBoardResponseDto {
   })
   @ValidateNested({ each: true })
   @Type(() => CommentList)
-  commentList: CommentList;
+  commentList: CommentList[];
+
+  constructor() {
+    this.author = new Author();
+    this.imageList = [];
+    this.commentList = [];
+  }
+}
+
+export class GetBoardDto {
+  id: number;
+  userId: number;
 }

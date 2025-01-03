@@ -4,16 +4,19 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  InternalServerErrorException,
+  Logger,
   ParseFilePipeBuilder,
   Post,
   Req,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBadRequestResponse, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
-import { Request } from 'express';
-import { HTTP_STATUS } from 'src/common/constants';
+import { ApiBadRequestResponse, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { HTTP_STATUS, LOGIN_COOKIE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -21,9 +24,13 @@ import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-ema
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerificationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
+import { Auth } from 'src/common/guards/auth.decorator';
+import { ResponseData } from 'src/common/types/response.type';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     @Inject(AuthService)
     private readonly authService: IAuthService,
@@ -57,6 +64,32 @@ export class AuthController {
     };
 
     return result;
+  }
+
+  @ApiOperation({
+    summary: '서비스에서 로그아웃을 진행 합니다.',
+    description: `
+    - 서비스에서 로그아웃을 진행 합니다.
+    - 서버에서 사용자의 세션을 종료 합니다.`
+  })
+  @ApiOkResponse()
+  @Auth()
+  @ApiUnauthorizedResponse()
+  @Post('logout')
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    req.session.destroy((e) => {
+      if(e)
+        throw new InternalServerErrorException(e);
+    });
+
+    res.clearCookie(LOGIN_COOKIE);
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    }
+    
+    return resData;
   }
 
   @ApiOperation({

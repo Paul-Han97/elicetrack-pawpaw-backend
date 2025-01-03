@@ -79,6 +79,8 @@ export const enum ENV_KEYS {
   PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
 }
 
+export const LOGIN_COOKIE = 'connect.sid';
+
 export const PLACE_API ='PLACE_API'
 
 

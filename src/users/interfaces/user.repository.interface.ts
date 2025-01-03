@@ -9,5 +9,7 @@ export interface IUserRepository extends Repository<User> {
     duplicateNicknameQueryDto: DuplicateNicknameQueryDto,
   ): Promise<User>;
 
+  findUser(id: number): Promise<User>;
+
   findNearbyUsers(lon: number, lat: number, radius: number): Promise<User[]>;
 }

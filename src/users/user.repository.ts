@@ -11,6 +11,18 @@ export class UserRepository
   extends Repository<User>
   implements IUserRepository
 {
+  async findUser(id: number): Promise<User> {
+    const result = await this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'image')
+      .leftJoinAndSelect('user.credential', 'credential')
+      .where('user.id = :id', {id})
+      .getOne()
+
+    return result;
+  }
+
   async findUserCredentialByEmail(username: string): Promise<User> {
     const reuslt = await this.createQueryBuilder('user')
       .select([

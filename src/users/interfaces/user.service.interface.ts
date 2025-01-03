@@ -9,6 +9,7 @@ import {
   GetNearbyUserListResponseDto,
   SaveUserLocationDto,
 } from '../dto/get-nearby-user-list.dto';
+import { GetUserDto, GetUserResponseDto } from '../dto/get-user.dto';
 
 export interface IUserService {
   checkDuplicateEmail(
@@ -35,6 +36,8 @@ export interface IUserService {
       nextCursor: number | null;
     }>
   >;
+
+  getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>>;
 
   saveUserLocation(
     saveUserLocationDto: SaveUserLocationDto,

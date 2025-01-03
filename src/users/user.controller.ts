@@ -36,6 +36,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
+import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -76,6 +77,25 @@ export class UserController {
     );
 
     return result;
+  }
+
+  @ApiOperation({
+    summary: '사용자의 정보를 조회 합니다.',
+    description: `
+    - 사용자의 ID로 정보를 조회 합니다.`
+  })
+  @ApiParam({
+    name: 'id',
+    description: '사용자의 ID'
+  })
+  @ApiOkResponse({
+    type: GetUserResponseDto,
+  })
+  @Get(':id')
+  async getUser(@Param('id') id: number) {
+    const getUserDto = new GetUserDto();
+    getUserDto.id = id;
+    return await this.userService.getUser(getUserDto);
   }
 
   @ApiOperation({
