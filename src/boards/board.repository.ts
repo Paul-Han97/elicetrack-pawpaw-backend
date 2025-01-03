@@ -144,8 +144,7 @@ LIMIT ?`,
       .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
-      .where('boardImage.isPrimary = true')
-      .orWhere('boardImage.isPrimary IS NULL')
+      .where('(boardImage.isPrimary = true OR boardImage.isPrimary IS NULL)')
       .orderBy('board.id', 'DESC')
       .take(take);
 
