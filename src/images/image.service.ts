@@ -61,7 +61,7 @@ export class ImageService implements IImageService {
         });
 
         const url = `https://s3.${this.awsRegion}.amazonaws.com/${this.s3BucketName}/${filename}`;
-        
+
         uploadImageResponseDto.imageList.push({
           filename,
           url,
@@ -78,9 +78,12 @@ export class ImageService implements IImageService {
   async deleteImageFromS3(deleteImageDto: DeleteImageDto): Promise<void> {
     await Promise.all(
       deleteImageDto.filenameList.map((filename) => {
+        const url = `https://s3.${this.awsRegion}.amazonaws.com/${this.s3BucketName}/`;
+        const key = filename.split(url).join('');
+
         const command = new DeleteObjectCommand({
           Bucket: this.s3BucketName,
-          Key: filename
+          Key: key,
         });
 
         return this.s3Client.send(command);

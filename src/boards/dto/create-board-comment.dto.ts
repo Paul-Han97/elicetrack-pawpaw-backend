@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateBoardCommentDto {
+export class CreateBoardCommentDto {
   @ApiProperty({
     description: '댓글의 내용',
   })
@@ -8,14 +8,9 @@ export class UpdateBoardCommentDto {
 
   id: number;
 
-  commentId: number;
-
   userId: number;
 }
 
-export class UpdateBoardcommentResponseDto {
-  @ApiProperty({
-    description: '게시글의 ID',
-  })
+export class CreateBoardCommentResponseDto {
   id: number;
 }
