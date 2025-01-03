@@ -26,6 +26,11 @@ class Author {
     description: '작성자의 닉네임',
   })
   nickname: string;
+
+  @ApiProperty({
+    description: '작성자의 프로필 이미지'
+  })
+  imageUrl: string;
 }
 
 class BoardList {
