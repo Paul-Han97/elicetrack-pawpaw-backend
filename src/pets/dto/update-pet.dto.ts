@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { GENDER_TYPE, PET_SIZE_TYPE } from 'src/common/constants';
 
 export class UpdatePetDto {
   @ApiProperty({
@@ -30,12 +31,25 @@ export class UpdatePetDto {
   @ApiProperty({
     description: '반려동물 성별',
     required: false,
+    enum: GENDER_TYPE,
   })
-  gender: string;
+  gender: GENDER_TYPE;
 
   @ApiProperty({
     description: '반려동물 크기',
     required: false,
+    enum: PET_SIZE_TYPE,
   })
-  size: string;
+  size: PET_SIZE_TYPE;
+
+  userId:number
+
+  id:number
+}
+
+export class UpdatePetResponseDto{
+  @ApiProperty({
+    description: '반려동물 ID',
+  })
+  id: number;
 }

@@ -44,18 +44,16 @@ export class PetController {
   @Post()
   async createPet(
     @UploadedFile() image: Express.Multer.File,
-    @Req() req:Request,
+    @Req() req: Request,
     @Body() createPetDto: CreatePetDto,
   ) {
+    const userId = req.session.user.id;
+    createPetDto.userId = userId;
+    createPetDto.image = image;
 
-    const userId = req.session.user.id
-    createPetDto.userId = userId
-    createPetDto.image=image
-    
-    const result = await this.petService.createPet(createPetDto)
+    const result = await this.petService.createPet(createPetDto);
 
-    return result
-
+    return result;
   }
 
   @ApiOperation({
@@ -74,8 +72,18 @@ export class PetController {
   async updatePetDto(
     @UploadedFile() image: Express.Multer.File,
     @Param('id') id: number,
+    @Req() req: Request,
     @Body() updatePetDto: UpdatePetDto,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+    updatePetDto.userId = userId;
+    updatePetDto.image = image;
+    updatePetDto.id = id;
+
+    const result = await this.petService.updatePet(updatePetDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '반려동물을 삭제 합니다.',
@@ -87,5 +95,9 @@ export class PetController {
     description: '반려동물의 ID',
   })
   @Delete(':id')
-  async deletePet(@Param('id') id: number) {}
+  async deletePet(@Param('id') id: number) {
+    const result = await this.petService.deletePet(id);
+
+    return result;
+  }
 }
