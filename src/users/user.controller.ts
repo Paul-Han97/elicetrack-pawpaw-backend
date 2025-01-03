@@ -34,7 +34,7 @@ import {
   SaveUserLocationDto,
 } from './dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserResponseDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
 
@@ -128,10 +128,9 @@ export class UserController {
   })
   @Get(':id/my-pages')
   async getMyPage(@Param('id') id: number) {
+    const result = await this.userService.getMyPage(id);
 
-    const result = await this.userService.getMyPage(id)
-
-    return result
+    return result;
   }
 
   @ApiOperation({
@@ -178,12 +177,23 @@ export class UserController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @Put(':id')
-  @ApiOkResponse()
+  @ApiOkResponse({
+    type: UpdateUserResponseDto,
+  })
   async updateUser(
     @UploadedFile() image: Express.Multer.File,
     @Param('id') id: number,
+    @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+    updateUserDto.id = userId;
+    updateUserDto.image = image;
+
+    const result = await this.userService.updateUser(updateUserDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자 위치 저장',
