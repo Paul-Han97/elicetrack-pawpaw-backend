@@ -11,28 +11,28 @@ import { ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ResponseData } from 'src/common/types/response.type';
 import { Location } from 'src/locations/entities/location.entity';
+import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
+import { LocationRepository } from 'src/locations/location.repository';
 import { IReviewRepository } from 'src/reviews/interfaces/review.repository.interface';
 import { ReviewRepository } from 'src/reviews/review.repository';
 import { UserLocation } from 'src/user-locations/entities/user-location.entity';
+import { IUserLocationRepository } from 'src/user-locations/interface/user-location.repository.interface';
+import { UserLocationRepository } from 'src/user-locations/user-location.repository';
 import { DataSource, EntityManager } from 'typeorm';
 import { DuplicateEmailQueryDto } from './dto/duplicate-email.dto';
 import { DuplicateNicknameQueryDto } from './dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from './dto/get-my-board-list.dto';
+import { GetMyPageResponseDto } from './dto/get-my-page.dto';
 import { GetMyReviewListDto } from './dto/get-my-review-list.dto';
 import {
   GetNearbyUserListQueryDto,
   GetNearbyUserListResponseDto,
   SaveUserLocationDto,
 } from './dto/get-nearby-user-list.dto';
-import { User } from './entities/user.entity';
+import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
 import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
-import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
-import { LocationRepository } from 'src/locations/location.repository';
-import { UserLocationRepository } from 'src/user-locations/user-location.repository';
-import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
-import { IUserLocationRepository } from 'src/user-locations/interface/user-location.repository.interface';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -51,7 +51,9 @@ export class UserService implements IUserService {
     private readonly userLocationRepository: IUserLocationRepository,
   ) {}
 
-  async getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>> {
+  async getUser(
+    getUserDto: GetUserDto,
+  ): Promise<ResponseData<GetUserResponseDto>> {
     const { id } = getUserDto;
 
     const result = await this.userRepository.findUser(id);
@@ -60,16 +62,18 @@ export class UserService implements IUserService {
     getUserResponseDto.email = result.credential[0].username;
     getUserResponseDto.imageUrl = result?.userImage[0]?.image?.url ?? null;
     getUserResponseDto.nickname = result.nickname;
-    
+
     const resData: ResponseData<GetUserResponseDto> = {
       message: SUCCESS_MESSAGE.FIND,
-      data: getUserResponseDto
-    }
+      data: getUserResponseDto,
+    };
 
     return resData;
   }
 
-  async checkDuplicateEmail(duplicateEmailQueryDto: DuplicateEmailQueryDto): Promise<ResponseData> {
+  async checkDuplicateEmail(
+    duplicateEmailQueryDto: DuplicateEmailQueryDto,
+  ): Promise<ResponseData> {
     const { email } = duplicateEmailQueryDto;
     const user = await this.userRepository.findUserCredentialByEmail(email);
 
@@ -183,7 +187,6 @@ export class UserService implements IUserService {
     };
   }
 
-
   async saveUserLocation(
     saveUserLocationDto: SaveUserLocationDto,
   ): Promise<ResponseData> {
@@ -192,9 +195,13 @@ export class UserService implements IUserService {
     try {
       await this.dataSource.transaction(
         async (manager: EntityManager): Promise<void> => {
-          const userRepository = manager.withRepository(this.userRepository)
-          const locationRepository = manager.withRepository(this.locationRepository)
-          const userLocationRepository = manager.withRepository(this.userLocationRepository)
+          const userRepository = manager.withRepository(this.userRepository);
+          const locationRepository = manager.withRepository(
+            this.locationRepository,
+          );
+          const userLocationRepository = manager.withRepository(
+            this.userLocationRepository,
+          );
 
           const user = await userRepository
             .createQueryBuilder('user')
@@ -269,6 +276,44 @@ export class UserService implements IUserService {
           nickname: user.nickname,
         };
       }),
+    };
+
+    return resData;
+  }
+
+  async getMyPage(id: number): Promise<ResponseData<GetMyPageResponseDto>> {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'image')
+      .leftJoinAndSelect('user.pet', 'pet')
+      .leftJoinAndSelect('pet.gender', 'gender')
+      .leftJoinAndSelect('pet.petSize', 'petSize')
+      .leftJoinAndSelect('pet.petImage', 'petImage')
+      .leftJoinAndSelect('petImage.image', 'images')
+      .where('user.id = :id', { id })
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const resData: ResponseData<GetMyPageResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        nickname: user.nickname ?? null,
+        canWalkingMate: user.canWalkingMate ?? null,
+        imageUrl: user.userImage?.[0]?.image?.url ?? null,
+        petList: user.pet.map((pet) => ({
+          id: pet.id ?? null,
+          name: pet.name ?? null,
+          age: pet.age ?? null,
+          description: pet.description ?? null,
+          gender: pet.gender?.type ?? null,
+          size: pet.petSize?.type ?? null,
+          imageUrl: pet.petImage?.[0]?.image?.url || null,
+        })),
+      },
     };
 
     return resData;
