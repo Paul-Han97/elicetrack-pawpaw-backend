@@ -29,6 +29,10 @@ import { IUserRepository } from './interfaces/user.repository.interface';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserRepository } from './user.repository';
 import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
+import { LocationRepository } from 'src/locations/location.repository';
+import { UserLocationRepository } from 'src/user-locations/user-location.repository';
+import { ILocationRepository } from 'src/locations/interface/location.repository.interface';
+import { IUserLocationRepository } from 'src/user-locations/interface/user-location.repository.interface';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -41,10 +45,10 @@ export class UserService implements IUserService {
     private readonly boardRepository: IBoardRepository,
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
-    // @Inject(LocationRepository)
-    // private readonly locationRepository: ILocationRepository,
-    // @Inject(UserLocationRepository)
-    // private readonly userLocationRepository: IUserLocationRepository,
+    @Inject(LocationRepository)
+    private readonly locationRepository: ILocationRepository,
+    @Inject(UserLocationRepository)
+    private readonly userLocationRepository: IUserLocationRepository,
   ) {}
 
   async getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>> {
@@ -188,9 +192,9 @@ export class UserService implements IUserService {
     try {
       await this.dataSource.transaction(
         async (manager: EntityManager): Promise<void> => {
-          const userRepository = manager.getRepository(User);
-          const locationRepository = manager.getRepository(Location);
-          const userLocationRepository = manager.getRepository(UserLocation);
+          const userRepository = manager.withRepository(this.userRepository)
+          const locationRepository = manager.withRepository(this.locationRepository)
+          const userLocationRepository = manager.withRepository(this.userLocationRepository)
 
           const user = await userRepository
             .createQueryBuilder('user')

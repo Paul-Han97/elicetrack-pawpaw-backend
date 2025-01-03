@@ -10,6 +10,8 @@ import { UserRepository } from 'src/users/user.repository';
 import { UserService } from 'src/users/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { LocationRepository } from 'src/locations/location.repository';
+import { UserLocationRepository } from 'src/user-locations/user-location.repository';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { AuthService } from './auth.service';
       ImageRepository,
       UserImageRepository,
       BoardRepository,
+      LocationRepository,
+      UserLocationRepository
     ]),
   ],
   controllers: [AuthController],
