@@ -5,10 +5,18 @@ import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { BoardRepository } from 'src/boards/board.repository';
+import { LocationRepository } from 'src/locations/location.repository';
+import { UserLocationRepository } from 'src/user-locations/user-location.repository';
 
 @Module({
   imports: [
-    TypeOrmCustomModule.forCustomRepository([UserRepository, ReviewRepository,BoardRepository]),
+    TypeOrmCustomModule.forCustomRepository([
+      UserRepository,
+      ReviewRepository,
+      BoardRepository,
+      LocationRepository,
+      UserLocationRepository,
+    ]),
   ],
   controllers: [UserController],
   providers: [UserService],

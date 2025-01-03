@@ -33,10 +33,10 @@ import {
   GetNearbyUserListQueryDto,
   SaveUserLocationDto,
 } from './dto/get-nearby-user-list.dto';
+import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
-import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -44,6 +44,21 @@ export class UserController {
     @Inject(UserService)
     private readonly userService: IUserService,
   ) {}
+
+  @ApiOperation({
+    summary: '주변 사용자 검색',
+    description:
+      '사용자의 위치를 기반으로 반경 내 walkmate가 true인 사용자 검색.',
+  })
+  @Auth()
+  @Get('nearby-users-list')
+  async getNearbyUsers(
+    @Query() getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
+  ) {
+    const result = this.userService.getNearbyUsers(getNearbyUserListQueryDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '이메일 중복을 확인 합니다.',
@@ -82,11 +97,11 @@ export class UserController {
   @ApiOperation({
     summary: '사용자의 정보를 조회 합니다.',
     description: `
-    - 사용자의 ID로 정보를 조회 합니다.`
+    - 사용자의 ID로 정보를 조회 합니다.`,
   })
   @ApiParam({
     name: 'id',
-    description: '사용자의 ID'
+    description: '사용자의 ID',
   })
   @ApiOkResponse({
     type: GetUserResponseDto,
@@ -177,23 +192,8 @@ export class UserController {
     @Body() saveUserLocationDto: SaveUserLocationDto,
   ) {
     const userId = req.session.user.id;
-    saveUserLocationDto.id= userId
+    saveUserLocationDto.id = userId;
     const result = this.userService.saveUserLocation(saveUserLocationDto);
-
-    return result;
-  }
-
-  @ApiOperation({
-    summary: '주변 사용자 검색',
-    description:
-      '사용자의 위치를 기반으로 반경 내 walkmate가 true인 사용자 검색.',
-  })
-  @Get('nearby-users-list')
-  @Auth()
-  async getNearbyUsers(
-    @Query() getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
-  ) {
-    const result = this.userService.getNearbyUsers(getNearbyUserListQueryDto);
 
     return result;
   }
