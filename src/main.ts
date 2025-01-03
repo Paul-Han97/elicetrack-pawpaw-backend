@@ -3,15 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RedisStore } from 'connect-redis';
+import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import IoRedis from 'ioredis';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { ENV_KEYS } from './common/constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { Logger } from 'nestjs-pino';
-import * as cookieParser from 'cookie-parser';
+import { SocketIoAdapter } from './common/adapters/socket.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -41,20 +42,21 @@ async function bootstrap() {
     prefix: configService.get<string>(ENV_KEYS.REDIS_PREFIX),
   });
 
-  app.use(
-    session({
-      store: redisStore,
-      secret: configService.get<string>(ENV_KEYS.SESSION_SECRET),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        // 1000 * 60 * 60
-        maxAge: 3_600_000,
-      },
-    }),
-  );
+  const sessionOptions = session({
+    store: redisStore,
+    secret: configService.get<string>(ENV_KEYS.SESSION_SECRET),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      // 1000 * 60 * 60
+      maxAge: 3_600_000,
+    },
+  });
 
+  app.use(sessionOptions);
+  app.useWebSocketAdapter(new SocketIoAdapter(sessionOptions));
+  
   const config = new DocumentBuilder()
     .setTitle('포포')
     .setDescription('포포의 API 명세서 입니다.')

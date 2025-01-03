@@ -23,10 +23,10 @@ type Room = {
 
 @WebSocketGateway({
   namespace: 'chats',
-  cors: {
-    origin: true,
-    credentials: true
-  }
+  cors: { 
+    origin: 'http://localhost:3000',
+    credentials: true,
+  },
 })
 @UseGuards(WsAuthGuard)
 export class ChatGateway
@@ -45,6 +45,16 @@ export class ChatGateway
   async afterInit(server: Server) {}
 
   async handleConnection(client: Socket) {
+    const request = client.request as any;
+    const session = request.session;
+    
+    console.log('session cookie', session.cookie)
+    console.log('request cookie', request.cookies)
+    console.log(client.handshake.headers.cookie);
+
+    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    // console.log(request)
+
     client.emit('receive-message', {
       body: {
         message: `client id: ${client.id} 연결`,
