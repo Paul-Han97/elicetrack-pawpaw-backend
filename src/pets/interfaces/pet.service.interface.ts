@@ -10,4 +10,6 @@ export interface IPetService {
   updatePet(
     updatePetDto: UpdatePetDto,
   ): Promise<ResponseData<UpdatePetResponseDto>>;
+
+  deletePet(id: number): Promise<ResponseData>;
 }
