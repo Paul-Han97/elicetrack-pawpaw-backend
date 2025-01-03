@@ -3,7 +3,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { PLACE_API, SUCCESS_MESSAGE } from 'src/common/constants';
 
 @Controller('crons')
-export class CronCtroller {
+export class CronController {
   constructor(private scheduler: SchedulerRegistry) {}
 
   @Post('start-places-api')
@@ -13,10 +13,9 @@ export class CronCtroller {
     job.start();
     console.log('start!!', job.lastDate());
     return {
-        message: SUCCESS_MESSAGE.REQUEST,
-        data: null
-    }
-
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    };
   }
 
   @Post('stop-places-api')
@@ -27,8 +26,8 @@ export class CronCtroller {
     console.log('stopped!!', job.lastDate());
 
     return {
-        message: SUCCESS_MESSAGE.REQUEST,
-        data: null
-    }
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    };
   }
 }
