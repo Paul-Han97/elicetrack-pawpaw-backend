@@ -34,6 +34,7 @@ import {
   CreateBoardCommentResponseDto,
 } from './dto/create-board-comment.dto';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
+import { DeleteBoardCommentDto } from './dto/delete-board-comment.dto';
 import { DeleteBoardDto } from './dto/delete-board.dto';
 import {
   GetBoardListQueryDto,
@@ -303,9 +304,20 @@ export class BoardController {
     name: 'commentId',
     description: '댓글의 ID',
   })
+  @Auth()
   @Delete(':id/comments/:commentId')
   async deleteBoardComment(
+    @Req() req: Request,
     @Param('id') id: number,
     @Param('commentId') commentId: number,
-  ) {}
+  ) {
+    const user = req.session?.user;
+
+    const deleteBoardCommentDto = new DeleteBoardCommentDto();
+    deleteBoardCommentDto.id = id;
+    deleteBoardCommentDto.commentId = commentId;
+    deleteBoardCommentDto.userId = user?.id ?? null;
+
+    return await this.boardService.deleteBoardComment(deleteBoardCommentDto);
+  }
 }

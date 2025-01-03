@@ -28,6 +28,7 @@ import {
   CreateBoardCommentResponseDto,
 } from './dto/create-board-comment.dto';
 import { CreateBoardDto, CreateBoardResponseDto } from './dto/create-board.dto';
+import { DeleteBoardCommentDto } from './dto/delete-board-comment.dto';
 import { DeleteBoardDto } from './dto/delete-board.dto';
 import {
   GetBoardListQueryDto,
@@ -172,10 +173,14 @@ export class BoardService implements IBoardService {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
     }
 
+    const user = new User();
+    user.id = userId;
+
     const comment = new Comment();
     comment.board = boardComment;
     comment.createdUser = userId.toString();
     comment.content = content;
+    comment.user = user;
 
     await this.commentRepository.save(comment, { reload: false });
 
@@ -444,6 +449,33 @@ export class BoardService implements IBoardService {
       message: SUCCESS_MESSAGE.REQUEST,
       data: null,
     };
+    return resData;
+  }
+
+  async deleteBoardComment(
+    deleteBoardCommentDto: DeleteBoardCommentDto,
+  ): Promise<ResponseData> {
+    const { id, userId, commentId } = deleteBoardCommentDto;
+
+    const boardComment = await this.boardRepository.findBoardComment(
+      id,
+      commentId,
+      userId,
+    );
+
+    if (!boardComment) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const comment = boardComment.comment;
+
+    await this.commentRepository.remove(comment);
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    };
+
     return resData;
   }
 }

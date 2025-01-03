@@ -1,8 +1,13 @@
 import { ResponseData } from 'src/common/types/response.type';
 import {
+  CreateBoardCommentDto,
+  CreateBoardCommentResponseDto,
+} from '../dto/create-board-comment.dto';
+import {
   CreateBoardDto,
   CreateBoardResponseDto,
 } from '../dto/create-board.dto';
+import { DeleteBoardCommentDto } from '../dto/delete-board-comment.dto';
 import { DeleteBoardDto } from '../dto/delete-board.dto';
 import {
   GetBoardListQueryDto,
@@ -22,7 +27,6 @@ import {
   UpdateBoardDto,
   UpdateBoardResponseDto,
 } from '../dto/update-board.dto';
-import { CreateBoardCommentDto, CreateBoardCommentResponseDto } from '../dto/create-board-comment.dto';
 
 export interface IBoardService {
   getPopularList(
@@ -45,7 +49,9 @@ export interface IBoardService {
     createBoardDto: CreateBoardDto,
   ): Promise<ResponseData<CreateBoardResponseDto>>;
 
-  createBoardComment(createBoardCommentDto: CreateBoardCommentDto): Promise<ResponseData<CreateBoardCommentResponseDto>>;
+  createBoardComment(
+    createBoardCommentDto: CreateBoardCommentDto,
+  ): Promise<ResponseData<CreateBoardCommentResponseDto>>;
 
   updateBoard(
     updateBoardDto: UpdateBoardDto,
@@ -56,4 +62,8 @@ export interface IBoardService {
   ): Promise<ResponseData<UpdateBoardResponseDto>>;
 
   deleteBoard(deleteBoardDto: DeleteBoardDto): Promise<ResponseData>;
+
+  deleteBoardComment(
+    deleteBoardCommentDto: DeleteBoardCommentDto,
+  ): Promise<ResponseData>;
 }
