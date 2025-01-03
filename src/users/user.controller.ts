@@ -127,7 +127,12 @@ export class UserController {
     type: GetMyPageResponseDto,
   })
   @Get(':id/my-pages')
-  async getMyPage(@Param('id') id: number) {}
+  async getMyPage(@Param('id') id: number) {
+
+    const result = await this.userService.getMyPage(id)
+
+    return result
+  }
 
   @ApiOperation({
     summary: '사용자가 작성한 게시글 목록을 조회 합니다.',
