@@ -11,7 +11,7 @@ export class CronController {
     const job = this.scheduler.getCronJob(PLACE_API);
 
     job.start();
-    console.log('start!!', job.lastDate());
+    
     return {
       message: SUCCESS_MESSAGE.REQUEST,
       data: null,
@@ -23,7 +23,6 @@ export class CronController {
     const job = this.scheduler.getCronJob(PLACE_API);
 
     job.stop();
-    console.log('stopped!!', job.lastDate());
 
     return {
       message: SUCCESS_MESSAGE.REQUEST,
