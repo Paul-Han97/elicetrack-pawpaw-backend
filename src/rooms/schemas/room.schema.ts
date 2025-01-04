@@ -11,7 +11,7 @@ export class Room {
   @Prop({
     required: true,
   })
-  socketId: string;
+  name: string;
 
   @Prop({
     required: true,
