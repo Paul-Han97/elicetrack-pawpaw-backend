@@ -55,8 +55,6 @@ export class PlaceService implements IPlaceService {
   async getNearbyPlaces(
     getNearbyPlaceQueryDto: GetNearbyPlaceListQueryDto,
   ): Promise<ResponseData<GetNearbyPlaceListResponseDto[]>> {
-    this.logger.log('주변 반경 시설 조회.');
-
     const category = PLACE_CATEGORY_KOR_TYPE[getNearbyPlaceQueryDto.category];
 
     const result = await this.placeRepository.findNearbyPlaces(
@@ -270,7 +268,7 @@ export class PlaceService implements IPlaceService {
 
       const likeRecord = review.reviewPlaceLike;
 
-      if (!isLikeClicked) {
+      if (isLikeClicked === false) {
         await reviewPlaceLikeRepository.remove(likeRecord);
       } else if (isLikeClicked && likeRecord.length === 0) {
         const reviewPlaceLike = new ReviewPlaceLike();

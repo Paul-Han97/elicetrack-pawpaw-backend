@@ -12,6 +12,11 @@ export class GetMyReviewListDto {
   placeId: number;
 
   @ApiProperty({
+    description: '장소의 이름',
+  })
+  placeName: string;
+
+  @ApiProperty({
     description: '리뷰 제목',
   })
   title: string;

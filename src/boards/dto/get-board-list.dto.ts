@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { IsEnum, IsString, ValidateNested } from 'class-validator';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
@@ -80,7 +80,8 @@ export class GetBoardListQueryDto extends PaginationDto {
       - 기본값 : 전체`,
     required: false,
   })
-  category: string;
+  @IsEnum(BOARD_CATEGORY_TYPE)
+  category: BOARD_CATEGORY_TYPE;
 
   userId: number;
 }
