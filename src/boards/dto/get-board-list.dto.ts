@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsString, ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
@@ -86,6 +86,7 @@ export class GetBoardListQueryDto extends PaginationDto {
     required: false,
   })
   @IsEnum(BOARD_CATEGORY_TYPE)
+  @IsOptional()
   category: BOARD_CATEGORY_TYPE;
 
   userId: number;
