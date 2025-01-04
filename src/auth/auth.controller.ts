@@ -125,6 +125,7 @@ export class AuthController {
           }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
         ],
+        fileIsRequired: false,
       }),
     )
     image: Express.Multer.File,

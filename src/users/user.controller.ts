@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
   Get,
   Inject,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -172,7 +175,24 @@ export class UserController {
   @ApiOperation({
     summary: '사용자의 정보를 수정 합니다.',
     description: `
-    - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.`,
+    - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.
+    - nickname: 최소 1글자 최대 30글자를 충족해야 합니다.
+    - canWalkingMate: 활성화 / 비활성화를 할 수 있습니다.
+      - 활성화 : true
+      - 비활성화 : false
+    - password: 아래의 조건을 충족해야 합니다.
+      - 최소 길이: 8
+      - 소문자: 1개 이상
+      - 대문자: 1개 이상
+      - 숫자: 1개 이상
+      - 특수문자: 1개 이상
+    - newPassword: 아래의 조건을 충족해야 합니다.
+      - 최소 길이: 8
+      - 소문자: 1개 이상
+      - 대문자: 1개 이상
+      - 숫자: 1개 이상
+      - 특수문자: 1개 이상
+    - nickname: 최소 1글자 최대 30글자를 충족해야 합니다.`,
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
@@ -181,7 +201,19 @@ export class UserController {
     type: UpdateUserResponseDto,
   })
   async updateUser(
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
     @Param('id') id: number,
     @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,

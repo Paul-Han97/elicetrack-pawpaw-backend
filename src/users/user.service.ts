@@ -159,7 +159,7 @@ export class UserService implements IUserService {
         reviews: reviews.map((review) => ({
           reviewId: review.id,
           placeId: review.place.id,
-          placeName:review.place.name,
+          placeName: review.place.name,
           title: review.title,
           content: review.content,
           isLikeClicked: review.reviewPlaceLike.some(
@@ -377,11 +377,8 @@ export class UserService implements IUserService {
             throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
           }
 
-          const updateUser = new User();
-          updateUser.id = user.id;
-          updateUser.nickname = nickname || user.nickname;
-          updateUser.canWalkingMate =
-            String(canWalkingMate).toLowerCase() === 'true';
+          user.nickname = nickname || user.nickname;
+          user.canWalkingMate = canWalkingMate;
 
           if (password && newPassword) {
             const isPasswordValid =
@@ -453,7 +450,7 @@ export class UserService implements IUserService {
             newImage.updatedUser = user.id.toString();
 
             const userImage = new UserImage();
-            userImage.user = updateUser;
+            userImage.user = user;
             userImage.image = newImage;
             userImage.createdUser = user.id.toString();
             userImage.updatedUser = user.id.toString();
@@ -465,7 +462,7 @@ export class UserService implements IUserService {
           const updateUserResponseDto = new UpdateUserResponseDto();
           updateUserResponseDto.id = user.id;
 
-          const savedUser = await userRepository.save(updateUser);
+          const savedUser = await userRepository.save(user);
           return {
             id: savedUser.id,
           };

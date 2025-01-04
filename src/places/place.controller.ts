@@ -62,13 +62,12 @@ export class PlaceController {
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {
-    const places = await this.placeService.getNearbyPlaces(
+    const result = await this.placeService.getNearbyPlaces(
       getNearbyPlaceListQueryDto,
     );
 
-    return places;
+    return result;
   }
-
 
   @ApiOperation({
     summary: '시설물의 정보를 조회 합니다.',
@@ -85,7 +84,7 @@ export class PlaceController {
   @Get(':id')
   async getPlace(@Param('id') id: number) {
     const result = await this.placeService.getPlace(id);
-    
+
     return { data: result };
   }
 

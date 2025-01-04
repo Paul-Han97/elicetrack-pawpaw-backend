@@ -2,8 +2,11 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Inject,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Req,
@@ -18,7 +21,7 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
-import { CreatePetDto } from './dto/create-pet.dto';
+import { CreatePetDto, CreatePetResponseDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { IPetService } from './interfaces/pet.service.interface';
 import { PetService } from './pet.service';
@@ -37,13 +40,27 @@ export class PetController {
     description: `
       - Body로 받은 데이터를 기반으로 반려동물 정보를 작성 합니다.`,
   })
-  @ApiOkResponse()
+  @ApiOkResponse({
+    type: CreatePetResponseDto,
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @Auth()
   @Post()
   async createPet(
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
     @Req() req: Request,
     @Body() createPetDto: CreatePetDto,
   ) {
@@ -59,7 +76,9 @@ export class PetController {
   @ApiOperation({
     summary: '반려동물의 정보를 수정 합니다.',
     description: `
-    - Body로 받은 데이터를 기반으로 수정 합니다.`,
+    - Body로 받은 데이터를 기반으로 수정 합니다.
+    - 기존 이미지를 모두 삭제 후 새롭게 이미지를 생성합니다.
+    `,
   })
   @ApiParam({
     name: 'id',
@@ -70,7 +89,19 @@ export class PetController {
   @UseInterceptors(FileInterceptor('image'))
   @Put(':id')
   async updatePetDto(
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
     @Param('id') id: number,
     @Req() req: Request,
     @Body() updatePetDto: UpdatePetDto,
