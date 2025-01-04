@@ -144,8 +144,9 @@ LIMIT ?`,
       .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
-      .where('boardImage.isPrimary = true')
-      .orWhere('boardImage.isPrimary IS NULL')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'authorImage')
+      .where('(boardImage.isPrimary = true OR boardImage.isPrimary IS NULL)')
       .orderBy('board.id', 'DESC')
       .take(take);
 
@@ -174,6 +175,7 @@ LIMIT ?`,
         author: {
           id: board.user.id,
           nickname: board.user.nickname,
+          imageUrl: board.user?.userImage[0]?.image?.url ?? null,
         },
         imageList: [
           {

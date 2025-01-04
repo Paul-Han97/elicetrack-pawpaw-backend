@@ -136,7 +136,6 @@ export class AuthService implements IAuthService {
       });
     } catch (e) {
       if (tempDeleteImageDto.filenameList.length > 0) {
-        console.log(tempDeleteImageDto.filenameList)
         await this.imageService.deleteImageFromS3(tempDeleteImageDto);
       }
       throw e;
@@ -190,8 +189,6 @@ export class AuthService implements IAuthService {
     if (!isMathces)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);
 
-
-    console.log('nickname', user.nickname)
     const resData: ResponseData<LoginResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
