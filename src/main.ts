@@ -2,22 +2,21 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RedisStore } from 'connect-redis';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
-import IoRedis from 'ioredis';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { ENV_KEYS } from './common/constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { SocketIoAdapter } from './common/adapters/socket.adapter';
+import { RedisService } from './redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const configService = app.get<ConfigService>(ConfigService);
+
   app.use(cookieParser());
   app.useLogger(app.get(Logger));
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -33,17 +32,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const redisClient = new IoRedis(
-    configService.get<string>(ENV_KEYS.REDIS_HOST),
-  );
-
-  const redisStore = new RedisStore({
-    client: redisClient,
-    prefix: configService.get<string>(ENV_KEYS.REDIS_PREFIX),
-  });
-
   const sessionOptions = session({
-    store: redisStore,
+    store: app.get<RedisService>(RedisService).getRedisStore(),
     secret: configService.get<string>(ENV_KEYS.SESSION_SECRET),
     resave: false,
     saveUninitialized: false,
@@ -55,8 +45,7 @@ async function bootstrap() {
   });
 
   app.use(sessionOptions);
-  app.useWebSocketAdapter(new SocketIoAdapter(sessionOptions));
-  
+
   const config = new DocumentBuilder()
     .setTitle('포포')
     .setDescription('포포의 API 명세서 입니다.')
