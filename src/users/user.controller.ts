@@ -113,7 +113,9 @@ export class UserController {
   async getUser(@Param('id') id: number) {
     const getUserDto = new GetUserDto();
     getUserDto.id = id;
-    return await this.userService.getUser(getUserDto);
+
+    const result = await this.userService.getUser(getUserDto);
+    return result;
   }
 
   @ApiOperation({
@@ -240,8 +242,8 @@ export class UserController {
   ) {
     const userId = req.session.user.id;
     saveUserLocationDto.id = userId;
-    const result = this.userService.saveUserLocation(saveUserLocationDto);
 
+    const result = this.userService.saveUserLocation(saveUserLocationDto);
     return result;
   }
 }

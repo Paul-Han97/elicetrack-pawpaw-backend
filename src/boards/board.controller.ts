@@ -97,7 +97,9 @@ export class BoardController {
   })
   @Get('latest-list')
   async getLatestList(@Query() getLatestListQueryDto: GetLatestListQueryDto) {
-    return await this.boardService.getLatestList(getLatestListQueryDto);
+    const result = await this.boardService.getLatestList(getLatestListQueryDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -124,8 +126,9 @@ export class BoardController {
   ) {
     const user = req.session.user;
     getBoardListQueryDto.userId = user?.id ?? null;
+    const result = await this.boardService.getBoardList(getBoardListQueryDto);
 
-    return await this.boardService.getBoardList(getBoardListQueryDto);
+    return result;
   }
 
   @ApiOperation({
@@ -147,7 +150,9 @@ export class BoardController {
     getBoardDto.id = id;
     getBoardDto.userId = user?.id ?? null;
 
-    return await this.boardService.getBoard(getBoardDto);
+    const result = await this.boardService.getBoard(getBoardDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -176,7 +181,9 @@ export class BoardController {
     createBoardDto.imageList = imageList;
     createBoardDto.userId = userId;
 
-    return await this.boardService.createBoard(createBoardDto);
+    const result = await this.boardService.createBoard(createBoardDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -223,7 +230,9 @@ export class BoardController {
     updateBoardDto.userId = user?.id ?? null;
     updateBoardDto.imageList = imageList;
 
-    return await this.boardService.updateBoard(updateBoardDto);
+    const result = await this.boardService.updateBoard(updateBoardDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -250,7 +259,10 @@ export class BoardController {
     createBoardCommentDto.id = id;
     createBoardCommentDto.userId = user?.id ?? null;
 
-    return await this.boardService.createBoardComment(createBoardCommentDto);
+    const result = await this.boardService.createBoardComment(
+      createBoardCommentDto,
+    );
+    return result;
   }
 
   @ApiOperation({
@@ -284,7 +296,11 @@ export class BoardController {
     updateBoardCommentDto.commentId = commentId;
     updateBoardCommentDto.userId = user?.id ?? null;
 
-    return await this.boardService.updateBoardComment(updateBoardCommentDto);
+    const result = await this.boardService.updateBoardComment(
+      updateBoardCommentDto,
+    );
+
+    return result;
   }
 
   @ApiOperation({
@@ -306,7 +322,9 @@ export class BoardController {
     deleteBoardDto.id = id;
     deleteBoardDto.userId = user?.id ?? null;
 
-    return await this.boardService.deleteBoard(deleteBoardDto);
+    const result = await this.boardService.deleteBoard(deleteBoardDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -337,6 +355,10 @@ export class BoardController {
     deleteBoardCommentDto.commentId = commentId;
     deleteBoardCommentDto.userId = user?.id ?? null;
 
-    return await this.boardService.deleteBoardComment(deleteBoardCommentDto);
+    const result = await this.boardService.deleteBoardComment(
+      deleteBoardCommentDto,
+    );
+
+    return result;
   }
 }
