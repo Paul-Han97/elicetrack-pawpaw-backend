@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
 import {
   PLACE_CATEGORY_KOR_TYPE,
   PLACE_CATEGORY_TYPE,
@@ -10,21 +12,35 @@ export class GetNearbyPlaceListQueryDto {
     required: false,
     enum: PLACE_CATEGORY_TYPE,
   })
-  category: string;
+  @IsEnum(PLACE_CATEGORY_TYPE)
+  @IsOptional()
+  category: PLACE_CATEGORY_TYPE;
 
   @ApiProperty({
     description: '조회할 반경',
   })
+  @IsNumber()
+  @Type(() => Number)
+  @Min(250)
+  @Max(1000)
   radius: number;
 
   @ApiProperty({
     description: '사용자의 위도',
   })
+  @IsNumber()
+  @Type(() => Number)
+  @Min(-90)
+  @Max(90)
   latitude: number;
 
   @ApiProperty({
     description: '사용자의 경도',
   })
+  @IsNumber()
+  @Type(() => Number)
+  @Min(-180)
+  @Max(180)
   longitude: number;
 }
 
