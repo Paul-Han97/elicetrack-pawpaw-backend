@@ -3,13 +3,11 @@ import {
   Controller,
   FileTypeValidator,
   HttpCode,
-  HttpStatus,
   Inject,
   InternalServerErrorException,
   Logger,
   MaxFileSizeValidator,
   ParseFilePipe,
-  ParseFilePipeBuilder,
   Post,
   Req,
   Res,
@@ -17,9 +15,23 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBadRequestResponse, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiConsumes,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { HTTP_STATUS, LOGIN_COOKIE, SUCCESS_MESSAGE } from 'src/common/constants';
+import {
+  HTTP_STATUS,
+  LOGIN_COOKIE,
+  SUCCESS_MESSAGE,
+} from 'src/common/constants';
+import { Auth } from 'src/common/guards/auth.decorator';
+import { ResponseData } from 'src/common/types/response.type';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -27,8 +39,6 @@ import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-ema
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerificationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
-import { Auth } from 'src/common/guards/auth.decorator';
-import { ResponseData } from 'src/common/types/response.type';
 
 @Controller('auth')
 export class AuthController {
@@ -54,7 +64,7 @@ export class AuthController {
     type: LoginResponseDto,
   })
   @ApiBadRequestResponse({
-    description: '계정 정보가 일치하지 않을 때'
+    description: '계정 정보가 일치하지 않을 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('login')
@@ -73,7 +83,7 @@ export class AuthController {
     summary: '서비스에서 로그아웃을 진행 합니다.',
     description: `
     - 서비스에서 로그아웃을 진행 합니다.
-    - 서버에서 사용자의 세션을 종료 합니다.`
+    - 서버에서 사용자의 세션을 종료 합니다.`,
   })
   @ApiOkResponse()
   @Auth()
@@ -81,8 +91,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     req.session.destroy((e) => {
-      if(e)
-        throw new InternalServerErrorException(e);
+      if (e) throw new InternalServerErrorException(e);
     });
 
     res.clearCookie(LOGIN_COOKIE);
@@ -90,8 +99,8 @@ export class AuthController {
     const resData: ResponseData = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: null,
-    }
-    
+    };
+
     return resData;
   }
 
@@ -112,7 +121,7 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @ApiUnprocessableEntityResponse({
-    description: '파일 유효성 에러'
+    description: '파일 유효성 에러',
   })
   @Post('register')
   async register(
@@ -132,7 +141,10 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
   ) {
     registerDto.image = image;
-    return await this.authService.register(registerDto);
+
+    const result = await this.authService.register(registerDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -146,9 +158,11 @@ export class AuthController {
   async sendVerificationEmail(
     @Body() sendVerificationEmailDto: SendVerificationEmailDto,
   ) {
-    return await this.authService.sendVerificationEmail(
+    const result = await this.authService.sendVerificationEmail(
       sendVerificationEmailDto,
     );
+
+    return result;
   }
 
   @ApiOperation({
@@ -159,19 +173,21 @@ export class AuthController {
     true를 반환하면 5분간 서버 캐시에 인증된 이메일로 기록됩니다.`,
   })
   @ApiNotFoundResponse({
-    description: '서버 캐시에 저장된 인증코드가 없을 때'
+    description: '서버 캐시에 저장된 인증코드가 없을 때',
   })
   @ApiBadRequestResponse({
-    description: '인증코드가 유효하지 않을 때'
+    description: '인증코드가 유효하지 않을 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('validate-verification-code')
   async validateVerificationCode(
     @Body() validateVerificationDto: ValidateVerificationDto,
   ) {
-    return await this.authService.validateVerificationCode(
+    const result = await this.authService.validateVerificationCode(
       validateVerificationDto,
     );
+
+    return result;
   }
 
   @ApiOperation({
@@ -182,15 +198,17 @@ export class AuthController {
     - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`,
   })
   @ApiBadRequestResponse({
-    description: '인증된 이메일이 아닐 때'
+    description: '인증된 이메일이 아닐 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('send-temporary-password-email')
   async sendTemporaryPasswordEmail(
     @Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto,
   ) {
-    return await this.authService.sendTemporaryPasswordEmail(
+    const result = await this.authService.sendTemporaryPasswordEmail(
       sendTemporaryPasswordEmailDto,
     );
+
+    return result;
   }
 }
