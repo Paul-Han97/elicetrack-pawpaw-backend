@@ -336,7 +336,7 @@ export class UserService implements IUserService {
           description: pet.description ?? null,
           gender: pet.gender?.type ?? null,
           size: pet.petSize?.type ?? null,
-          imageUrl: pet.petImage?.[0]?.image?.url || null,
+          imageUrl: pet.petImage?.[0]?.image?.url ?? null,
         })),
       },
     };
