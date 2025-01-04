@@ -159,6 +159,7 @@ export class UserService implements IUserService {
         reviews: reviews.map((review) => ({
           reviewId: review.id,
           placeId: review.place.id,
+          placeName:review.place.name,
           title: review.title,
           content: review.content,
           isLikeClicked: review.reviewPlaceLike.some(

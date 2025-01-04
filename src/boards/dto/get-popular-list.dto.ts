@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Max, Min } from 'class-validator';
+import { IsNumber, IsString, Max, Min } from 'class-validator';
 
 export class GetPopularListQueryDto {
   @ApiProperty({
@@ -8,6 +8,7 @@ export class GetPopularListQueryDto {
   })
   @Min(1)
   @Max(7)
+  @IsNumber()
   @Type(() => Number)
   count: number;
 }

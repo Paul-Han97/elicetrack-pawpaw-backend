@@ -2,9 +2,12 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   Inject,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -73,7 +76,11 @@ export class BoardController {
   async getPopularList(
     @Query() getPopularListQueryDto: GetPopularListQueryDto,
   ) {
-    return await this.boardService.getPopularList(getPopularListQueryDto);
+    const result = await this.boardService.getPopularList(
+      getPopularListQueryDto,
+    );
+
+    return result;
   }
 
   @ApiOperation({
@@ -149,8 +156,8 @@ export class BoardController {
     - 게시글을 생성 합니다.
     - 이미지는 최대 5장 업로드 가능합니다.
     - 이미지의 각 파일은 최대 10MB를 넘지 않아야 합니다.
-    - 제목은 한글 및 공백 포함 최대 30자까지 허용 합니다.
-    - 내용은 최대 1,000Byte까지 허용 합니다.
+    - 제목은 한글 및 공백 포함 최소 1자, 최대 30자까지 허용 합니다.
+    - 내용은 최대 1,500Byte까지 허용 합니다.
     `,
   })
   @ApiCreatedResponse({
@@ -194,7 +201,18 @@ export class BoardController {
   @UseInterceptors(AnyFilesInterceptor())
   @Put(':id')
   async updateBoard(
-    @UploadedFiles() imageList: Express.Multer.File[],
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
+    )
+    imageList: Express.Multer.File[],
     @Req() req: Request,
     @Param('id') id: number,
     @Body() updateBoardDto: UpdateBoardDto,

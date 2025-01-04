@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsByteLength, IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 
 export class CreateBoardDto {
@@ -15,16 +16,22 @@ export class CreateBoardDto {
     description: '게시글의 카테고리',
     enum: BOARD_CATEGORY_TYPE,
   })
-  category: string;
+  @IsEnum(BOARD_CATEGORY_TYPE)
+  category: BOARD_CATEGORY_TYPE;
 
   @ApiProperty({
     description: '게시글의 제목',
   })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(30)
   title: string;
 
   @ApiProperty({
     description: '게시글의 내용',
   })
+  @IsString()
+  @IsByteLength(0,1500)
   content: string;
 
   userId: number;
