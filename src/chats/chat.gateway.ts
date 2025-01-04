@@ -9,22 +9,19 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
+import { SOCKET_KEYS } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
 import { ChatService } from './chat.service';
 import { IChatService } from './interfaces/chat.service.interface';
 
-type Room = {
-  roomId: string,
-  userList: [{
-    id: string,
-  }]
-}
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-@WebSocketGateway({
-  namespace: 'chats',
-  cors: { 
-    origin: 'http://localhost:3000',
+@WebSocketGateway(Number(process.env.SOCKET_PORT), {
+  namespace: SOCKET_KEYS.NAMESPACE,
+  cors: {
+    origin: true,
     credentials: true,
   },
 })
@@ -37,99 +34,35 @@ export class ChatGateway
     private readonly chatService: IChatService,
   ) {}
 
-  private readonly roomList:Array<Room> = [];
-
   @WebSocketServer()
   private readonly server: Server;
 
   async afterInit(server: Server) {}
 
-  async handleConnection(client: Socket) {
-    const request = client.request as any;
-    const session = request.session;
-    
-    console.log('session cookie', session.cookie)
-    console.log('request cookie', request.cookies)
-    console.log(client.handshake.headers.cookie);
+  async handleConnection(client: Socket) {}
 
-    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-    // console.log(request)
-
-    client.emit('receive-message', {
-      body: {
-        message: `client id: ${client.id} 연결`,
-      },
-    });
-  }
-
-  async handleDisconnect(client: any) {
-    client.emit('receive-message', {
-      body: {
-        message: `client id: ${client.id} 끊김`,
-      },
-    });
-  }
+  async handleDisconnect(client: any) {}
 
   @SubscribeMessage('create-room')
   async createRoom(
     @MessageBody() roomId: string,
     @ConnectedSocket() client: Socket,
-  ) {
-    console.log('client id:', client.id);
-    await client.join(roomId);
-    client.emit('receive-message', {
-      body: {
-        message: `${client.id} 님이 ${roomId} 를 생성 하였습니다.`,
-      },
-    });
-    this.roomList.push({
-      roomId: roomId,
-      userList: [{
-        id: client.id,
-      }]
-    })
-    console.log('created client.rooms', client.rooms);
-  }
+  ) {}
 
   @SubscribeMessage('join')
-  async join(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
-    console.log('client id:', client.id);
-    await client.join(roomId);
-    for(const room of this.roomList) {
-      if(room.roomId === roomId) {
-        room.userList.push({id: client.id});
-        console.log(room);
-      }
-    }
-    console.log(this.roomList)
-    client.emit('receive-message', {
-      body: {
-        message: `${client.id} 님이 ${roomId} 로 연결 되었습니다.`,
-      },
-    });
-    console.log('client.rooms', client.rooms);
-  }
+  async join(
+    @MessageBody() roomId: string,
+    @ConnectedSocket() client: Socket,
+  ) {}
 
   @SubscribeMessage('send-message')
   async sendMessage(
     @MessageBody() body: { roomId: string; message: string },
     @ConnectedSocket() client: Socket,
-  ) {
-    console.log('client id:', client.id);
-    console.log('client.rooms', client.rooms);
-    console.log(`body.roomId: ${body.roomId}`);
-    console.log(`body.message: ${body.message}`);
-    client.broadcast.to(body.roomId).emit('receive-message', {
-      body: {
-        message: body.message,
-      },
-    });
-  }
+  ) {}
 
   @SubscribeMessage('get-room-list')
-  async getRoomList(@ConnectedSocket() client: Socket){
-    client.emit('receive-message', this.roomList);
-  }
+  async getRoomList(@ConnectedSocket() client: Socket) {}
 
   /**
    * @name getChatList

@@ -79,10 +79,18 @@ export const enum ENV_KEYS {
   PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
 }
 
+export const enum SOCKET_KEYS {
+  NAMESPACE = 'chats',
+  SEND_MESSAGE = 'send-message',
+  RECEIVE_MESSAGE = 'receive-message',
+  RECEIVE_ERROR = 'receive-error',
+}
+
 export const LOGIN_COOKIE = 'connect.sid';
 
-export const PLACE_API ='PLACE_API'
+export const LOGIN_COOKIE_HEADER = 's%3A';
 
+export const PLACE_API ='PLACE_API'
 
 export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
         <span style="display: block; text-align:center;">포포</span>

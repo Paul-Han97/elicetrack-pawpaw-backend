@@ -63,6 +63,7 @@ import { UserModule } from './users/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -82,7 +83,6 @@ import { CronModule } from './cron/cron.module';
         redact: {
           remove: true,
           paths: [
-
             'req',
             'res',
             'req.headers["sec-ch-ua-platform"]',
@@ -127,6 +127,7 @@ import { CronModule } from './cron/cron.module';
         EMAIL_PASSWORD: Joi.string().required(),
         PASSWORD_STRING: Joi.string().required(),
         PASSWORD_SPECIAL: Joi.string().required(),
+        SOCKET_PORT: Joi.number().port().required(),
       }),
       isGlobal: true,
     }),
@@ -248,7 +249,8 @@ import { CronModule } from './cron/cron.module';
     ChatModule,
     NotificationModule,
     NotificationTypeModule,
-    CronModule
+    CronModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
