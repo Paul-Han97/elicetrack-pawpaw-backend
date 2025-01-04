@@ -207,12 +207,15 @@ export class BoardService implements IBoardService {
     getBoardResponseDto.title = result.title;
     getBoardResponseDto.content = result.content;
     getBoardResponseDto.likeCount = result.userBoardLike.length;
-    getBoardResponseDto.author.id = result.user.id;
     getBoardResponseDto.isLikeClicked =
-      result.userBoardLike.filter(
-        (userBoardLike) => userBoardLike.user.id === userId,
-      ).length > 0;
-    getBoardResponseDto.author.nickname = result.user.nickname;
+    result.userBoardLike.filter(
+      (userBoardLike) => userBoardLike.user.id === userId,
+    ).length > 0;
+    getBoardResponseDto.author = {
+      id: result.user.id,
+      nickname: result.user.nickname,
+      imageUrl: result.user.userImage?.[0]?.image?.url ?? null
+    }
     getBoardResponseDto.createdAt = result.createdAt;
     getBoardResponseDto.likeCount = result.userBoardLike.length;
 
@@ -227,9 +230,12 @@ export class BoardService implements IBoardService {
       getBoardResponseDto.commentList.push({
         id: comment.id,
         createdAt: comment.createdAt,
-        nickname: comment.user.nickname,
+        author: {
+          id: comment.user.id,
+          nickname: comment.user.nickname,
+          imageUrl: comment.user?.userImage?.[0]?.image?.url ?? null,
+        },
         content: comment.content,
-        imageUrl: comment.user?.userImage[0]?.image?.url ?? null,
       });
     }
 

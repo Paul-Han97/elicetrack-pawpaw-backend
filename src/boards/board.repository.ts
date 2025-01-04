@@ -36,6 +36,8 @@ export class BoardRepository
   async findBoard(id: number, userId?: number): Promise<Board> {
     const query = this.createQueryBuilder('board')
       .leftJoinAndSelect('board.user', 'user')
+      .leftJoinAndSelect('user.userImage', 'authorImage')
+      .leftJoinAndSelect('authorImage.image', 'authorProfileImage')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
       .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
       .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
