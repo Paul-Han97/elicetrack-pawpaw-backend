@@ -205,7 +205,7 @@ export class BoardController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({
-            // 공식 maxSize: 1024 * 1024 * 10MB
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
             maxSize: 10_485_760,
           }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),

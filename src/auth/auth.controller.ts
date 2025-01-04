@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
   Logger,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   ParseFilePipeBuilder,
   Post,
   Req,
@@ -114,14 +117,15 @@ export class AuthController {
   @Post('register')
   async register(
     @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 10240, // 10MB
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          fileIsRequired: false,
-        }),
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
     )
     image: Express.Multer.File,
     @Body() registerDto: RegisterDto,
