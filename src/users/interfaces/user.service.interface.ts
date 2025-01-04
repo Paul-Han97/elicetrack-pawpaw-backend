@@ -10,6 +10,8 @@ import {
   SaveUserLocationDto,
 } from '../dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from '../dto/get-user.dto';
+import { GetMyPageResponseDto } from '../dto/get-my-page.dto';
+import { UpdateUserDto, UpdateUserResponseDto } from '../dto/update-user.dto';
 
 export interface IUserService {
   checkDuplicateEmail(
@@ -46,4 +48,12 @@ export interface IUserService {
   getNearbyUsers(
     getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
   ): Promise<ResponseData<GetNearbyUserListResponseDto[]>>;
+
+
+  getMyPage(id: number): Promise<ResponseData<GetMyPageResponseDto>>
+
+
+  updateUser(
+    updateUserDto: UpdateUserDto,
+  ): Promise<ResponseData<UpdateUserResponseDto>>
 }

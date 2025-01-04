@@ -17,8 +17,23 @@ export class UpdateUserDto {
   nickname: string;
 
   @ApiProperty({
-    description: '사용자의 현재 비밀번호',
+    description: '사용자의 현재 비밀번호 (변경 시 필요)',
     required: false,
   })
   password: string;
+
+  @ApiProperty({
+    description: '사용자의 새로운 비밀번호 (변경 시 필요)',
+    required: false,
+  })
+  newPassword: string
+
+  id:number
+}
+
+export class UpdateUserResponseDto{
+  @ApiProperty({
+    description: '사용자의 ID',
+  })
+  id:number
 }
