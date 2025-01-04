@@ -19,8 +19,8 @@ export class NotificationService implements INotificationService {
   async getNotification(
     getNotificationDto: GetNotificationDto,
   ): Promise<ResponseData<GetNotificationResponseDto>> {
-    const { id } = getNotificationDto;
-    
+    const { userId } = getNotificationDto;
+
     const getNotificationResponseDto = new GetNotificationResponseDto();
 
     const resData: ResponseData<GetNotificationResponseDto> = {

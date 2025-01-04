@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { NOTIFICATION_TYPE } from 'src/common/constants';
 
 export class GetNotificationDto {
-  id: number;
+  userId: number;
 }
 
 class Sender {
