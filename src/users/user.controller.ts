@@ -229,6 +229,7 @@ export class UserController {
     return result;
   }
 
+
   @ApiOperation({
     summary: '사용자 위치 저장',
     description: '클라이언트에서 받은 사용자의 위치 데이터를 저장합니다.',
