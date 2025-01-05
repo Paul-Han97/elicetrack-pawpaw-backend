@@ -17,8 +17,18 @@ export class Chat {
 
   @Prop({
     required: true,
+  })
+  recipientId: number;
+
+  @Prop({
+    required: true,
+  })
+  message: string;
+
+  @Prop({
+    required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
+    ref: Room.name,
   })
   room: Room;
 
