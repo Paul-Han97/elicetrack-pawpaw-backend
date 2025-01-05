@@ -15,21 +15,25 @@ export class Room {
 
   @Prop({
     required: true,
+    default: 'PawPaw',
   })
   createdUser: string;
 
   @Prop({
     required: true,
+    default: new Date(),
   })
   createdAt: Date;
 
   @Prop({
     required: true,
+    default: null,
   })
   updatedUser: string;
 
   @Prop({
     required: true,
+    default: new Date(),
   })
   updatedAt: Date;
 }
