@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 import { NOTIFICATION_TYPE } from 'src/common/constants';
 
 export class GetNotificationDto {
@@ -17,7 +19,12 @@ class Sender {
   nickname: string;
 }
 
-export class GetNotificationResponseDto {
+class NotificationList {
+  @ApiProperty({
+    description: '알림의 ID',
+  })
+  id: number;
+
   @ApiProperty({
     description: '알림을 보낸 사용자',
   })
@@ -43,4 +50,16 @@ export class GetNotificationResponseDto {
     description: '알림을 읽은 상태',
   })
   isRead: boolean;
+}
+
+export class GetNotificationResponseDto {
+  @ApiProperty({
+    description: '알림 목록',
+    type: [NotificationList]
+  })
+  notificationList: NotificationList[];
+
+  constructor(){
+    this.notificationList = [];
+  }
 }
