@@ -11,6 +11,9 @@ export class Notification extends CommonEntity {
   @Column()
   chatId: number;
 
+  @Column()
+  roomName: string;
+
   @ManyToOne(() => User)
   @JoinColumn({ referencedColumnName: 'id' })
   user: User;

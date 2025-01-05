@@ -5,8 +5,6 @@ import { ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
 import { CounterRepository } from 'src/counters/counter.repository';
 import { ICounterRepository } from 'src/counters/interfaces/counter.repository.interface';
-import { IRoomRepository } from 'src/rooms/interfaces/room.repository.interface';
-import { RoomRepository } from 'src/rooms/room.repository';
 import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 import { UserRepository } from 'src/users/user.repository';
 import {
@@ -28,9 +26,6 @@ export class NotificationService implements INotificationService {
 
     @Inject(ChatRepository)
     private readonly chatRepository: IChatRepository,
-
-    @Inject(RoomRepository)
-    private readonly roomRepository: IRoomRepository,
 
     @Inject(CounterRepository)
     private readonly counterRepository: ICounterRepository,
@@ -60,7 +55,7 @@ export class NotificationService implements INotificationService {
         id: notification.id,
         isRead: notification.isRead,
         message: chat.message,
-        roomName: chat.room.name,
+        roomName: chat.roomName,
         sender: {
           id: sender.id,
           nickname: sender.nickname,
