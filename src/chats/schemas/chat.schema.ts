@@ -1,6 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
-import { Room } from 'src/rooms/schemas/room.schema';
 
 @Schema()
 export class Chat {
@@ -8,7 +6,7 @@ export class Chat {
     required: true,
     unique: true,
   })
-  id: number
+  id: number;
 
   @Prop({
     required: true,
@@ -27,10 +25,8 @@ export class Chat {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId,
-    ref: Room.name,
   })
-  room: Room;
+  roomName: string;
 
   @Prop({
     required: true,
@@ -47,15 +43,14 @@ export class Chat {
   })
   createdAt: Date;
 
-  @Prop({
-    required: true,
-  })
+  @Prop()
   updatedUser: string;
 
-  @Prop({
-    required: true,
-  })
+  @Prop()
   updatedAt: Date;
+
+  @Prop()
+  deletedAt: Date;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);
