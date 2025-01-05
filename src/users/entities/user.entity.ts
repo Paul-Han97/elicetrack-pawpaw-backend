@@ -56,6 +56,9 @@ export class User extends CommonEntity {
   @OneToMany(() => Review, (review) => review.user)
   review: Review[];
   
-  @OneToMany(() => RoomUser, (roomUser) => roomUser.user)
-  roomUser: RoomUser[];
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.sender)
+  sender: RoomUser[];
+
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.recipient)
+  recipient: RoomUser[];
 }
