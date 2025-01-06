@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiConsumes,
+  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -131,6 +132,8 @@ export class UserController {
   @ApiResponse({
     type: GetMyPageResponseDto,
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/my-pages')
   async getMyPage(@Param('id') id: number) {
     const result = await this.userService.getMyPage(id);
@@ -146,6 +149,8 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyBoardListResponseDto],
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/boards')
   async getMyBoardList(
     @Query() paginationDto: PaginationDto,
@@ -164,6 +169,8 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyReviewListDto],
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/reviews')
   async getMyReviewList(
     @Query() paginationDto: PaginationDto,
@@ -198,6 +205,8 @@ export class UserController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @Auth()
+  @ApiCookieAuth()
   @Put(':id')
   @ApiOkResponse({
     type: UpdateUserResponseDto,
