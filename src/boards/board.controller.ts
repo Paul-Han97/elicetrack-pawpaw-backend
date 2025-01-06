@@ -54,6 +54,7 @@ import {
 } from './dto/get-popular-list.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
 import { IBoardService } from './interface/board.service.interface';
+import { UpdateIsLikeClickedDto } from './dto/update-is-like-clicked.dto';
 
 @Controller('boards')
 export class BoardController {
@@ -177,6 +178,28 @@ export class BoardController {
     createBoardDto.userId = userId;
 
     return await this.boardService.createBoard(createBoardDto);
+  }
+
+  @ApiOperation({
+    summary: '로그인된 사용자가 해당 게시글의 좋아요 상태를 변경합니다.',
+    description: `
+    - isLikeClicked를 true로 호출하면 DB에 데이터가 삽입 됩니다.
+    - isLikeClicked를 false로 호출하면 DB에 데이터가 제거 됩니다.`
+  })
+  @ApiParam({
+    name: 'id',
+    description: '게시글의 ID'
+  })
+  @Auth()
+  @Put(':id/isLikeClicked')
+  async updateIsLikeClicked(@Req() req: Request, @Param('id') id: number, @Body() updateIsLikeClickedDto: UpdateIsLikeClickedDto){
+    const user = req.session.user;
+    updateIsLikeClickedDto.userId = user.id;
+    updateIsLikeClickedDto.id = id;
+
+    const result = await this.boardService.updateIsLikeClicked(updateIsLikeClickedDto);
+
+    return result;
   }
 
   @ApiOperation({

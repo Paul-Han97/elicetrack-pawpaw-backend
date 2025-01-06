@@ -27,6 +27,7 @@ import {
   UpdateBoardDto,
   UpdateBoardResponseDto,
 } from '../dto/update-board.dto';
+import { UpdateIsLikeClickedDto } from '../dto/update-is-like-clicked.dto';
 
 export interface IBoardService {
   getPopularList(
@@ -56,6 +57,10 @@ export interface IBoardService {
   updateBoard(
     updateBoardDto: UpdateBoardDto,
   ): Promise<ResponseData<UpdateBoardResponseDto>>;
+
+  updateIsLikeClicked(
+    updateIsLikeClickedDto: UpdateIsLikeClickedDto,
+  ): Promise<ResponseData>;
 
   updateBoardComment(
     updateBoardCommentDto: UpdateBoardCommentDto,
