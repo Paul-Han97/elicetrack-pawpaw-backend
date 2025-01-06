@@ -16,6 +16,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -46,6 +47,7 @@ export class PetController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @Auth()
+  @ApiCookieAuth()
   @Post()
   async createPet(
     @UploadedFile(
@@ -87,6 +89,8 @@ export class PetController {
   @ApiCreatedResponse()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @Auth()
+  @ApiCookieAuth()
   @Put(':id')
   async updatePetDto(
     @UploadedFile(
@@ -125,6 +129,8 @@ export class PetController {
     name: 'id',
     description: '반려동물의 ID',
   })
+  @Auth()
+  @ApiCookieAuth()
   @Delete(':id')
   async deletePet(@Param('id') id: number) {
     const result = await this.petService.deletePet(id);

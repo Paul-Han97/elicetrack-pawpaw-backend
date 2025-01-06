@@ -173,6 +173,7 @@ export class BoardController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(AnyFilesInterceptor())
   @Auth()
+  @ApiCookieAuth()
   @Post()
   async createBoard(
     @UploadedFiles() imageList: Express.Multer.File[],
@@ -231,6 +232,8 @@ export class BoardController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(AnyFilesInterceptor())
+  @Auth()
+  @ApiCookieAuth()
   @Put(':id')
   async updateBoard(
     @UploadedFiles(
@@ -270,6 +273,7 @@ export class BoardController {
     description: '게시글 ID',
   })
   @Auth()
+  @ApiCookieAuth()
   @ApiCreatedResponse({
     type: CreateBoardCommentResponseDto,
   })
@@ -305,6 +309,7 @@ export class BoardController {
     description: '댓글의 ID',
   })
   @Auth()
+  @ApiCookieAuth()
   @ApiOkResponse({
     type: UpdateBoardcommentResponseDto,
   })
@@ -367,6 +372,7 @@ export class BoardController {
     description: '댓글의 ID',
   })
   @Auth()
+  @ApiCookieAuth()
   @Delete(':id/comments/:commentId')
   async deleteBoardComment(
     @Req() req: Request,
