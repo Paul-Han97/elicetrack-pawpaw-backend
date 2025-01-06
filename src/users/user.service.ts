@@ -163,7 +163,7 @@ export class UserService implements IUserService {
           title: review.title,
           content: review.content,
           isLikeClicked: review.reviewPlaceLike.some(
-            (like) => like.review === review,
+            (like) => like.isLikeClicked,
           ),
         })),
         nextCursor,
