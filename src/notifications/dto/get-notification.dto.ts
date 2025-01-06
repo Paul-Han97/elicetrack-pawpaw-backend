@@ -4,7 +4,7 @@ import { ValidateNested } from 'class-validator';
 import { NOTIFICATION_TYPE } from 'src/common/constants';
 
 export class GetNotificationDto {
-  userId: number;
+  recipientId: number;
 }
 
 class Sender {

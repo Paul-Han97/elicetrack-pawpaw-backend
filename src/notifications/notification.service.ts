@@ -1,7 +1,11 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ChatRepository } from 'src/chats/chat.repository';
 import { IChatRepository } from 'src/chats/interfaces/chat.repository.interface';
-import { ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
+import {
+  ERROR_MESSAGE,
+  NOTIFICATION_TYPE,
+  SUCCESS_MESSAGE,
+} from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
 import { CounterRepository } from 'src/counters/counter.repository';
 import { ICounterRepository } from 'src/counters/interfaces/counter.repository.interface';
@@ -37,10 +41,10 @@ export class NotificationService implements INotificationService {
   async getNotification(
     getNotificationDto: GetNotificationDto,
   ): Promise<ResponseData<GetNotificationResponseDto>> {
-    const { userId } = getNotificationDto;
+    const { recipientId } = getNotificationDto;
 
     const notificationList =
-      await this.notificationRepository.findNotification(userId);
+      await this.notificationRepository.findNotification(recipientId);
 
     if (notificationList.length === 0) {
       throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
@@ -48,19 +52,32 @@ export class NotificationService implements INotificationService {
 
     const getNotificationResponseDto = new GetNotificationResponseDto();
     for (const notification of notificationList) {
+      if (notification.notificationType.type === NOTIFICATION_TYPE.INVITE) {
+        getNotificationResponseDto.notificationList.push({
+          id: notification.id,
+          isRead: notification.isRead,
+          roomName: notification.roomName,
+          type: notification.notificationType.type,
+          message: null,
+          sender: null,
+        });
+
+        continue;
+      }
+
       const chat = await this.chatRepository.findById(notification.chatId);
       const sender = await this.userRepository.findUser(chat.senderId);
 
       getNotificationResponseDto.notificationList.push({
         id: notification.id,
         isRead: notification.isRead,
+        type: notification.notificationType.type,
+        roomName: notification.roomName,
         message: chat.message,
-        roomName: chat.roomName,
         sender: {
           id: sender.id,
           nickname: sender.nickname,
         },
-        type: notification.notificationType.type,
       });
     }
 
@@ -79,7 +96,7 @@ export class NotificationService implements INotificationService {
 
     const notification = await this.notificationRepository.findOneBy({
       id,
-      user: { id: userId },
+      recipient: { id: userId },
     });
 
     if (!notification) {
@@ -91,7 +108,7 @@ export class NotificationService implements INotificationService {
 
     await this.notificationRepository.save(notification, { reload: false });
 
-    const resData: ResponseData = { 
+    const resData: ResponseData = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: null,
     };

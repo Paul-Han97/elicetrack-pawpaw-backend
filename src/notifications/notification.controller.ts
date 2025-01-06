@@ -32,7 +32,7 @@ export class NotificationController {
     const user = req.session?.user;
 
     const getNotificationDto = new GetNotificationDto();
-    getNotificationDto.userId = user?.id;
+    getNotificationDto.recipientId = user?.id;
 
     const result =
       await this.notificationService.getNotification(getNotificationDto);
