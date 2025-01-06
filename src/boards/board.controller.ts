@@ -18,6 +18,7 @@ import {
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -191,6 +192,7 @@ export class BoardController {
     description: '게시글의 ID'
   })
   @Auth()
+  @ApiCookieAuth()
   @Put(':id/isLikeClicked')
   async updateIsLikeClicked(@Req() req: Request, @Param('id') id: number, @Body() updateIsLikeClickedDto: UpdateIsLikeClickedDto){
     const user = req.session.user;
