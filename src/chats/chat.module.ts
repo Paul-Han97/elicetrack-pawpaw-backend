@@ -8,10 +8,12 @@ import { ChatService } from './chat.service';
 import { Chat, ChatSchema } from './schemas/chat.schema';
 import { RoomUserRepository } from 'src/room-user/room-user.repository';
 import { TypeOrmCustomModule } from 'src/common/typeorm/typeorm-custom.module';
+import { RoomUserService } from 'src/room-user/room-user.service';
+import { NotificationRepository } from 'src/notifications/notification.repository';
 
 @Module({
   imports: [
-    TypeOrmCustomModule.forCustomRepository([RoomUserRepository]),
+    TypeOrmCustomModule.forCustomRepository([RoomUserRepository, NotificationRepository]),
     MongooseModule.forFeature([
       { name: Chat.name, schema: ChatSchema },
       { name: Counter.name, schema: CounterSchema },
@@ -21,6 +23,7 @@ import { TypeOrmCustomModule } from 'src/common/typeorm/typeorm-custom.module';
   providers: [
     ChatGateway,
     ChatService,
+    RoomUserService,
     ChatRepository,
     CounterRepository,
   ],

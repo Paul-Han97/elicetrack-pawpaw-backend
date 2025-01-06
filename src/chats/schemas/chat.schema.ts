@@ -36,6 +36,11 @@ export class Chat {
   @Prop({
     required: true,
   })
+  isRead: boolean;
+
+  @Prop({
+    required: true,
+  })
   createdUser: string;
 
   @Prop({
