@@ -9,11 +9,11 @@ export class RoomUser extends CommonEntity {
   })
   roomName: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.roomUserRecipient)
   @JoinColumn({ referencedColumnName: 'id' })
   recipient: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.roomUserSender)
   @JoinColumn({ referencedColumnName: 'id' })
   sender: User;
 }
