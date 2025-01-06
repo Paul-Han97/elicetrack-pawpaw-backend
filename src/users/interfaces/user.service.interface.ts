@@ -3,6 +3,7 @@ import { ResponseData } from 'src/common/types/response.type';
 import { DuplicateEmailQueryDto } from '../dto/duplicate-email.dto';
 import { DuplicateNicknameQueryDto } from '../dto/duplicate-nickname.dto';
 import { GetMyBoardListResponseDto } from '../dto/get-my-board-list.dto';
+import { GetMyPageResponseDto } from '../dto/get-my-page.dto';
 import { GetMyReviewListDto } from '../dto/get-my-review-list.dto';
 import {
   GetNearbyUserListQueryDto,
@@ -10,7 +11,6 @@ import {
   SaveUserLocationDto,
 } from '../dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from '../dto/get-user.dto';
-import { GetMyPageResponseDto } from '../dto/get-my-page.dto';
 import { UpdateUserDto, UpdateUserResponseDto } from '../dto/update-user.dto';
 
 export interface IUserService {
@@ -49,11 +49,9 @@ export interface IUserService {
     getNearbyUserListQueryDto: GetNearbyUserListQueryDto,
   ): Promise<ResponseData<GetNearbyUserListResponseDto[]>>;
 
-
-  getMyPage(id: number): Promise<ResponseData<GetMyPageResponseDto>>
-
+  getMyPage(id: number): Promise<ResponseData<GetMyPageResponseDto>>;
 
   updateUser(
     updateUserDto: UpdateUserDto,
-  ): Promise<ResponseData<UpdateUserResponseDto>>
+  ): Promise<ResponseData<UpdateUserResponseDto>>;
 }

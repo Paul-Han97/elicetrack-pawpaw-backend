@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -102,6 +103,7 @@ export class PlaceController {
     type: CreatePlaceReviewResponseDto,
   })
   @Auth()
+  @ApiCookieAuth()
   @Post(':id/reviews')
   async createPlaceReview(
     @Req() req: Request,
@@ -165,6 +167,7 @@ export class PlaceController {
     type: UpdatePlaceReviewResponseDto,
   })
   @Auth()
+  @ApiCookieAuth()
   @Put(':id/reviews/:reviewId')
   async updateReview(
     @Req() req: Request,
@@ -200,6 +203,8 @@ export class PlaceController {
   @ApiOkResponse({
     type: DeletePlaceReviewResponseDto,
   })
+  @Auth()
+  @ApiCookieAuth()
   @Delete(':id/reviews/:reviewId')
   async deleteReview(
     @Req() req: Request,

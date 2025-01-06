@@ -31,7 +31,7 @@ export class UpdateUserDto {
     description: '사용자의 닉네임',
     required: false,
   })
-  @IsString()
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(30)
@@ -41,6 +41,7 @@ export class UpdateUserDto {
     description: '사용자의 현재 비밀번호 (변경 시 필요)',
     required: false,
   })
+  @IsOptional()
   @IsStrongPassword()
   password: string;
 
@@ -48,6 +49,7 @@ export class UpdateUserDto {
     description: '사용자의 새로운 비밀번호 (변경 시 필요)',
     required: false,
   })
+  @IsOptional()
   @IsStrongPassword()
   newPassword: string;
 

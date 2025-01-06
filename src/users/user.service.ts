@@ -163,7 +163,7 @@ export class UserService implements IUserService {
           title: review.title,
           content: review.content,
           isLikeClicked: review.reviewPlaceLike.some(
-            (like) => like.review === review,
+            (like) => like.isLikeClicked,
           ),
         })),
         nextCursor,
@@ -400,6 +400,11 @@ export class UserService implements IUserService {
             await credentialRepository.save(user.credential[0]);
           }
 
+          const updateUserResponseDto = new UpdateUserResponseDto();
+          updateUserResponseDto.id = user.id;
+
+          const savedUser = await userRepository.save(user);
+
           if (!image) {
             const images = user.userImage;
             tempDeleteImageDto.filenameList = images
@@ -459,10 +464,6 @@ export class UserService implements IUserService {
             await userImageRepository.save(userImage);
           }
 
-          const updateUserResponseDto = new UpdateUserResponseDto();
-          updateUserResponseDto.id = user.id;
-
-          const savedUser = await userRepository.save(user);
           return {
             id: savedUser.id,
           };

@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiConsumes,
+  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -113,7 +114,9 @@ export class UserController {
   async getUser(@Param('id') id: number) {
     const getUserDto = new GetUserDto();
     getUserDto.id = id;
-    return await this.userService.getUser(getUserDto);
+
+    const result = await this.userService.getUser(getUserDto);
+    return result;
   }
 
   @ApiOperation({
@@ -129,6 +132,8 @@ export class UserController {
   @ApiResponse({
     type: GetMyPageResponseDto,
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/my-pages')
   async getMyPage(@Param('id') id: number) {
     const result = await this.userService.getMyPage(id);
@@ -144,6 +149,8 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyBoardListResponseDto],
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/boards')
   async getMyBoardList(
     @Query() paginationDto: PaginationDto,
@@ -162,6 +169,8 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyReviewListDto],
   })
+  @Auth()
+  @ApiCookieAuth()
   @Get(':id/reviews')
   async getMyReviewList(
     @Query() paginationDto: PaginationDto,
@@ -196,6 +205,8 @@ export class UserController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
+  @Auth()
+  @ApiCookieAuth()
   @Put(':id')
   @ApiOkResponse({
     type: UpdateUserResponseDto,
@@ -227,6 +238,7 @@ export class UserController {
     return result;
   }
 
+
   @ApiOperation({
     summary: '사용자 위치 저장',
     description: '클라이언트에서 받은 사용자의 위치 데이터를 저장합니다.',
@@ -240,8 +252,8 @@ export class UserController {
   ) {
     const userId = req.session.user.id;
     saveUserLocationDto.id = userId;
-    const result = this.userService.saveUserLocation(saveUserLocationDto);
 
+    const result = this.userService.saveUserLocation(saveUserLocationDto);
     return result;
   }
 }
