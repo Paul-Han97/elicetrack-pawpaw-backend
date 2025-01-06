@@ -1,1 +1,6 @@
-export interface IChatRepository {}
+import { Chat } from '../schemas/chat.schema';
+
+export interface IChatRepository {
+  findById(id: number): Promise<Chat>;
+  findByRoomName(roomName: string): Promise<Chat>;
+}

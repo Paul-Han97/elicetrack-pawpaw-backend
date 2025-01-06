@@ -64,6 +64,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
 import { RedisModule } from './redis/redis.module';
+import { CounterModule } from './counters/counter.module';
 
 @Module({
   imports: [
@@ -154,6 +155,7 @@ import { RedisModule } from './redis/redis.module';
         return {
           uri,
           retryAttempts: 0,
+          dbName: name
         };
       },
     }),
@@ -245,8 +247,8 @@ import { RedisModule } from './redis/redis.module';
     ReviewModule,
     ReviewPlaceLikeModule,
     RoomUserModule,
-    // RoomModule,
     ChatModule,
+    CounterModule,
     NotificationModule,
     NotificationTypeModule,
     CronModule,

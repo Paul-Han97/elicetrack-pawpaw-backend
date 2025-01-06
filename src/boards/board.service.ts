@@ -20,6 +20,9 @@ import { ImageRepository } from 'src/images/image.repository';
 import { ImageService } from 'src/images/image.service';
 import { IImageRepository } from 'src/images/interface/image.repository.interface';
 import { IImageService } from 'src/images/interface/image.service.interface';
+import { UserBoardLike } from 'src/user-board-likes/entities/user-board-like.entity';
+import { IUserBoardLikeRepository } from 'src/user-board-likes/interface/user-board-like.repository.interface';
+import { UserBoardLikeRepository } from 'src/user-board-likes/user-board-like.repository';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { BoardRepository } from './board.repository';
@@ -48,6 +51,7 @@ import {
   UpdateBoardcommentResponseDto,
 } from './dto/update-board-comment.dto';
 import { UpdateBoardDto, UpdateBoardResponseDto } from './dto/update-board.dto';
+import { UpdateIsLikeClickedDto } from './dto/update-is-like-clicked.dto';
 import { Board } from './entities/board.entity';
 import { IBoardRepository } from './interface/board.repository.interface';
 import { IBoardService } from './interface/board.service.interface';
@@ -69,6 +73,9 @@ export class BoardService implements IBoardService {
 
     @Inject(CommentRepository)
     private readonly commentRepository: ICommentRepository,
+
+    @Inject(UserBoardLikeRepository)
+    private readonly userBoardLikeRepository: IUserBoardLikeRepository,
 
     @Inject(getDataSourceToken())
     private readonly dataSource: DataSource,
@@ -207,12 +214,15 @@ export class BoardService implements IBoardService {
     getBoardResponseDto.title = result.title;
     getBoardResponseDto.content = result.content;
     getBoardResponseDto.likeCount = result.userBoardLike.length;
-    getBoardResponseDto.author.id = result.user.id;
     getBoardResponseDto.isLikeClicked =
       result.userBoardLike.filter(
         (userBoardLike) => userBoardLike.user.id === userId,
       ).length > 0;
-    getBoardResponseDto.author.nickname = result.user.nickname;
+    getBoardResponseDto.author = {
+      id: result.user.id,
+      nickname: result.user.nickname,
+      imageUrl: result.user.userImage?.[0]?.image?.url ?? null,
+    };
     getBoardResponseDto.createdAt = result.createdAt;
     getBoardResponseDto.likeCount = result.userBoardLike.length;
 
@@ -227,9 +237,12 @@ export class BoardService implements IBoardService {
       getBoardResponseDto.commentList.push({
         id: comment.id,
         createdAt: comment.createdAt,
-        nickname: comment.user.nickname,
+        author: {
+          id: comment.user.id,
+          nickname: comment.user.nickname,
+          imageUrl: comment.user?.userImage?.[0]?.image?.url ?? null,
+        },
         content: comment.content,
-        imageUrl: comment.user?.userImage[0]?.image?.url ?? null,
       });
     }
 
@@ -379,6 +392,45 @@ export class BoardService implements IBoardService {
     const resData: ResponseData<UpdateBoardResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: updateBoardResponseDto,
+    };
+    return resData;
+  }
+
+  async updateIsLikeClicked(
+    updateIsLikeClickedDto: UpdateIsLikeClickedDto,
+  ): Promise<ResponseData> {
+    const { id, isLikeClicked, userId } = updateIsLikeClickedDto;
+
+    const board = await this.boardRepository.findBoard(id);
+
+    if (!board) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const userBoardLikeList = board.userBoardLike.filter(
+      (userBoardLike) => userBoardLike.user.id === userId,
+    );
+
+    if (isLikeClicked && userBoardLikeList.length === 0) {
+      const user = new User();
+      user.id = userId;
+
+      const userBoardLike = new UserBoardLike();
+      userBoardLike.board = board;
+      userBoardLike.createdUser = userId.toString();
+      userBoardLike.user = user;
+      userBoardLike.isLikeClicked = isLikeClicked;
+
+      await this.userBoardLikeRepository.save(userBoardLike);
+    }
+
+    if (!isLikeClicked && userBoardLikeList.length === 1) {
+      await this.userBoardLikeRepository.remove(userBoardLikeList[0]);
+    }
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
     };
     return resData;
   }

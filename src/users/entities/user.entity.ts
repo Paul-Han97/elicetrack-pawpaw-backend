@@ -50,12 +50,15 @@ export class User extends CommonEntity {
   @OneToMany(() => Comment, (comment) => comment.user)
   comment: Comment[];
 
-  @OneToMany(() => Notification, (notification) => notification.user)
-  notification: Notification[];
+  @OneToMany(() => Notification, (notification) => notification.recipient)
+  notificationRecipient: Notification[];
   
   @OneToMany(() => Review, (review) => review.user)
   review: Review[];
   
-  @OneToMany(() => RoomUser, (roomUser) => roomUser.user)
-  roomUser: RoomUser[];
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.sender)
+  roomUserSender: RoomUser[];
+
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.recipient)
+  roomUserRecipient: RoomUser[];
 }

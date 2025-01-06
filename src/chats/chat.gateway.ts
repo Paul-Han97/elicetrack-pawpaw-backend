@@ -13,8 +13,12 @@ import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
 import { SOCKET_KEYS } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
+import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
+import { RoomUserService } from 'src/room-user/room-user.service';
+import { User } from 'src/users/entities/user.entity';
 import { ChatService } from './chat.service';
 import { IChatService } from './interfaces/chat.service.interface';
+import { SendMessageDto } from './dto/send-message.dto';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -32,6 +36,9 @@ export class ChatGateway
   constructor(
     @Inject(ChatService)
     private readonly chatService: IChatService,
+
+    @Inject(RoomUserService)
+    private readonly roomUserService: IRoomUserService,
   ) {}
 
   @WebSocketServer()
@@ -45,21 +52,75 @@ export class ChatGateway
 
   @SubscribeMessage('create-room')
   async createRoom(
-    @MessageBody() roomId: string,
+    @MessageBody() data: { recipientId: number },
     @ConnectedSocket() client: Socket,
-  ) {}
+  ) {
+    const user = <User>client.data;
+    const { recipientId } = data;
+    const createdRoom = await this.roomUserService.createRoom(user.id, recipientId);
+
+    const { roomName } = createdRoom;
+
+    await client.join(roomName);
+
+    client.emit('create-room-response', {
+      message: '채팅방이 생성 되었습니다.',
+      data: {
+        roomName,
+      },
+    });
+
+    console.log('client room', client.rooms);
+    return;
+  }
 
   @SubscribeMessage('join')
   async join(
-    @MessageBody() roomId: string,
+    @MessageBody() data: { roomName: string },
     @ConnectedSocket() client: Socket,
-  ) {}
+  ) {
+    const { roomName } = data;
+    const user = <User>client.data;
+
+    console.log('roomName', roomName);
+    console.log('roomName', typeof roomName);
+
+    const roomUser = await this.roomUserService.joinRoom(user.id, roomName);
+
+    await client.join(roomUser.roomName);
+
+    client.emit('join-response', {
+      message: '채팅방에 입장 되었습니다.',
+      data: {
+        roomName,
+      },
+    });
+    console.log('client room', client.rooms);
+  }
 
   @SubscribeMessage('send-message')
   async sendMessage(
-    @MessageBody() body: { roomId: string; message: string },
+    @MessageBody() data: { roomName: string; message: string, recipientId: number },
     @ConnectedSocket() client: Socket,
-  ) {}
+  ) {
+    const user = <User>client.data;
+    const { roomName, message, recipientId} = data;
+
+    const sendMessageDto = new SendMessageDto();
+    sendMessageDto.senderId = user.id;
+    sendMessageDto.recipientId = recipientId;
+    sendMessageDto.roomName = roomName;
+    sendMessageDto.message = message;
+
+    const chat = await this.chatService.sendMessage(sendMessageDto);
+
+    client.to(roomName).emit('send-message-response', {
+      message: '메세지를 보냈습니다.',
+      data: {
+        message
+      }
+    })
+  }
 
   @SubscribeMessage('get-room-list')
   async getRoomList(@ConnectedSocket() client: Socket) {}
