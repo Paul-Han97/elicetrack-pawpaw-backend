@@ -17,7 +17,7 @@ import { ChatRepository } from 'src/chats/chat.repository';
     MongooseModule.forFeature([{ name: Chat.name, schema: ChatSchema }]),
   ],
   controllers: [RoomUserController],
-  providers: [RoomUserService],
-  exports: [RoomUserService, ChatRepository],
+  providers: [RoomUserService, ChatRepository],
+  exports: [RoomUserService],
 })
 export class RoomUserModule {}
