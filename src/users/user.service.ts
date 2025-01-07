@@ -84,9 +84,11 @@ export class UserService implements IUserService {
     const result = await this.userRepository.findUser(id);
 
     const getUserResponseDto = new GetUserResponseDto();
+    getUserResponseDto.id = result.id;
     getUserResponseDto.email = result.credential[0].username;
     getUserResponseDto.imageUrl = result?.userImage[0]?.image?.url ?? null;
     getUserResponseDto.nickname = result.nickname;
+    getUserResponseDto.canWalkingMate = result.canWalkingMate;
 
     const resData: ResponseData<GetUserResponseDto> = {
       message: SUCCESS_MESSAGE.FIND,
@@ -327,6 +329,7 @@ export class UserService implements IUserService {
     const resData: ResponseData<GetMyPageResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: {
+        id: user.id,
         nickname: user.nickname ?? null,
         canWalkingMate: user.canWalkingMate ?? null,
         imageUrl: user.userImage?.[0]?.image?.url ?? null,

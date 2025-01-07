@@ -41,6 +41,11 @@ class PetList {
 
 export class GetMyPageResponseDto {
   @ApiProperty({
+    description: '사용자의 ID',
+  })
+  id: number;
+  
+  @ApiProperty({
     description: '사용자의 닉네임',
   })
   nickname: string;
