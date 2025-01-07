@@ -19,6 +19,18 @@ class Sender {
   nickname: string;
 }
 
+class Recipient {
+  @ApiProperty({
+    description: '수신자 ID',
+  })
+  id: number;
+
+  @ApiProperty({
+    description: '송신자 '
+  })
+  nickname: string;
+}
+
 class NotificationList {
   @ApiProperty({
     description: '알림의 ID',
@@ -29,6 +41,11 @@ class NotificationList {
     description: '알림을 보낸 사용자',
   })
   sender: Sender;
+
+  @ApiProperty({
+    description: '알림을 받는 사용자',
+  })
+  recipient: Recipient;
 
   @ApiProperty({
     description: '알림의 종류',

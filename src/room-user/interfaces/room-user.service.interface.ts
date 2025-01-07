@@ -1,9 +1,18 @@
 import { ResponseData } from 'src/common/types/response.type';
-import { GetRoomListDto, GetRoomListResponseDto } from '../dto/get-room-list.dto';
+import { CreateRoomResponseDto } from '../dto/create-room.dto';
+import {
+  GetRoomListDto,
+  GetRoomListResponseDto,
+} from '../dto/get-room-list.dto';
 import { RoomUser } from '../entities/room-user.entity';
 
 export interface IRoomUserService {
-  getRoomList(getRoomListDto: GetRoomListDto): Promise<ResponseData<GetRoomListResponseDto>>
-  createRoom(senderId: number, recipientId: number): Promise<RoomUser>;
+  getRoomList(
+    getRoomListDto: GetRoomListDto,
+  ): Promise<ResponseData<GetRoomListResponseDto>>;
+  createRoom(
+    senderId: number,
+    recipientId: number,
+  ): Promise<CreateRoomResponseDto>;
   joinRoom(recipientId: number, roomName: string): Promise<RoomUser>;
 }

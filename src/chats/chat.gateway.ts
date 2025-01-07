@@ -19,6 +19,7 @@ import { User } from 'src/users/entities/user.entity';
 import { ChatService } from './chat.service';
 import { IChatService } from './interfaces/chat.service.interface';
 import { SendMessageDto } from './dto/send-message.dto';
+import { GetNotificationResponseDto } from 'src/notifications/dto/get-notification.dto';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -57,9 +58,10 @@ export class ChatGateway
   ) {
     const user = <User>client.data;
     const { recipientId } = data;
-    const createdRoom = await this.roomUserService.createRoom(user.id, recipientId);
+    const createRoomResponseDto = await this.roomUserService.createRoom(user.id, recipientId);
 
-    const { roomName } = createdRoom;
+    const { roomName } = createRoomResponseDto.roomUser;
+
 
     await client.join(roomName);
 
@@ -69,6 +71,13 @@ export class ChatGateway
         roomName,
       },
     });
+
+    client.emit('notification-response', {
+      message: '알림이 도착 했습니다.',
+      data: {
+        notification: createRoomResponseDto.notification
+      }
+    })
 
     console.log('client room', client.rooms);
     return;
