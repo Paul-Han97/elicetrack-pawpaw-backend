@@ -187,6 +187,26 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: '사용자와 반려동물의 정보를 조회 합니다.',
+    description: `
+      - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
+      - 사용자의 반려동물들의 정보를 조회 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '사용자의 ID',
+  })
+  @ApiResponse({
+    type: GetMyPageResponseDto,
+  })
+  @Get(':id')
+  async getUserInfo(@Param('id') id: number) {
+    const result = await this.userService.getMyPage(id);
+
+    return result;
+  }
+
+  @ApiOperation({
     summary: '사용자의 정보를 수정 합니다.',
     description: `
     - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.
