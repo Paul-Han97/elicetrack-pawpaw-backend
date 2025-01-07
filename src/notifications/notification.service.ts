@@ -51,6 +51,7 @@ export class NotificationService implements INotificationService {
     }
 
     const getNotificationResponseDto = new GetNotificationResponseDto();
+
     for (const notification of notificationList) {
       if (notification.notificationType.type === NOTIFICATION_TYPE.INVITE) {
         getNotificationResponseDto.notificationList.push({
@@ -59,24 +60,34 @@ export class NotificationService implements INotificationService {
           roomName: notification.roomName,
           type: notification.notificationType.type,
           message: null,
-          sender: null,
+          sender: {
+            id: notification.sender.id,
+            nickname: notification.sender.nickname,
+          },
+          recipient: {
+            id: notification.recipient.id,
+            nickname: notification.recipient.nickname,
+          },
         });
 
         continue;
       }
 
       const chat = await this.chatRepository.findById(notification.chatId);
-      const sender = await this.userRepository.findUser(chat.senderId);
 
       getNotificationResponseDto.notificationList.push({
         id: notification.id,
         isRead: notification.isRead,
         type: notification.notificationType.type,
         roomName: notification.roomName,
-        message: chat.message,
+        message: chat?.message ?? null,
         sender: {
-          id: sender.id,
-          nickname: sender.nickname,
+          id: notification.sender.id,
+          nickname: notification.sender.nickname,
+        },
+        recipient: {
+          id: notification.recipient.id,
+          nickname: notification.recipient.nickname,
         },
       });
     }
