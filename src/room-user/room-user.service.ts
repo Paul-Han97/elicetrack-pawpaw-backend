@@ -55,15 +55,23 @@ export class RoomUserService implements IRoomUserService {
     const { userId } = getRoomListDto;
 
     const roomUserList = await this.roomUserRepository.findRoomList(userId);
+    const getRoomListResponseDto = new GetRoomListResponseDto();
 
     for (const roomUser of roomUserList) {
       const chat = await this.chatRepository.findByRoomName(roomUser.roomName);
-      
+      const sender = await this.userRepository.findUser(chat.senderId);
+
+      getRoomListResponseDto.roomList.push({
+        name: roomUser?.roomName ?? null,
+        hasNewMessage: chat.isRead,
+        lastMessage: chat.message,
+        sender: {
+          id: sender.id,
+          nickname: sender.nickname,
+          imageUrl: sender?.userImage?.[0]?.image?.url ?? null,
+        },
+      });
     }
-
-    const getRoomListResponseDto = new GetRoomListResponseDto();
-
-    getRoomListResponseDto.roomList;
 
     const resData: ResponseData<GetRoomListResponseDto> = {
       message: SUCCESS_MESSAGE.FIND,
@@ -75,8 +83,9 @@ export class RoomUserService implements IRoomUserService {
   async getRoomNameList(userId: number): Promise<string[]> {
     const roomUserList = await this.roomUserRepository.findRoomList(userId);
 
-    const roomNameList = roomUserList.map((roomUser) => roomUser.roomName);
-    
+    const roomNameList =
+      roomUserList?.map((roomUser) => roomUser.roomName) ?? null;
+
     return roomNameList;
   }
 
@@ -84,59 +93,63 @@ export class RoomUserService implements IRoomUserService {
     senderId: number,
     recipientId: number,
   ): Promise<CreateRoomResponseDto> {
-    const createRoomResponseDto = await this.dataSource.transaction<CreateRoomResponseDto>(
-      async (manager: EntityManager): Promise<CreateRoomResponseDto> => {
-        const roomName = this.utilService.uuidGenerator.generate();
-        const roomUserRepository = manager.withRepository(
-          this.roomUserRepository,
-        );
-        const notificationRepository = manager.withRepository(
-          this.notificationRepository,
-        );
-        const userRepository = manager.withRepository(this.userRepository)
+    const createRoomResponseDto =
+      await this.dataSource.transaction<CreateRoomResponseDto>(
+        async (manager: EntityManager): Promise<CreateRoomResponseDto> => {
+          const roomName = this.utilService.uuidGenerator.generate();
+          const roomUserRepository = manager.withRepository(
+            this.roomUserRepository,
+          );
+          const notificationRepository = manager.withRepository(
+            this.notificationRepository,
+          );
+          const userRepository = manager.withRepository(this.userRepository);
 
-        const recipient = await userRepository.findOneBy({
-          id: recipientId
-        });
+          const recipient = await userRepository.findOneBy({
+            id: recipientId,
+          });
 
-        const sender = await userRepository.findOneBy({
-          id: senderId
-        })
+          const sender = await userRepository.findOneBy({
+            id: senderId,
+          });
 
-        const notificationType = new NotificationType();
-        notificationType.id = NOTIFICATION_TYPE_INDEX.INVITE;
+          const notificationType = new NotificationType();
+          notificationType.id = NOTIFICATION_TYPE_INDEX.INVITE;
 
-        const notification = new Notification();
-        notification.notificationType = notificationType;
-        notification.recipient = recipient;
-        notification.sender = sender;
-        notification.roomName = roomName;
-        notification.isRead = false;
-        notification.chatId = null;
-        notification.createdUser = senderId.toString();
+          const notification = new Notification();
+          notification.notificationType = notificationType;
+          notification.recipient = recipient;
+          notification.sender = sender;
+          notification.roomName = roomName;
+          notification.isRead = false;
+          notification.chatId = null;
+          notification.createdUser = senderId.toString();
 
-        const roomUser = await roomUserRepository.createRoomUser(
-          senderId,
-          roomName,
-        );
+          const roomUser = await roomUserRepository.createRoomUser(
+            senderId,
+            roomName,
+          );
 
-        const createdNotification = await notificationRepository.save(notification);
-        
-        const createRoomResponseDto = new CreateRoomResponseDto();
-        createRoomResponseDto.roomUser = roomUser;
-        createRoomResponseDto.notification.id = createdNotification.id;
-        createRoomResponseDto.notification.isRead = createdNotification.isRead;
-        createRoomResponseDto.notification.recipient.id = recipient.id;
-        createRoomResponseDto.notification.recipient.nickname = recipient.nickname;
-        createRoomResponseDto.notification.sender.id = sender.id;
-        createRoomResponseDto.notification.sender.nickname = sender.nickname;
-        createRoomResponseDto.notification.type = NOTIFICATION_TYPE.INVITE
-        createRoomResponseDto.notification.message = null;
-        createRoomResponseDto.notification.roomName = roomName;
-        
-        return createRoomResponseDto;
-      },
-    );
+          const createdNotification =
+            await notificationRepository.save(notification);
+
+          const createRoomResponseDto = new CreateRoomResponseDto();
+          createRoomResponseDto.roomUser = roomUser;
+          createRoomResponseDto.notification.id = createdNotification.id;
+          createRoomResponseDto.notification.isRead =
+            createdNotification.isRead;
+          createRoomResponseDto.notification.recipient.id = recipient.id;
+          createRoomResponseDto.notification.recipient.nickname =
+            recipient.nickname;
+          createRoomResponseDto.notification.sender.id = sender.id;
+          createRoomResponseDto.notification.sender.nickname = sender.nickname;
+          createRoomResponseDto.notification.type = NOTIFICATION_TYPE.INVITE;
+          createRoomResponseDto.notification.message = null;
+          createRoomResponseDto.notification.roomName = roomName;
+
+          return createRoomResponseDto;
+        },
+      );
 
     return createRoomResponseDto;
   }
