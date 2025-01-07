@@ -49,7 +49,16 @@ export class ChatGateway
 
   async handleConnection(client: Socket) {}
 
-  async handleDisconnect(client: any) {}
+  async handleDisconnect(client: Socket) {
+    console.log('disconnect before client.rooms', client.rooms)
+
+    for(const room in client.rooms){
+      console.log('disconnected room', room)
+      client.leave(room);
+    }
+
+    console.log('disconnect after client.rooms', client.rooms)
+  }
 
   @SubscribeMessage('create-room')
   async createRoom(
@@ -61,7 +70,6 @@ export class ChatGateway
     const createRoomResponseDto = await this.roomUserService.createRoom(user.id, recipientId);
 
     const { roomName } = createRoomResponseDto.roomUser;
-
 
     await client.join(roomName);
 
@@ -79,7 +87,6 @@ export class ChatGateway
       }
     })
 
-    console.log('client room', client.rooms);
     return;
   }
 
@@ -131,8 +138,16 @@ export class ChatGateway
     })
   }
 
-  @SubscribeMessage('get-room-list')
-  async getRoomList(@ConnectedSocket() client: Socket) {}
+  @SubscribeMessage('join-room-list')
+  async getRoomList(@ConnectedSocket() client: Socket) {
+    const user = <User>client.data;
+    
+    const roomNameList = await this.roomUserService.getRoomNameList(user.id);
+    
+    for(const roomName of roomNameList) {
+      client.join(roomName);
+    }
+  }
 
   /**
    * @name getChatList
