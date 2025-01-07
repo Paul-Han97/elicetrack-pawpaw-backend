@@ -15,4 +15,5 @@ export interface IRoomUserService {
     recipientId: number,
   ): Promise<CreateRoomResponseDto>;
   joinRoom(recipientId: number, roomName: string): Promise<RoomUser>;
+  getRoomNameList(userId: number): Promise<string[]>;
 }

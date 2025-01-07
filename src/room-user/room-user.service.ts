@@ -15,6 +15,8 @@ import { Notification } from 'src/notifications/entities/notification.entity';
 import { INotificationRepository } from 'src/notifications/interfaces/notification.repository.interface';
 import { NotificationRepository } from 'src/notifications/notification.repository';
 import { User } from 'src/users/entities/user.entity';
+import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
+import { UserRepository } from 'src/users/user.repository';
 import { DataSource, EntityManager } from 'typeorm';
 import { CreateRoomResponseDto } from './dto/create-room.dto';
 import {
@@ -25,8 +27,6 @@ import { RoomUser } from './entities/room-user.entity';
 import { IRoomUserRepository } from './interfaces/room-user.repository.interface';
 import { IRoomUserService } from './interfaces/room-user.service.interface';
 import { RoomUserRepository } from './room-user.repository';
-import { UserRepository } from 'src/users/user.repository';
-import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 
 @Injectable()
 export class RoomUserService implements IRoomUserService {
@@ -58,6 +58,7 @@ export class RoomUserService implements IRoomUserService {
 
     for (const roomUser of roomUserList) {
       const chat = await this.chatRepository.findByRoomName(roomUser.roomName);
+      
     }
 
     const getRoomListResponseDto = new GetRoomListResponseDto();
@@ -69,6 +70,14 @@ export class RoomUserService implements IRoomUserService {
       data: getRoomListResponseDto,
     };
     return resData;
+  }
+
+  async getRoomNameList(userId: number): Promise<string[]> {
+    const roomUserList = await this.roomUserRepository.findRoomList(userId);
+
+    const roomNameList = roomUserList.map((roomUser) => roomUser.roomName);
+    
+    return roomNameList;
   }
 
   async createRoom(
@@ -100,6 +109,7 @@ export class RoomUserService implements IRoomUserService {
         const notification = new Notification();
         notification.notificationType = notificationType;
         notification.recipient = recipient;
+        notification.sender = sender;
         notification.roomName = roomName;
         notification.isRead = false;
         notification.chatId = null;
@@ -111,7 +121,7 @@ export class RoomUserService implements IRoomUserService {
         );
 
         const createdNotification = await notificationRepository.save(notification);
-
+        
         const createRoomResponseDto = new CreateRoomResponseDto();
         createRoomResponseDto.roomUser = roomUser;
         createRoomResponseDto.notification.id = createdNotification.id;
