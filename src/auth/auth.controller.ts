@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   FileTypeValidator,
+  Get,
   HttpCode,
   Inject,
   InternalServerErrorException,
@@ -9,23 +10,29 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
+  Query,
+  Redirect,
   Req,
   Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiConsumes,
+  ApiExcludeEndpoint,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import axios from 'axios';
 import { Request, Response } from 'express';
 import {
+  ENV_KEYS,
   HTTP_STATUS,
   LOGIN_COOKIE,
   SUCCESS_MESSAGE,
@@ -33,7 +40,8 @@ import {
 import { Auth } from 'src/common/guards/auth.decorator';
 import { ResponseData } from 'src/common/types/response.type';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './dto/login.dto';
+import { KakaoLoginDto, LoginKakaoRedirectQueryDto } from './dto/login-kakao-redirect.dto';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
@@ -47,7 +55,105 @@ export class AuthController {
   constructor(
     @Inject(AuthService)
     private readonly authService: IAuthService,
+
+    private readonly configService: ConfigService,
   ) {}
+
+  @ApiExcludeEndpoint()
+  @Get('login/kakao-redirect')
+  @Redirect('https://localhost/', 301)
+  async kakaoOauthRedirect(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query() loginKakaoRedirectQueryDto: LoginKakaoRedirectQueryDto,
+  ) {
+    const { code } = loginKakaoRedirectQueryDto;
+    const url = this.configService.get<string>(ENV_KEYS.OAUTH_KAKAO_TOKEN);
+    const clientId = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_RESTAPI_KEY,
+    );
+    const redirectUri = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_LOGIN_REDIRECT,
+    );
+
+    const authorizeRes = await axios.post(
+      url,
+      {
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      },
+    );
+
+    const token = authorizeRes.data.access_token;
+    const getUserInfoUrl = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_USER_ME,
+    );
+    const userInfoRes = await axios.post(
+      getUserInfoUrl,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      },
+    );
+
+    const userInfo = userInfoRes.data;
+
+    const kakaoLoginDto = new KakaoLoginDto()
+    kakaoLoginDto.id = userInfo?.id ?? null;
+    kakaoLoginDto.email = userInfo?.email ?? null;
+    kakaoLoginDto.nickname = userInfo?.properties?.nickname ?? null;
+
+    const result = await this.authService.kakaoLogin(kakaoLoginDto);
+    
+    req.session.user = {
+      id: result.data.user.id,
+      role: result.data.user.role,
+    };
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    };
+
+    return resData;
+  }
+
+  @ApiOperation({
+    description: `
+    - 카카오 로그인 절차를 진행하여 인증 URL을 받습니다.`,
+  })
+  @Post('login/kakao')
+  async kakaoLoginDto() {
+    const url = this.configService.get<string>(ENV_KEYS.OAUTH_KAKAO_AUTHORIZE);
+
+    const clientId = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_RESTAPI_KEY,
+    );
+    const redirectUri = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_LOGIN_REDIRECT,
+    );
+    const responseType = 'code';
+
+    const authUrl = `${url}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        url: authUrl,
+      },
+    };
+    return resData;
+  }
 
   @ApiOperation({
     summary: '서비스에 로그인을 진행 합니다.',
@@ -59,9 +165,6 @@ export class AuthController {
     - 대문자: 1개 이상
     - 숫자: 1개 이상
     - 특수문자: 1개 이상`,
-  })
-  @ApiOkResponse({
-    type: LoginResponseDto,
   })
   @ApiBadRequestResponse({
     description: '계정 정보가 일치하지 않을 때',

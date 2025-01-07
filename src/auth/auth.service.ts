@@ -39,12 +39,14 @@ import { User } from 'src/users/entities/user.entity';
 import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 import { UserRepository } from 'src/users/user.repository';
 import { DataSource, EntityManager } from 'typeorm';
+import { KakaoLoginDto } from './dto/login-kakao-redirect.dto';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerificationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
+import { UuidGenerator } from 'src/common/utils/uuid-generator.util';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -84,9 +86,13 @@ export class AuthService implements IAuthService {
     try {
       await this.dataSource.transaction(async (manager: EntityManager) => {
         const userRepository = manager.withRepository(this.userRepository);
-        const credentialRepository = manager.withRepository(this.credentialRepository);
+        const credentialRepository = manager.withRepository(
+          this.credentialRepository,
+        );
         const imageRepository = manager.withRepository(this.imageRepository);
-        const userImageRepository = manager.withRepository(this.userImageRepository);
+        const userImageRepository = manager.withRepository(
+          this.userImageRepository,
+        );
 
         const role = new Role();
         role.id = ROLE_TYPE_INDEX.USER;
@@ -104,28 +110,32 @@ export class AuthService implements IAuthService {
 
         const newCredential = new Credential();
         newCredential.username = email;
-        newCredential.password = await this.utilService.passwordManager.hash(password);
+        newCredential.password =
+          await this.utilService.passwordManager.hash(password);
         newCredential.loginMethod = loginMethod;
         newCredential.user = createdUser;
         newCredential.createdUser = createdUser.id.toString();
-        
+
         await credentialRepository.save(newCredential, { reload: false });
-        
-        if(!image) {
+
+        if (!image) {
           return;
         }
 
         uploadImageDto.entity.id = createdUser.id;
         uploadImageDto.entity.name = User.name;
         uploadImageDto.imageList.push(image);
-        
-        const createdImage = await this.imageService.uploadImageToS3(uploadImageDto);
-        tempDeleteImageDto.filenameList.push(createdImage.imageList[0].filename);
+
+        const createdImage =
+          await this.imageService.uploadImageToS3(uploadImageDto);
+        tempDeleteImageDto.filenameList.push(
+          createdImage.imageList[0].filename,
+        );
 
         const newImage = new Image();
         newImage.url = createdImage.imageList[0].url;
         newImage.createdUser = createdUser.id.toString();
-        
+
         const newUserImage = new UserImage();
         newUserImage.image = newImage;
         newUserImage.user = createdUser;
@@ -189,16 +199,77 @@ export class AuthService implements IAuthService {
     if (!isMathces)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_PASSWORD_NOT_MATCH);
 
+    const loginResponseDto = new LoginResponseDto();
+    loginResponseDto.user.id = user.id;
+    loginResponseDto.user.role = user.role.type;
+
     const resData: ResponseData<LoginResponseDto> = {
       message: SUCCESS_MESSAGE.REQUEST,
-      data: {
-        user: {
-          id: user.id,
-          role: user.role.type,
-          canWalkingMate: user.canWalkingMate,
-          nickname: user.nickname,
-        },
-      },
+      data: loginResponseDto,
+    };
+
+    return resData;
+  }
+
+  async kakaoLogin(kakaoLoginDto: KakaoLoginDto): Promise<ResponseData<LoginResponseDto>> {
+    const { id, nickname, email } = kakaoLoginDto;
+
+    if (!id) {
+      throw new NotFoundException(ERROR_MESSAGE.NOT_FOUND);
+    }
+
+    const user = await this.userRepository.findUserCredentialByEmail(email);
+
+    if (user) {
+      const loginResponseDto = new LoginResponseDto();
+      loginResponseDto.user.id = user.id;
+      loginResponseDto.user.role = user.role.type;
+
+      const userExistResData: ResponseData<LoginResponseDto> = {
+        message: SUCCESS_MESSAGE.REQUEST,
+        data: loginResponseDto
+      }
+      return userExistResData;
+    }
+
+    const loginResponseDto = await this.dataSource.transaction<LoginResponseDto>(async (manager: EntityManager):Promise<LoginResponseDto> => {
+      const userRepository = manager.withRepository(this.userRepository);
+      const credentialRepository = manager.withRepository(this.credentialRepository);
+
+      const kakaoNickname = `KAKAO_${id}`;
+
+      const role = new Role();
+      role.id = ROLE_TYPE_INDEX.USER;
+
+      const newUser = new User();
+      newUser.nickname = nickname ?? kakaoNickname;
+      newUser.name = nickname;
+      newUser.role = role;
+
+      const password = this.utilService.uuidGenerator.generate();
+
+      const loginMethod = new LoginMethod();
+      loginMethod.id = LOGIN_METHOD_TYPE_INDEX.KAKAO;
+
+      const credential = new Credential();
+      credential.username = email;
+      credential.password = await this.utilService.passwordManager.hash(password);
+      credential.loginMethod = loginMethod;
+      credential.user = newUser;
+      
+      const createdUser = await userRepository.save(newUser);
+      await credentialRepository.save(credential);
+
+      const loginResponseDto = new LoginResponseDto();
+      loginResponseDto.user.id = createdUser.id;
+      loginResponseDto.user.role = createdUser.role.type;
+
+      return loginResponseDto;
+    });
+
+    const resData: ResponseData<LoginResponseDto> = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: loginResponseDto
     };
 
     return resData;

@@ -12,16 +12,6 @@ class UserResponse {
     description: '사용자의 권한',
   })
   role: string;
-
-  @ApiProperty({
-    description: '산책메이트 기능 상태'
-  })
-  canWalkingMate: boolean;
-
-  @ApiProperty({
-    description: '사용자의 닉네임'
-  })
-  nickname: string;
 }
 
 export class LoginDto {
@@ -45,4 +35,8 @@ export class LoginResponseDto {
   })
   @Type(() => UserResponse)
   user: UserResponse;
+
+  constructor(){
+    this.user = new UserResponse();
+  }
 }
