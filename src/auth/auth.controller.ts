@@ -61,7 +61,7 @@ export class AuthController {
 
   @ApiExcludeEndpoint()
   @Get('login/kakao-redirect')
-  @Redirect('https://localhost/', 301)
+  @Redirect('https://kdt-react-node-1-team01.elicecoding.com/', 301)
   async kakaoOauthRedirect(
     @Req() req: Request,
     @Res() res: Response,
@@ -110,7 +110,7 @@ export class AuthController {
 
     const kakaoLoginDto = new KakaoLoginDto()
     kakaoLoginDto.id = userInfo?.id ?? null;
-    kakaoLoginDto.email = userInfo?.email ?? null;
+    kakaoLoginDto.email = userInfo?.kakao_account?.email ?? null;
     kakaoLoginDto.nickname = userInfo?.properties?.nickname ?? null;
 
     const result = await this.authService.kakaoLogin(kakaoLoginDto);
