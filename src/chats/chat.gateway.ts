@@ -11,15 +11,15 @@ import {
 } from '@nestjs/websockets';
 import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
-import { SOCKET_KEYS } from 'src/common/constants';
+import { SOCKET_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
 import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
 import { RoomUserService } from 'src/room-user/room-user.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatService } from './chat.service';
-import { IChatService } from './interfaces/chat.service.interface';
+import { GetMessageByRoomNameDto } from './dto/get-message-by-room-name.dto';
 import { SendMessageDto } from './dto/send-message.dto';
-import { GetNotificationResponseDto } from 'src/notifications/dto/get-notification.dto';
+import { IChatService } from './interfaces/chat.service.interface';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -49,48 +49,42 @@ export class ChatGateway
 
   async handleConnection(client: Socket) {}
 
-  async handleDisconnect(client: Socket) {
-    console.log('disconnect before client.rooms', client.rooms)
+  async handleDisconnect(client: Socket) {}
 
-    for(const room in client.rooms){
-      console.log('disconnected room', room)
-      client.leave(room);
-    }
-
-    console.log('disconnect after client.rooms', client.rooms)
-  }
-
-  @SubscribeMessage('create-room')
+  @SubscribeMessage(SOCKET_KEYS.CREATE_ROOM)
   async createRoom(
     @MessageBody() data: { recipientId: number },
     @ConnectedSocket() client: Socket,
   ) {
     const user = <User>client.data;
     const { recipientId } = data;
-    const createRoomResponseDto = await this.roomUserService.createRoom(user.id, recipientId);
+    const { roomUser, notification } = await this.roomUserService.createRoom(
+      user.id,
+      recipientId,
+    );
 
-    const { roomName } = createRoomResponseDto.roomUser;
+    const { roomName } = roomUser;
 
     await client.join(roomName);
 
-    client.emit('create-room-response', {
-      message: '채팅방이 생성 되었습니다.',
+    client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
+      message: SUCCESS_MESSAGE.CREATED_CHAT_ROOM,
       data: {
         roomName,
       },
     });
 
-    client.emit('notification-response', {
-      message: '알림이 도착 했습니다.',
+    client.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+      message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
       data: {
-        notification: createRoomResponseDto.notification
-      }
-    })
+        notification,
+      },
+    });
 
     return;
   }
 
-  @SubscribeMessage('join')
+  @SubscribeMessage(SOCKET_KEYS.JOIN)
   async join(
     @MessageBody() data: { roomName: string },
     @ConnectedSocket() client: Socket,
@@ -98,29 +92,26 @@ export class ChatGateway
     const { roomName } = data;
     const user = <User>client.data;
 
-    console.log('roomName', roomName);
-    console.log('roomName', typeof roomName);
-
     const roomUser = await this.roomUserService.joinRoom(user.id, roomName);
 
     await client.join(roomUser.roomName);
 
-    client.emit('join-response', {
-      message: '채팅방에 입장 되었습니다.',
+    client.emit(SOCKET_KEYS.JOIN_RESPONSE, {
+      message: SUCCESS_MESSAGE.JOINED_ROOM,
       data: {
         roomName,
       },
     });
-    console.log('client room', client.rooms);
   }
 
-  @SubscribeMessage('send-message')
+  @SubscribeMessage(SOCKET_KEYS.SEND_MESSAGE)
   async sendMessage(
-    @MessageBody() data: { roomName: string; message: string, recipientId: number },
+    @MessageBody()
+    data: { roomName: string; message: string; recipientId: number },
     @ConnectedSocket() client: Socket,
   ) {
     const user = <User>client.data;
-    const { roomName, message, recipientId} = data;
+    const { roomName, message, recipientId } = data;
 
     const sendMessageDto = new SendMessageDto();
     sendMessageDto.senderId = user.id;
@@ -130,36 +121,49 @@ export class ChatGateway
 
     const chat = await this.chatService.sendMessage(sendMessageDto);
 
-    client.to(roomName).emit('send-message-response', {
-      message: '메세지를 보냈습니다.',
+    client.to(roomName).emit(SOCKET_KEYS.SEND_MESSAGE_RESPONSE, {
+      message: SUCCESS_MESSAGE.SENT_MESSAGE,
       data: {
-        message
-      }
-    })
+        message,
+      },
+    });
   }
 
-  @SubscribeMessage('join-room-list')
-  async getRoomList(@ConnectedSocket() client: Socket) {
+  @SubscribeMessage(SOCKET_KEYS.JOIN_ROOM_LIST)
+  async joinRoomList(@ConnectedSocket() client: Socket) {
     const user = <User>client.data;
-    
+
     const roomNameList = await this.roomUserService.getRoomNameList(user.id);
-    
-    for(const roomName of roomNameList) {
-      client.join(roomName);
+
+    for (const roomName of roomNameList) {
+      await client.join(roomName);
     }
+
+    client.emit(SOCKET_KEYS.JOIN_ROOM_LIST_RESPONSE, {
+      message: SUCCESS_MESSAGE.JOINED_ROOM,
+      data: {
+        roomNameList,
+      },
+    });
   }
 
-  /**
-   * @name getChatList
-   * - 채팅방 목록을 조회 합니다.
-   * - room_user Table에서 사용자의 id를 조회하는데,
-   *  해당 roomId에는 2명이상 존재 해야 합니다.
-   * - 사용자가 채팅방에서 마지막으로 읽은 채팅보다 뒤에 받은 채팅이 있다면
-   *  새로운 채팅 상태를 나타낼 수 있는 응답을 포함 합니다.
-   */
-  @SubscribeMessage('get-chat-list')
-  async getChatList(
-    @MessageBody() message: string,
+  @SubscribeMessage(SOCKET_KEYS.GET_MESSAGE_LIST)
+  async getMessageByRoomName(
+    @MessageBody() data: { roomName: string },
     @ConnectedSocket() client: Socket,
-  ) {}
+  ) {
+    const getMessageByRoomNameDto = new GetMessageByRoomNameDto();
+    getMessageByRoomNameDto.roomName = data.roomName;
+
+    const messageList = await this.chatService.getMessageByRoomName(
+      getMessageByRoomNameDto,
+    );
+
+    client.emit(SOCKET_KEYS.GET_MESSAGE_LIST_RESPONSE, {
+      message: SUCCESS_MESSAGE.FIND,
+      data: {
+        messageList,
+      },
+    });
+  }
 }
