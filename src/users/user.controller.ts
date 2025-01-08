@@ -103,17 +103,17 @@ export class UserController {
     description: `
     - 사용자의 ID로 정보를 조회 합니다.`,
   })
-  @ApiParam({
-    name: 'id',
-    description: '사용자의 ID',
-  })
+  @ApiCookieAuth()
+  @Auth()
   @ApiOkResponse({
     type: GetUserResponseDto,
   })
-  @Get(':id')
-  async getUser(@Param('id') id: number) {
+  @Get()
+  async getUser(@Req() req: Request) {
+    const user = req.session.user;
+
     const getUserDto = new GetUserDto();
-    getUserDto.id = id;
+    getUserDto.id = user.id;
 
     const result = await this.userService.getUser(getUserDto);
     return result;
@@ -125,18 +125,15 @@ export class UserController {
     - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
     - 사용자의 반려동물들의 정보를 조회 합니다.`,
   })
-  @ApiParam({
-    name: 'id',
-    description: '사용자의 id',
-  })
   @ApiResponse({
     type: GetMyPageResponseDto,
   })
   @Auth()
   @ApiCookieAuth()
-  @Get(':id/my-pages')
-  async getMyPage(@Param('id') id: number) {
-    const result = await this.userService.getMyPage(id);
+  @Get('my-pages')
+  async getMyPage(@Req() req: Request) {
+    const user = req.session.user;
+    const result = await this.userService.getMyPage(user.id);
 
     return result;
   }
@@ -151,12 +148,16 @@ export class UserController {
   })
   @Auth()
   @ApiCookieAuth()
-  @Get(':id/boards')
+  @Get('boards')
   async getMyBoardList(
+    @Req() req: Request,
     @Query() paginationDto: PaginationDto,
-    @Param('id') id: number,
   ) {
-    const result = await this.userService.getMyBoardList(id, paginationDto);
+    const user = req.session.user;
+    const result = await this.userService.getMyBoardList(
+      user.id,
+      paginationDto,
+    );
 
     return result;
   }
@@ -171,12 +172,36 @@ export class UserController {
   })
   @Auth()
   @ApiCookieAuth()
-  @Get(':id/reviews')
+  @Get('reviews')
   async getMyReviewList(
+    @Req() req: Request,
     @Query() paginationDto: PaginationDto,
-    @Param('id') id: number,
   ) {
-    const result = await this.userService.getMyReviewList(id, paginationDto);
+    const user = req.session.user;
+    const result = await this.userService.getMyReviewList(
+      user.id,
+      paginationDto,
+    );
+
+    return result;
+  }
+
+  @ApiOperation({
+    summary: '사용자와 반려동물의 정보를 조회 합니다.',
+    description: `
+      - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
+      - 사용자의 반려동물들의 정보를 조회 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '사용자의 ID',
+  })
+  @ApiResponse({
+    type: GetMyPageResponseDto,
+  })
+  @Get(':id')
+  async getUserInfo(@Param('id') id: number) {
+    const result = await this.userService.getMyPage(id);
 
     return result;
   }
@@ -207,7 +232,7 @@ export class UserController {
   @UseInterceptors(FileInterceptor('image'))
   @Auth()
   @ApiCookieAuth()
-  @Put(':id')
+  @Put()
   @ApiOkResponse({
     type: UpdateUserResponseDto,
   })
@@ -225,7 +250,6 @@ export class UserController {
       }),
     )
     image: Express.Multer.File,
-    @Param('id') id: number,
     @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -237,7 +261,6 @@ export class UserController {
 
     return result;
   }
-
 
   @ApiOperation({
     summary: '사용자 위치 저장',

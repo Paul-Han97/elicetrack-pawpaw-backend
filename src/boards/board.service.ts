@@ -115,7 +115,7 @@ export class BoardService implements IBoardService {
           const board = await boardRepository.save(newBoard);
 
           if (imageList.length === 0) {
-            return;
+            return board.id;
           }
 
           uploadImageDto.entity.id = board.id;

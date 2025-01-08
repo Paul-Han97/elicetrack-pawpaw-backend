@@ -15,6 +15,7 @@ export class NotificationRepository
   async findNotification(recipientId: number): Promise<Notification[]> {
     const result = await this.createQueryBuilder('notification')
       .leftJoinAndSelect('notification.recipient', 'recipient')
+      .leftJoinAndSelect('notification.sender', 'sender')
       .leftJoinAndSelect('notification.notificationType', 'notificationType')
       .where('recipient.id = :recipientId', { recipientId })
       .andWhere('notification.isRead = false')

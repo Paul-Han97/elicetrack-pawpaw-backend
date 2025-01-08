@@ -40,13 +40,18 @@ export const enum ERROR_MESSAGE {
   EMAIL_PASSWORD_NOT_MATCH = '이메일 또는 패스워드가 일치하지 않습니다.',
   UNAUTHORIZED = '로그인이 필요 합니다.',
   NOT_FOUND = '해당하는 리소스를 찾을 수 없습니다.',
-  FAILED_SEND_EMAIL = "이메일 전송이 실패 했습니다.",
+  FAILED_SEND_EMAIL = '이메일 전송이 실패 했습니다.',
 }
 
 export const enum SUCCESS_MESSAGE {
   SIGN_UP = '회원 가입이 성공적으로 완료 되었습니다.',
   FIND = `성공적으로 조회 되었습니다.`,
   REQUEST = '요청이 성공적으로 완료 되었습니다.',
+
+  CREATED_CHAT_ROOM = '채팅방이 생성 되었습니다.',
+  NOTIFICATION_ARRIVED = '알림을 수신 했습니다.',
+  JOINED_ROOM = '채팅방에 입장 되었습니다.',
+  SENT_MESSAGE = '메세지를 전송 했습니다.',
 }
 
 export const enum ENV_KEYS {
@@ -71,31 +76,65 @@ export const enum ENV_KEYS {
   AWS_S3_ACCESS = 'AWS_S3_ACCESS',
   AWS_S3_SECRET = 'AWS_S3_SECRET',
   AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME',
-  EMAIL_HOST = "EMAIL_HOST",
-  EMAIL_PORT = "EMAIL_PORT",
-  EMAIL_USERNAME = "EMAIL_USERNAME",
-  EMAIL_PASSWORD = "EMAIL_PASSWORD",
-  PASSWORD_STRING = "PASSWORD_STRING",
-  PASSWORD_SPECIAL = "PASSWORD_SPECIAL",
+  EMAIL_HOST = 'EMAIL_HOST',
+  EMAIL_PORT = 'EMAIL_PORT',
+  EMAIL_USERNAME = 'EMAIL_USERNAME',
+  EMAIL_PASSWORD = 'EMAIL_PASSWORD',
+  PASSWORD_STRING = 'PASSWORD_STRING',
+  PASSWORD_SPECIAL = 'PASSWORD_SPECIAL',
+  OAUTH_KAKAO_RESTAPI_KEY = 'OAUTH_KAKAO_RESTAPI_KEY',
+  OAUTH_KAKAO_AUTHORIZE = 'OAUTH_KAKAO_AUTHORIZE',
+  OAUTH_KAKAO_TOKEN = 'OAUTH_KAKAO_TOKEN',
+  OAUTH_KAKAO_LOGIN_REDIRECT = 'OAUTH_KAKAO_LOGIN_REDIRECT',
+  OAUTH_KAKAO_USER_ME = 'OAUTH_KAKAO_USER_ME',
 }
 
 export const enum SOCKET_KEYS {
   NAMESPACE = 'chats',
+
   SEND_MESSAGE = 'send-message',
+  SEND_MESSAGE_ERROR = 'send-message-error',
+  SEND_MESSAGE_RESPONSE = 'send-message-response',
+
   RECEIVE_MESSAGE = 'receive-message',
   RECEIVE_ERROR = 'receive-error',
+  RECEIVE_MESSAGE_RESPONSE = 'receive-message-response',
+
+  CREATE_ROOM = 'create-room',
+  CREATE_ROOM_ERROR = 'create-room-error',
+  CREATE_ROOM_RESPONSE = 'create-room-response',
+
+  JOIN = 'join',
+  JOIN_ERROR = 'join-error',
+  JOIN_RESPONSE = 'join-response',
+
+  JOIN_ROOM_LIST = 'join-room-list',
+  JOIN_ROOM_LIST_ERROR = 'join-room-list-error',
+  JOIN_ROOM_LIST_RESPONSE = 'join-room-list-response',
+
+  NOTIFICATION = 'notification',
+  NOTIFICATION_ERROR = 'notification-error',
+  NOTIFICATION_RESPONSE = 'notification-response',
+
+  GET_MESSAGE_LIST = 'get-message-list',
+  GET_MESSAGE_LIST_ERROR = 'get-message-list-error',
+  GET_MESSAGE_LIST_RESPONSE = 'get-message-list-response',
+
+  GET_ROOM_LIST = 'get-room-list',
+  GET_ROOM_LIST_ERROR = 'get-room-list-error',
+  GET_ROOM_LIST_RESPONSE = 'get-room-list-response',
 }
 
 export const LOGIN_COOKIE = 'connect.sid';
 
 export const LOGIN_COOKIE_HEADER = 's%3A';
 
-export const PLACE_API ='PLACE_API'
+export const PLACE_API = 'PLACE_API';
 
 export const EMAIL_TEMPLATE_OPENER = `<div style="margin: 0 auto; width: 200px; height: 300px;">
         <span style="display: block; text-align:center;">포포</span>
         <span style="display: block; text-align:center;">인증코드</span>
-        <span style="display: block; text-align:center; margin-top: 10px; font-size: larger; font-weight: bold; letter-spacing: 5px;">`
+        <span style="display: block; text-align:center; margin-top: 10px; font-size: larger; font-weight: bold; letter-spacing: 5px;">`;
 
 export const EMAIL_TEMPLATE_CLOSER = `</span></div>`;
 

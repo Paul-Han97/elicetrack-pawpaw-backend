@@ -16,7 +16,7 @@ export class RoomUserRepository
       .where('sender.id = :userId', { userId })
       .orWhere('recipient.id = :userId', { userId })
       .getMany();
-      
+
     return result;
   }
 

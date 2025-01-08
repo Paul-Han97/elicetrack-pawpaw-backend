@@ -16,6 +16,21 @@ export class ChatRepository implements IChatRepository {
   }
 
   async findByRoomName(roomName: string): Promise<Chat> {
-    return await this.chatModel.findOne({ roomName });
+    return await this.chatModel
+      .findOne({ roomName })
+      .sort({ $natural: -1 })
+      .exec();
+  }
+
+  async createMessage(chat: Chat): Promise<Chat> {
+    const newChat = new this.chatModel(chat);
+    return await newChat.save();
+  }
+
+  async findMessageByRoomName(roomName: string): Promise<Chat[]> {
+    return await this.chatModel
+      .find({ roomName })
+      .sort({ createdAt: 'asc' })
+      .exec();
   }
 }

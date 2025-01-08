@@ -34,7 +34,7 @@ export class User extends CommonEntity {
 
   @OneToMany(() => UserImage, (userImage) => userImage.user)
   userImage: UserImage[];
-  
+
   @OneToMany(() => UserLocation, (userLocation) => userLocation.user)
   userLocation: UserLocation[];
 
@@ -52,10 +52,13 @@ export class User extends CommonEntity {
 
   @OneToMany(() => Notification, (notification) => notification.recipient)
   notificationRecipient: Notification[];
-  
+
+  @OneToMany(() => Notification, (notification) => notification.sender)
+  notificationSender: Notification[];
+
   @OneToMany(() => Review, (review) => review.user)
   review: Review[];
-  
+
   @OneToMany(() => RoomUser, (roomUser) => roomUser.sender)
   roomUserSender: RoomUser[];
 
