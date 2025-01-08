@@ -70,6 +70,7 @@ export class ChatGateway
     client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
       message: SUCCESS_MESSAGE.CREATED_CHAT_ROOM,
       data: {
+        roomId: roomUser.id,
         roomName,
       },
     });
