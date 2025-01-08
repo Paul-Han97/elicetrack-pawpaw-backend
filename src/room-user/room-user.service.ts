@@ -59,15 +59,15 @@ export class RoomUserService implements IRoomUserService {
 
     for (const roomUser of roomUserList) {
       const chat = await this.chatRepository.findByRoomName(roomUser.roomName);
-      const sender = await this.userRepository.findUser(chat.senderId);
-
+      const sender = await this.userRepository.findUser(roomUser?.sender?.id ?? null);
+      
       getRoomListResponseDto.roomList.push({
         name: roomUser?.roomName ?? null,
-        hasNewMessage: chat.isRead,
-        lastMessage: chat.message,
+        hasNewMessage: chat?.isRead ?? false,
+        lastMessage: chat?.message ?? null,
         sender: {
-          id: sender.id,
-          nickname: sender.nickname,
+          id: sender?.id ?? null,
+          nickname: sender?.nickname ?? null,
           imageUrl: sender?.userImage?.[0]?.image?.url ?? null,
         },
       });
