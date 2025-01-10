@@ -62,7 +62,7 @@ export class BoardRepository
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
-      .where('boardImage.isPrimary = true')
+      .where('(boardImage.isPrimary = true OR boardImage.isPrimary IS NULL)')
       .orderBy('board.id', 'DESC')
       .limit(count)
       .getMany();
@@ -71,7 +71,7 @@ export class BoardRepository
       return {
         id: board.id,
         title: board.title,
-        imageUrl: board.boardImage[0].image.url,
+        imageUrl: board.boardImage[0]?.image?.url ?? null,
         category: board.boardCategory.korName,
       };
     });
@@ -123,6 +123,7 @@ SELECT A.id, A.title, A.content, D.url, E.korName, COUNT(B.isLikeClicked) isLike
   LEFT OUTER JOIN board_image C ON C.boardId = A.id
   LEFT OUTER JOIN image D ON D.id = C.imageId 
   LEFT OUTER JOIN board_category E ON E.id = A.boardCategoryId
+ WHERE (C.isPrimary = true OR C.isPrimary IS NULL)
 GROUP BY A.id, A.title, A.content, D.url
 ORDER BY isLikeCount DESC
 		,id DESC
