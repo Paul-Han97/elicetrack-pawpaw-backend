@@ -477,21 +477,53 @@ export class BoardService implements IBoardService {
     }
 
     const deleteImageDto = new DeleteImageDto();
-    deleteImageDto.filenameList = board?.boardImage.map(
-      (boardImage) => boardImage.image.url,
-    );
+    for(const boardImage of board?.boardImage) {
+      deleteImageDto.filenameList.push(boardImage.image.url)
+    }
 
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const boardRepository = manager.withRepository(this.boardRepository);
-      this.imageService.deleteImageFromS3(deleteImageDto);
+      const imageRepository = manager.withRepository(this.imageRepository);
+      const boardImageRepository = manager.withRepository(
+        this.boardImageRepository,
+      );
+      const userBoardLikeRepository = manager.withRepository(
+        this.userBoardLikeRepository,
+      );
+      const commentRepository = manager.withRepository(this.commentRepository);
 
-      await boardRepository.query(
-        `
-        DELETE A, B
-        FROM board_image A
-        JOIN image B ON A.imageId = B.id
-        WHERE A.boardId = ?`,
-        [Number(id)],
+      await this.imageService.deleteImageFromS3(deleteImageDto);
+
+      const boardImageList = await boardImageRepository
+        .createQueryBuilder('boardImage')
+        .leftJoinAndSelect('boardImage.image', 'image')
+        .where('boardImage.boardId = :boardId', { boardId: id })
+        .getMany();
+
+      for (const boardImage of boardImageList) {
+        await boardImageRepository.remove(boardImage);
+        await imageRepository.remove(boardImage.image);
+      }
+
+      const userBoardLikeList = await userBoardLikeRepository.findBy({
+        board: {
+          id,
+        },
+      });
+      console.log(userBoardLikeList);
+      await Promise.all(
+        userBoardLikeList.map((userBoardLike) =>
+          userBoardLikeRepository.remove(userBoardLike),
+        ),
+      );
+
+      const commentList = await commentRepository.findBy({
+        board: {
+          id,
+        },
+      });
+      await Promise.all(
+        commentList.map((comment) => commentRepository.remove(comment)),
       );
 
       await boardRepository.remove(board);
