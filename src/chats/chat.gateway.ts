@@ -13,6 +13,8 @@ import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
 import { SOCKET_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
+import { INotificationService } from 'src/notifications/interfaces/notification.service.interface';
+import { NotificationService } from 'src/notifications/notification.service';
 import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
 import { RoomUserService } from 'src/room-user/room-user.service';
 import { User } from 'src/users/entities/user.entity';
@@ -40,6 +42,9 @@ export class ChatGateway
 
     @Inject(RoomUserService)
     private readonly roomUserService: IRoomUserService,
+
+    @Inject(NotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   @WebSocketServer()
@@ -58,12 +63,16 @@ export class ChatGateway
   ) {
     const user = <User>client.data;
     const { recipientId } = data;
-    const { roomUser, notification } = await this.roomUserService.createRoom(
-      user.id,
-      recipientId,
-    );
+    const { roomUser } = await this.roomUserService.createRoom(user.id);
 
     const { roomName } = roomUser;
+
+    const notification = await this.notificationService.wsCreateNotification({
+      recipientId,
+      senderId: user.id,
+      chatId: null,
+      roomName,
+    });
 
     await client.join(roomName);
 
@@ -81,8 +90,6 @@ export class ChatGateway
         notification,
       },
     });
-
-    return;
   }
 
   @SubscribeMessage(SOCKET_KEYS.JOIN)
