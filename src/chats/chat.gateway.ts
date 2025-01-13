@@ -75,7 +75,7 @@ export class ChatGateway
       },
     });
 
-    client.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+    this.server.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
       message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
       data: {
         notification,
