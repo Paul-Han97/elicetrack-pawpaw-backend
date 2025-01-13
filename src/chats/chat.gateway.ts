@@ -129,12 +129,26 @@ export class ChatGateway
 
     const chat = await this.chatService.sendMessage(sendMessageDto);
 
+    const notification = await this.notificationService.wsCreateNotification({
+      senderId: user.id,
+      recipientId,
+      chat: chat,
+      roomName,
+    })
+
     client.to(roomName).emit(SOCKET_KEYS.SEND_MESSAGE_RESPONSE, {
       message: SUCCESS_MESSAGE.SENT_MESSAGE,
       data: {
         message,
       },
     });
+
+    client.broadcast.to(roomName).emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+      message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
+      data: {
+        notification,
+      }
+    })
   }
 
   @SubscribeMessage(SOCKET_KEYS.JOIN_ROOM_LIST)
