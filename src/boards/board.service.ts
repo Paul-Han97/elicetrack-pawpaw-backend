@@ -510,7 +510,7 @@ export class BoardService implements IBoardService {
           id,
         },
       });
-      console.log(userBoardLikeList);
+      
       await Promise.all(
         userBoardLikeList.map((userBoardLike) =>
           userBoardLikeRepository.remove(userBoardLike),
