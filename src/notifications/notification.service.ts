@@ -4,6 +4,7 @@ import { IChatRepository } from 'src/chats/interfaces/chat.repository.interface'
 import {
   ERROR_MESSAGE,
   NOTIFICATION_TYPE,
+  NOTIFICATION_TYPE_INDEX,
   SUCCESS_MESSAGE,
 } from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
@@ -19,6 +20,11 @@ import { UpdateReadStatusDto } from './dto/update-read-status.dto';
 import { INotificationRepository } from './interfaces/notification.repository.interface';
 import { INotificationService } from './interfaces/notification.service.interface';
 import { NotificationRepository } from './notification.repository';
+import { WsCreateNotificationDto, WsCreateNotificationResponseDto } from './dto/ws-create-notification.dto';
+import { User } from 'src/users/entities/user.entity';
+import { NotificationType } from 'src/notification-types/entities/notification-type.entity';
+import { Notification } from './entities/notification.entity';
+import { Chat } from 'src/chats/schemas/chat.schema';
 
 @Injectable()
 export class NotificationService implements INotificationService {
@@ -125,5 +131,49 @@ export class NotificationService implements INotificationService {
     };
 
     return resData;
+  }
+
+  async wsCreateNotification(wsCreateNotificationDto: WsCreateNotificationDto): Promise<WsCreateNotificationResponseDto>{
+    const { senderId, recipientId, chatId, roomName } = wsCreateNotificationDto;
+
+    const recipient = await this.userRepository.findOneBy({
+      id: recipientId,
+    });
+
+    const sender = await this.userRepository.findOneBy({
+      id: senderId,
+    });
+
+    const notificationType = new NotificationType();
+    notificationType.id = chatId ? NOTIFICATION_TYPE_INDEX.RECEIVE_MESSAGE : NOTIFICATION_TYPE_INDEX.INVITE;
+
+    const notification = new Notification();
+    notification.isRead = false;
+    notification.notificationType = notificationType;
+    notification.sender = sender;
+    notification.recipient = recipient;
+    notification.roomName = roomName;
+    notification.chatId = chatId ?? null;
+    notification.createdUser = senderId.toString();
+
+    const createdNotification = await this.notificationRepository.save(notification);
+
+    let chat: Chat = null;
+    if(chatId) {
+      chat = await this.chatRepository.findById(chatId);
+    }
+
+    const wsCreateNotificationResponseDto = new WsCreateNotificationResponseDto();
+    wsCreateNotificationResponseDto.id = createdNotification.id;
+    wsCreateNotificationResponseDto.type = createdNotification.notificationType.type;
+    wsCreateNotificationResponseDto.isRead = createdNotification.isRead;
+    wsCreateNotificationResponseDto.recipient.id = recipient.id;
+    wsCreateNotificationResponseDto.recipient.nickname = recipient.nickname;
+    wsCreateNotificationResponseDto.sender.id = sender.id;
+    wsCreateNotificationResponseDto.sender.nickname = sender.nickname;
+    wsCreateNotificationResponseDto.roomName = roomName;
+    wsCreateNotificationResponseDto.message = chat?.message ?? null;
+
+    return wsCreateNotificationResponseDto;
   }
 }
