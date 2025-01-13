@@ -70,7 +70,7 @@ export class ChatGateway
     const notification = await this.notificationService.wsCreateNotification({
       recipientId,
       senderId: user.id,
-      chatId: null,
+      chat: null,
       roomName,
     });
 
