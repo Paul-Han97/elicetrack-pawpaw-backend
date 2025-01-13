@@ -2,14 +2,14 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  Logger,
-  UnauthorizedException,
+  Logger
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { WsException } from '@nestjs/websockets';
+import { SessionData } from 'express-session';
 import { Socket } from 'socket.io';
 import { RedisService } from 'src/redis/redis.service';
-import { ENV_KEYS, ERROR_MESSAGE, HTTP_STATUS, LOGIN_COOKIE, LOGIN_COOKIE_HEADER, SOCKET_KEYS } from '../constants';
-import { SessionData } from 'express-session';
+import { ENV_KEYS, ERROR_MESSAGE, LOGIN_COOKIE, LOGIN_COOKIE_HEADER } from '../constants';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
@@ -24,22 +24,26 @@ export class WsAuthGuard implements CanActivate {
     const client = context.switchToWs().getClient<Socket>();
     const cookies = client.handshake.headers.cookie?.split(';')?.map((cookie) => cookie.split('=')) ?? null;
     
-    if(!cookies) {
-      client.emit(SOCKET_KEYS.RECEIVE_ERROR, { status: HTTP_STATUS['401'], message: ERROR_MESSAGE.UNAUTHORIZED })
-      throw new UnauthorizedException(ERROR_MESSAGE.UNAUTHORIZED);
+    if (!cookies) {
+      throw new WsException(ERROR_MESSAGE.UNAUTHORIZED);
     }
     
-    let loginCookieValue:string = null;
-    for(const [key, value] of cookies) {
+    let loginCookieValue: string = null;
+    
+    for (const [key, value] of cookies) {
       loginCookieValue = key.trim() === LOGIN_COOKIE ? value : loginCookieValue;
     }
 
-    if(!loginCookieValue) {
-      client.emit(SOCKET_KEYS.RECEIVE_ERROR, { status: HTTP_STATUS['401'], message: ERROR_MESSAGE.UNAUTHORIZED })
-      throw new UnauthorizedException(ERROR_MESSAGE.UNAUTHORIZED);
+    if (!loginCookieValue) {
+      throw new WsException(ERROR_MESSAGE.UNAUTHORIZED);
     }
 
     const session = await this.getSessionData(loginCookieValue)
+
+    if (!session) {
+      throw new WsException(ERROR_MESSAGE.UNAUTHORIZED);
+    }
+
     const user = session.user;
 
     client.data = user;
