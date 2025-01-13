@@ -134,7 +134,7 @@ export class NotificationService implements INotificationService {
   }
 
   async wsCreateNotification(wsCreateNotificationDto: WsCreateNotificationDto): Promise<WsCreateNotificationResponseDto>{
-    const { senderId, recipientId, chatId, roomName } = wsCreateNotificationDto;
+    const { senderId, recipientId, roomName, chat } = wsCreateNotificationDto;
 
     const recipient = await this.userRepository.findOneBy({
       id: recipientId,
@@ -145,7 +145,7 @@ export class NotificationService implements INotificationService {
     });
 
     const notificationType = new NotificationType();
-    notificationType.id = chatId ? NOTIFICATION_TYPE_INDEX.RECEIVE_MESSAGE : NOTIFICATION_TYPE_INDEX.INVITE;
+    notificationType.id = chat ? NOTIFICATION_TYPE_INDEX.RECEIVE_MESSAGE : NOTIFICATION_TYPE_INDEX.INVITE;
 
     const notification = new Notification();
     notification.isRead = false;
@@ -153,15 +153,10 @@ export class NotificationService implements INotificationService {
     notification.sender = sender;
     notification.recipient = recipient;
     notification.roomName = roomName;
-    notification.chatId = chatId ?? null;
+    notification.chatId = chat?.id ?? null;
     notification.createdUser = senderId.toString();
 
     const createdNotification = await this.notificationRepository.save(notification);
-
-    let chat: Chat = null;
-    if(chatId) {
-      chat = await this.chatRepository.findById(chatId);
-    }
 
     const wsCreateNotificationResponseDto = new WsCreateNotificationResponseDto();
     wsCreateNotificationResponseDto.id = createdNotification.id;

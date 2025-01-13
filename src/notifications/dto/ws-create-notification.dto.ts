@@ -1,9 +1,10 @@
+import { Chat } from 'src/chats/schemas/chat.schema';
 import { NOTIFICATION_TYPE } from 'src/common/constants';
 
 export class WsCreateNotificationDto {
   senderId: number;
   recipientId: number;
-  chatId: number;
+  chat: Chat;
   roomName: string;
 }
 
