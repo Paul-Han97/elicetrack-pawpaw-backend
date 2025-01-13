@@ -93,11 +93,9 @@ export const enum SOCKET_KEYS {
   NAMESPACE = 'chats',
 
   SEND_MESSAGE = 'send-message',
-  SEND_MESSAGE_ERROR = 'send-message-error',
   SEND_MESSAGE_RESPONSE = 'send-message-response',
 
   RECEIVE_MESSAGE = 'receive-message',
-  RECEIVE_ERROR = 'receive-error',
   RECEIVE_MESSAGE_RESPONSE = 'receive-message-response',
 
   CREATE_ROOM = 'create-room',
@@ -105,23 +103,18 @@ export const enum SOCKET_KEYS {
   CREATE_ROOM_RESPONSE = 'create-room-response',
 
   JOIN = 'join',
-  JOIN_ERROR = 'join-error',
   JOIN_RESPONSE = 'join-response',
 
   JOIN_ROOM_LIST = 'join-room-list',
-  JOIN_ROOM_LIST_ERROR = 'join-room-list-error',
   JOIN_ROOM_LIST_RESPONSE = 'join-room-list-response',
 
   NOTIFICATION = 'notification',
-  NOTIFICATION_ERROR = 'notification-error',
   NOTIFICATION_RESPONSE = 'notification-response',
 
   GET_MESSAGE_LIST = 'get-message-list',
-  GET_MESSAGE_LIST_ERROR = 'get-message-list-error',
   GET_MESSAGE_LIST_RESPONSE = 'get-message-list-response',
 
   GET_ROOM_LIST = 'get-room-list',
-  GET_ROOM_LIST_ERROR = 'get-room-list-error',
   GET_ROOM_LIST_RESPONSE = 'get-room-list-response',
 }
 
