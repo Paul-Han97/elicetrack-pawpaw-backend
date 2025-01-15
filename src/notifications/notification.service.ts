@@ -160,7 +160,7 @@ export class NotificationService implements INotificationService {
 
     const wsCreateNotificationResponseDto = new WsCreateNotificationResponseDto();
     wsCreateNotificationResponseDto.id = createdNotification.id;
-    wsCreateNotificationResponseDto.type = createdNotification.notificationType.type;
+    wsCreateNotificationResponseDto.type = chat ? NOTIFICATION_TYPE.RECEIVE_MESSAGE : NOTIFICATION_TYPE.INVITE;
     wsCreateNotificationResponseDto.isRead = createdNotification.isRead;
     wsCreateNotificationResponseDto.recipient.id = recipient.id;
     wsCreateNotificationResponseDto.recipient.nickname = recipient.nickname;
