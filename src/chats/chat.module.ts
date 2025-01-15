@@ -11,6 +11,7 @@ import { ChatGateway } from './chat.gateway';
 import { ChatRepository } from './chat.repository';
 import { ChatService } from './chat.service';
 import { Chat, ChatSchema } from './schemas/chat.schema';
+import { NotificationService } from 'src/notifications/notification.service';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { Chat, ChatSchema } from './schemas/chat.schema';
     ChatGateway,
     ChatService,
     RoomUserService,
+    NotificationService,
     ChatRepository,
     CounterRepository,
   ],

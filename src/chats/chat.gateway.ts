@@ -13,6 +13,8 @@ import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
 import { SOCKET_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
+import { INotificationService } from 'src/notifications/interfaces/notification.service.interface';
+import { NotificationService } from 'src/notifications/notification.service';
 import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
 import { RoomUserService } from 'src/room-user/room-user.service';
 import { User } from 'src/users/entities/user.entity';
@@ -40,6 +42,9 @@ export class ChatGateway
 
     @Inject(RoomUserService)
     private readonly roomUserService: IRoomUserService,
+
+    @Inject(NotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   @WebSocketServer()
@@ -58,31 +63,45 @@ export class ChatGateway
   ) {
     const user = <User>client.data;
     const { recipientId } = data;
-    const { roomUser, notification } = await this.roomUserService.createRoom(
+    const { roomUser, hasRoomUser } = await this.roomUserService.createRoom(
       user.id,
       recipientId,
     );
 
-    const { roomName } = roomUser;
+    if (hasRoomUser) {
+      client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
+        message: SUCCESS_MESSAGE.ROOM_ALREADY_EXIST,
+        data: {
+          roomId: roomUser.id,
+          roomName: roomUser.roomName,
+        },
+      });
+      return;
+    }
 
-    await client.join(roomName);
+    const notification = await this.notificationService.wsCreateNotification({
+      recipientId,
+      senderId: user.id,
+      chat: null,
+      roomName: roomUser.roomName,
+    });
+
+    await client.join(roomUser.roomName);
 
     client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
       message: SUCCESS_MESSAGE.CREATED_CHAT_ROOM,
       data: {
         roomId: roomUser.id,
-        roomName,
+        roomName: roomUser.roomName,
       },
     });
 
-    client.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+    this.server.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
       message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
       data: {
         notification,
       },
     });
-
-    return;
   }
 
   @SubscribeMessage(SOCKET_KEYS.JOIN)
@@ -122,10 +141,24 @@ export class ChatGateway
 
     const chat = await this.chatService.sendMessage(sendMessageDto);
 
+    const notification = await this.notificationService.wsCreateNotification({
+      senderId: user.id,
+      recipientId,
+      chat: chat,
+      roomName,
+    });
+
     client.to(roomName).emit(SOCKET_KEYS.SEND_MESSAGE_RESPONSE, {
       message: SUCCESS_MESSAGE.SENT_MESSAGE,
       data: {
         message,
+      },
+    });
+
+    client.broadcast.to(roomName).emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+      message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
+      data: {
+        notification,
       },
     });
   }

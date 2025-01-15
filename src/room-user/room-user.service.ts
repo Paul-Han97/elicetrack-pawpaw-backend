@@ -2,22 +2,15 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { ChatRepository } from 'src/chats/chat.repository';
 import { IChatRepository } from 'src/chats/interfaces/chat.repository.interface';
-import {
-  ERROR_MESSAGE,
-  NOTIFICATION_TYPE,
-  NOTIFICATION_TYPE_INDEX,
-  SUCCESS_MESSAGE,
-} from 'src/common/constants';
+import { ERROR_MESSAGE, SUCCESS_MESSAGE } from 'src/common/constants';
 import { ResponseData } from 'src/common/types/response.type';
 import { UtilService } from 'src/common/utils/util.service';
-import { NotificationType } from 'src/notification-types/entities/notification-type.entity';
-import { Notification } from 'src/notifications/entities/notification.entity';
 import { INotificationRepository } from 'src/notifications/interfaces/notification.repository.interface';
 import { NotificationRepository } from 'src/notifications/notification.repository';
 import { User } from 'src/users/entities/user.entity';
 import { IUserRepository } from 'src/users/interfaces/user.repository.interface';
 import { UserRepository } from 'src/users/user.repository';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { CreateRoomResponseDto } from './dto/create-room.dto';
 import {
   GetRoomListDto,
@@ -59,8 +52,10 @@ export class RoomUserService implements IRoomUserService {
 
     for (const roomUser of roomUserList) {
       const chat = await this.chatRepository.findByRoomName(roomUser.roomName);
-      const sender = await this.userRepository.findUser(roomUser?.sender?.id ?? null);
-      
+      const sender = await this.userRepository.findUser(
+        roomUser?.sender?.id ?? null,
+      );
+
       getRoomListResponseDto.roomList.push({
         name: roomUser?.roomName ?? null,
         hasNewMessage: chat?.isRead ?? false,
@@ -89,67 +84,25 @@ export class RoomUserService implements IRoomUserService {
     return roomNameList;
   }
 
-  async createRoom(
-    senderId: number,
-    recipientId: number,
-  ): Promise<CreateRoomResponseDto> {
-    const createRoomResponseDto =
-      await this.dataSource.transaction<CreateRoomResponseDto>(
-        async (manager: EntityManager): Promise<CreateRoomResponseDto> => {
-          const roomName = this.utilService.uuidGenerator.generate();
-          const roomUserRepository = manager.withRepository(
-            this.roomUserRepository,
-          );
-          const notificationRepository = manager.withRepository(
-            this.notificationRepository,
-          );
-          const userRepository = manager.withRepository(this.userRepository);
+  async createRoom(senderId: number, recipientId: number): Promise<CreateRoomResponseDto> {
+    const hasRoomUser = await this.roomUserRepository.findBySenderAndRecipient(senderId, recipientId);
 
-          const recipient = await userRepository.findOneBy({
-            id: recipientId,
-          });
+    if (hasRoomUser) {
+      const createRoomResponseDto = new CreateRoomResponseDto();
+      createRoomResponseDto.roomUser = hasRoomUser;
+      createRoomResponseDto.hasRoomUser = true;
+      return createRoomResponseDto;
+    }
 
-          const sender = await userRepository.findOneBy({
-            id: senderId,
-          });
+    const roomName = this.utilService.uuidGenerator.generate();
+    const roomUser = await this.roomUserRepository.createRoomUser(
+      senderId,
+      roomName,
+    );
 
-          const notificationType = new NotificationType();
-          notificationType.id = NOTIFICATION_TYPE_INDEX.INVITE;
-
-          const notification = new Notification();
-          notification.notificationType = notificationType;
-          notification.recipient = recipient;
-          notification.sender = sender;
-          notification.roomName = roomName;
-          notification.isRead = false;
-          notification.chatId = null;
-          notification.createdUser = senderId.toString();
-
-          const roomUser = await roomUserRepository.createRoomUser(
-            senderId,
-            roomName,
-          );
-
-          const createdNotification =
-            await notificationRepository.save(notification);
-
-          const createRoomResponseDto = new CreateRoomResponseDto();
-          createRoomResponseDto.roomUser = roomUser;
-          createRoomResponseDto.notification.id = createdNotification.id;
-          createRoomResponseDto.notification.isRead =
-            createdNotification.isRead;
-          createRoomResponseDto.notification.recipient.id = recipient.id;
-          createRoomResponseDto.notification.recipient.nickname =
-            recipient.nickname;
-          createRoomResponseDto.notification.sender.id = sender.id;
-          createRoomResponseDto.notification.sender.nickname = sender.nickname;
-          createRoomResponseDto.notification.type = NOTIFICATION_TYPE.INVITE;
-          createRoomResponseDto.notification.message = null;
-          createRoomResponseDto.notification.roomName = roomName;
-
-          return createRoomResponseDto;
-        },
-      );
+    const createRoomResponseDto = new CreateRoomResponseDto();
+    createRoomResponseDto.roomUser = roomUser;
+    createRoomResponseDto.hasRoomUser = false;
 
     return createRoomResponseDto;
   }
