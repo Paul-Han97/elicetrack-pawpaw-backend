@@ -68,8 +68,7 @@ import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
 import { makeCounterProvider, PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { MetricsController } from './metrics/metrics.controller';
-import { MetricsModule } from './metrics/metrics.module';
+
 
 
 
