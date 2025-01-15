@@ -90,9 +90,7 @@ export class AuthService implements IAuthService {
           this.credentialRepository,
         );
         const imageRepository = manager.withRepository(this.imageRepository);
-        const userImageRepository = manager.withRepository(
-          this.userImageRepository,
-        );
+        const userImageRepository = manager.withRepository(this.userImageRepository);
 
         const role = new Role();
         role.id = ROLE_TYPE_INDEX.USER;

@@ -34,6 +34,8 @@ import { Location } from './locations/entities/location.entity';
 import { LocationModule } from './locations/location.module';
 import { LoginMethod } from './login-methods/entities/login-method.entity';
 import { LoginMethodModule } from './login-methods/login-method.module';
+import { MetricsController } from './metrics/metrics.controller';
+import { MetricsModule } from './metrics/metrics.module';
 import { NotificationType } from './notification-types/entities/notification-type.entity';
 import { NotificationTypeModule } from './notification-types/notification-type.module';
 import { Notification } from './notifications/entities/notification.entity';
@@ -68,6 +70,7 @@ import { UserModule } from './users/user.module';
 import { makeCounterProvider, PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { MetricsController } from './metrics/metrics.controller';
 import { MetricsModule } from './metrics/metrics.module';
+
 
 
 @Module({
