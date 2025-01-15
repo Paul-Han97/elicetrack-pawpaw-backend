@@ -84,7 +84,16 @@ export class RoomUserService implements IRoomUserService {
     return roomNameList;
   }
 
-  async createRoom(senderId: number): Promise<CreateRoomResponseDto> {
+  async createRoom(senderId: number, recipientId: number): Promise<CreateRoomResponseDto> {
+    const hasRoomUser = await this.roomUserRepository.findBySenderAndRecipient(senderId, recipientId);
+
+    if (hasRoomUser) {
+      const createRoomResponseDto = new CreateRoomResponseDto();
+      createRoomResponseDto.roomUser = hasRoomUser;
+      createRoomResponseDto.hasRoomUser = true;
+      return createRoomResponseDto;
+    }
+
     const roomName = this.utilService.uuidGenerator.generate();
     const roomUser = await this.roomUserRepository.createRoomUser(
       senderId,
@@ -93,6 +102,7 @@ export class RoomUserService implements IRoomUserService {
 
     const createRoomResponseDto = new CreateRoomResponseDto();
     createRoomResponseDto.roomUser = roomUser;
+    createRoomResponseDto.hasRoomUser = false;
 
     return createRoomResponseDto;
   }
