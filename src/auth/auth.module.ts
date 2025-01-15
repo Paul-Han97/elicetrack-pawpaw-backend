@@ -12,6 +12,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LocationRepository } from 'src/locations/location.repository';
 import { UserLocationRepository } from 'src/user-locations/user-location.repository';
+import { MetricsService } from 'src/metrics/metrics.service';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { UserLocationRepository } from 'src/user-locations/user-location.reposit
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, ImageService],
+  providers: [AuthService, UserService, ImageService, MetricsService],
 })
 export class AuthModule {}

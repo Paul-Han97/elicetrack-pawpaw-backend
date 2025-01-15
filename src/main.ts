@@ -20,14 +20,19 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useLogger(app.get(Logger));
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({
-    transform:true
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new ResponseInterceptor(),
   );
-  app.setGlobalPrefix('api');
+
+  app.setGlobalPrefix('api', {
+    exclude: ['/metrics'],
+  });
 
   app.enableCors({
     origin: true,

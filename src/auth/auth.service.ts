@@ -84,9 +84,13 @@ export class AuthService implements IAuthService {
     try {
       await this.dataSource.transaction(async (manager: EntityManager) => {
         const userRepository = manager.withRepository(this.userRepository);
-        const credentialRepository = manager.withRepository(this.credentialRepository);
+        const credentialRepository = manager.withRepository(
+          this.credentialRepository,
+        );
         const imageRepository = manager.withRepository(this.imageRepository);
-        const userImageRepository = manager.withRepository(this.userImageRepository);
+        const userImageRepository = manager.withRepository(
+          this.userImageRepository,
+        );
 
         const role = new Role();
         role.id = ROLE_TYPE_INDEX.USER;
@@ -104,28 +108,29 @@ export class AuthService implements IAuthService {
 
         const newCredential = new Credential();
         newCredential.username = email;
-        newCredential.password = await this.utilService.passwordManager.hash(password);
+        newCredential.password =
+          await this.utilService.passwordManager.hash(password);
         newCredential.loginMethod = loginMethod;
         newCredential.user = createdUser;
         newCredential.createdUser = createdUser.id.toString();
-        
+
         await credentialRepository.save(newCredential, { reload: false });
-        
-        if(!image) {
+
+        if (!image) {
           return;
         }
 
         uploadImageDto.entity.id = createdUser.id;
         uploadImageDto.entity.name = User.name;
         uploadImageDto.imageList.push(image);
-        
+
         const createdImage = await this.imageService.uploadImageToS3(uploadImageDto);
-        tempDeleteImageDto.filenameList.push(createdImage.imageList[0].filename);
+        tempDeleteImageDto.filenameList.push(createdImage.imageList[0].filename,);
 
         const newImage = new Image();
         newImage.url = createdImage.imageList[0].url;
         newImage.createdUser = createdUser.id.toString();
-        
+
         const newUserImage = new UserImage();
         newUserImage.image = newImage;
         newUserImage.user = createdUser;

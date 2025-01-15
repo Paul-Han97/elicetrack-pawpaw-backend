@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs'
 import { ENV_KEYS } from '../constants';
 
 @Injectable()
@@ -17,10 +17,11 @@ export class PasswordManager {
   }
 
   async compare(
-    password: string | Buffer,
+    password: string,
     encryptedPassword: string,
   ): Promise<boolean> {
     return await bcrypt.compare(password, encryptedPassword);
+
   }
 
   generate(): string {

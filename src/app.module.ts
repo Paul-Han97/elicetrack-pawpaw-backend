@@ -1,7 +1,9 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
@@ -20,8 +22,10 @@ import { CommentModule } from './comments/comment.module';
 import { Comment } from './comments/entities/comment.entity';
 import { ENV_KEYS, MYSQL_MIGRATION_PATH } from './common/constants';
 import { UtilModule } from './common/utils/util.module';
+import { CounterModule } from './counters/counter.module';
 import { CredentialModule } from './credentials/credential.module';
 import { Credential } from './credentials/entities/credential.entity';
+import { CronModule } from './cron/cron.module';
 import { Gender } from './genders/entities/gender.entity';
 import { GenderModule } from './genders/gender.module';
 import { Image } from './images/entities/image.entity';
@@ -44,6 +48,7 @@ import { PlaceLocation } from './place-locations/entities/place-location.entity'
 import { PlaceLocationModule } from './place-locations/place-location.module';
 import { Place } from './places/entities/place.entity';
 import { PlaceModule } from './places/place.module';
+import { RedisModule } from './redis/redis.module';
 import { ReviewPlaceLike } from './review-place-likes/entities/review-place-like.entity';
 import { ReviewPlaceLikeModule } from './review-place-likes/review-place-like.module';
 import { Review } from './reviews/entities/review.entity';
@@ -60,14 +65,14 @@ import { UserLocation } from './user-locations/entities/user-location.entity';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ScheduleModule } from '@nestjs/schedule';
-import { CronModule } from './cron/cron.module';
-import { RedisModule } from './redis/redis.module';
-import { CounterModule } from './counters/counter.module';
+import { makeCounterProvider, PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { MetricsController } from './metrics/metrics.controller';
+import { MetricsModule } from './metrics/metrics.module';
+
 
 @Module({
   imports: [
+  
     LoggerModule.forRoot({
       pinoHttp: {
         stream:
@@ -149,13 +154,13 @@ import { CounterModule } from './counters/counter.module';
           ENV_KEYS.DATABASE_MONGO_PASSWORD,
         );
         const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
-        
+
         const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
-        
+
         return {
           uri,
           retryAttempts: 0,
-          dbName: name
+          dbName: name,
         };
       },
     }),
@@ -222,6 +227,7 @@ import { CounterModule } from './counters/counter.module';
         },
       }),
     }),
+
     ScheduleModule.forRoot(),
     UtilModule,
     AuthModule,
@@ -253,8 +259,10 @@ import { CounterModule } from './counters/counter.module';
     NotificationTypeModule,
     CronModule,
     RedisModule,
+    MetricsModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController,MetricsController],
+  providers: [AppService
+  ],
 })
 export class AppModule {}
