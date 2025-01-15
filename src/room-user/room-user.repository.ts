@@ -9,13 +9,22 @@ export class RoomUserRepository
   extends Repository<RoomUser>
   implements IRoomUserRepository
 {
-  async findBySenderAndRecipient(senderId: number, recipientId: number): Promise<RoomUser> {
+  async findBySenderAndRecipient(
+    senderId: number,
+    recipientId: number,
+  ): Promise<RoomUser> {
     const result = await this.createQueryBuilder('roomUser')
-                             .leftJoinAndSelect('roomUser.sender', 'sender')
-                             .leftJoinAndSelect('roomUser.recipient', 'recipient')
-                             .where('(sender.id = :senderId OR recipient.id = :recipientId)', { senderId, recipientId })
-                             .orWhere('(sender.id = :recipientId OR recipient.id = :senderId)', { recipientId, senderId })
-                             .getOne()
+      .leftJoinAndSelect('roomUser.sender', 'sender')
+      .leftJoinAndSelect('roomUser.recipient', 'recipient')
+      .where('(sender.id = :senderId AND recipient.id = :recipientId)', {
+        senderId,
+        recipientId,
+      })
+      .orWhere('(sender.id = :recipientId AND recipient.id = :senderId)', {
+        recipientId,
+        senderId,
+      })
+      .getOne();
     return result;
   }
 
