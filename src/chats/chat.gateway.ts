@@ -63,24 +63,36 @@ export class ChatGateway
   ) {
     const user = <User>client.data;
     const { recipientId } = data;
-    const { roomUser } = await this.roomUserService.createRoom(user.id);
+    const { roomUser, hasRoomUser } = await this.roomUserService.createRoom(
+      user.id,
+      recipientId,
+    );
 
-    const { roomName } = roomUser;
+    if (hasRoomUser) {
+      client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
+        message: SUCCESS_MESSAGE.ROOM_ALREADY_EXIST,
+        data: {
+          roomId: roomUser.id,
+          roomName: roomUser.roomName,
+        },
+      });
+      return;
+    }
 
     const notification = await this.notificationService.wsCreateNotification({
       recipientId,
       senderId: user.id,
       chat: null,
-      roomName,
+      roomName: roomUser.roomName,
     });
 
-    await client.join(roomName);
+    await client.join(roomUser.roomName);
 
     client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
       message: SUCCESS_MESSAGE.CREATED_CHAT_ROOM,
       data: {
         roomId: roomUser.id,
-        roomName,
+        roomName: roomUser.roomName,
       },
     });
 
@@ -134,7 +146,7 @@ export class ChatGateway
       recipientId,
       chat: chat,
       roomName,
-    })
+    });
 
     client.to(roomName).emit(SOCKET_KEYS.SEND_MESSAGE_RESPONSE, {
       message: SUCCESS_MESSAGE.SENT_MESSAGE,
@@ -147,8 +159,8 @@ export class ChatGateway
       message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
       data: {
         notification,
-      }
-    })
+      },
+    });
   }
 
   @SubscribeMessage(SOCKET_KEYS.JOIN_ROOM_LIST)

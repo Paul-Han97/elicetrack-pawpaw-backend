@@ -48,6 +48,7 @@ export const enum SUCCESS_MESSAGE {
   FIND = `성공적으로 조회 되었습니다.`,
   REQUEST = '요청이 성공적으로 완료 되었습니다.',
 
+  ROOM_ALREADY_EXIST = '이미 연결된 사용자 입니다.',
   CREATED_CHAT_ROOM = '채팅방이 생성 되었습니다.',
   NOTIFICATION_ARRIVED = '알림을 수신 했습니다.',
   JOINED_ROOM = '채팅방에 입장 되었습니다.',
