@@ -115,11 +115,7 @@ import { UserModule } from './users/user.module';
         SESSION_SECRET: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PREFIX: Joi.string().required(),
-        DATABASE_MONGO_HOST: Joi.string().required(),
-        DATABASE_MONGO_NAME: Joi.string().required(),
-        DATABASE_MONGO_USERNAME: Joi.string().required(),
-        DATABASE_MONGO_PASSWORD: Joi.string().required(),
-        DATABASE_MONGO_PORT: Joi.number().port().required(),
+        DATABASE_MONGO_URI: Joi.string().required(),
         PUBLIC_PET_API_KEY: Joi.string().required(),
         PUBLIC_PET_API_END_POINT: Joi.string().required(),
         EMAIL_HOST: Joi.string().required(),
@@ -145,22 +141,10 @@ import { UserModule } from './users/user.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const host = configService.get<string>(ENV_KEYS.DATABASE_MONGO_HOST);
-        const name = configService.get<string>(ENV_KEYS.DATABASE_MONGO_NAME);
-        const username = configService.get<string>(
-          ENV_KEYS.DATABASE_MONGO_USERNAME,
-        );
-        const password = configService.get<string>(
-          ENV_KEYS.DATABASE_MONGO_PASSWORD,
-        );
-        const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
-
-        const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
-
+        const uri = configService.get<string>(ENV_KEYS.DATABASE_MONGO_URI);
         return {
           uri,
           retryAttempts: 0,
-          dbName: name,
         };
       },
     }),
