@@ -5,7 +5,7 @@ export class GetRoomListDto {
   userId: number;
 }
 
-class Sender {
+class Partner {
   @ApiProperty({
     description: '송신자 ID',
   })
@@ -30,9 +30,9 @@ class RoomList {
 
   @ApiProperty({
     description: '메세지 송신자',
-    type: Sender,
+    type: Partner,
   })
-  sender: Sender;
+  partner: Partner;
 
   @ApiProperty({
     description: '해당 채팅방에서 마지막으로 보낸 메세지',
@@ -45,7 +45,7 @@ class RoomList {
   hasNewMessage: boolean;
 
   constructor(){
-    this.sender = new Sender();
+    this.partner = new Partner();
   }
 }
 

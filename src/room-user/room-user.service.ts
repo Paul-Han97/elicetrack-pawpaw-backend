@@ -51,19 +51,19 @@ export class RoomUserService implements IRoomUserService {
     const getRoomListResponseDto = new GetRoomListResponseDto();
 
     for (const roomUser of roomUserList) {
+      const { sender, recipient } = roomUser;
+      const partnerId = sender.id !== userId ? sender.id : recipient.id;
       const chat = await this.chatRepository.findByRoomName(roomUser.roomName);
-      const sender = await this.userRepository.findUser(
-        roomUser?.sender?.id ?? null,
-      );
+      const partner = await this.userRepository.findUser(partnerId);
 
       getRoomListResponseDto.roomList.push({
         name: roomUser?.roomName ?? null,
         hasNewMessage: chat?.isRead ?? false,
         lastMessage: chat?.message ?? null,
-        sender: {
-          id: sender?.id ?? null,
-          nickname: sender?.nickname ?? null,
-          imageUrl: sender?.userImage?.[0]?.image?.url ?? null,
+        partner: {
+          id: partner?.id ?? null,
+          nickname: partner?.nickname ?? null,
+          imageUrl: partner?.userImage?.[0]?.image?.url ?? null,
         },
       });
     }
@@ -84,8 +84,14 @@ export class RoomUserService implements IRoomUserService {
     return roomNameList;
   }
 
-  async createRoom(senderId: number, recipientId: number): Promise<CreateRoomResponseDto> {
-    const hasRoomUser = await this.roomUserRepository.findBySenderAndRecipient(senderId, recipientId);
+  async createRoom(
+    senderId: number,
+    recipientId: number,
+  ): Promise<CreateRoomResponseDto> {
+    const hasRoomUser = await this.roomUserRepository.findBySenderAndRecipient(
+      senderId,
+      recipientId,
+    );
 
     if (hasRoomUser) {
       const createRoomResponseDto = new CreateRoomResponseDto();

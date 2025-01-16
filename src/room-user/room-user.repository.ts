@@ -32,8 +32,9 @@ export class RoomUserRepository
     const result = await this.createQueryBuilder('roomUser')
       .leftJoinAndSelect('roomUser.sender', 'sender')
       .leftJoinAndSelect('roomUser.recipient', 'recipient')
-      .where('sender.id = :userId', { userId })
-      .orWhere('recipient.id = :userId', { userId })
+      .where('sender.id IS NOT NULL')
+      .andWhere('recipient.id IS NOT NULL')
+      .andWhere('(sender.id = :senderId OR recipient.id = :recipientId)', { senderId: userId, recipientId: userId })
       .getMany();
 
     return result;
