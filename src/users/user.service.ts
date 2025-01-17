@@ -484,4 +484,17 @@ export class UserService implements IUserService {
       throw e;
     }
   }
+
+  async updateClientId(id: number, clientId: string): Promise<void> {
+    await this.userRepository
+      .createQueryBuilder('user')
+      .update()
+      .set({ clientId })
+      .where('user.id = :id', { id })
+      .execute();
+  }
+
+  async getUserById(id: number): Promise<User> {
+    return await this.userRepository.findOneBy({ id });
+  }
 }

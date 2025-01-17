@@ -12,6 +12,7 @@ import {
 } from '../dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from '../dto/get-user.dto';
 import { UpdateUserDto, UpdateUserResponseDto } from '../dto/update-user.dto';
+import { User } from '../entities/user.entity';
 
 export interface IUserService {
   checkDuplicateEmail(
@@ -40,6 +41,8 @@ export interface IUserService {
   >;
 
   getUser(getUserDto: GetUserDto): Promise<ResponseData<GetUserResponseDto>>;
+  
+  getUserById(id: number): Promise<User>;
 
   saveUserLocation(
     saveUserLocationDto: SaveUserLocationDto,
@@ -54,4 +57,9 @@ export interface IUserService {
   updateUser(
     updateUserDto: UpdateUserDto,
   ): Promise<ResponseData<UpdateUserResponseDto>>;
+
+  updateClientId(
+    id: number,
+    clientId: string
+  ): Promise<void>
 }
