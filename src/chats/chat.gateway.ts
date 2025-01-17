@@ -18,6 +18,8 @@ import { NotificationService } from 'src/notifications/notification.service';
 import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
 import { RoomUserService } from 'src/room-user/room-user.service';
 import { User } from 'src/users/entities/user.entity';
+import { IUserService } from 'src/users/interfaces/user.service.interface';
+import { UserService } from 'src/users/user.service';
 import { ChatService } from './chat.service';
 import { GetMessageByRoomNameDto } from './dto/get-message-by-room-name.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -45,6 +47,9 @@ export class ChatGateway
 
     @Inject(NotificationService)
     private readonly notificationService: INotificationService,
+
+    @Inject(UserService)
+    private readonly userService: IUserService,
   ) {}
 
   @WebSocketServer()
@@ -96,7 +101,8 @@ export class ChatGateway
       },
     });
 
-    this.server.emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+    const recipient = await this.userService.getUserById(recipientId);
+    client.to(recipient.clientId).emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
       message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
       data: {
         notification,
@@ -166,6 +172,8 @@ export class ChatGateway
   @SubscribeMessage(SOCKET_KEYS.JOIN_ROOM_LIST)
   async joinRoomList(@ConnectedSocket() client: Socket) {
     const user = <User>client.data;
+
+    await this.userService.updateClientId(user.id, client.id);
 
     const roomNameList = await this.roomUserService.getRoomNameList(user.id);
 

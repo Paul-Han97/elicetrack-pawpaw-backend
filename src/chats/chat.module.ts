@@ -12,6 +12,15 @@ import { ChatRepository } from './chat.repository';
 import { ChatService } from './chat.service';
 import { Chat, ChatSchema } from './schemas/chat.schema';
 import { NotificationService } from 'src/notifications/notification.service';
+import { UserService } from 'src/users/user.service';
+import { ReviewRepository } from 'src/reviews/review.repository';
+import { BoardRepository } from 'src/boards/board.repository';
+import { ImageService } from 'src/images/image.service';
+import { ImageRepository } from 'src/images/image.repository';
+import { UserImageRepository } from 'src/user-images/user-image.repository';
+import { LocationRepository } from 'src/locations/location.repository';
+import { UserLocationRepository } from 'src/user-locations/user-location.repository';
+import { CredentialRepository } from 'src/credentials/credential.repository';
 
 @Module({
   imports: [
@@ -19,6 +28,13 @@ import { NotificationService } from 'src/notifications/notification.service';
       RoomUserRepository,
       NotificationRepository,
       UserRepository,
+      ReviewRepository,
+      BoardRepository,
+      ImageRepository,
+      UserImageRepository,
+      LocationRepository,
+      UserLocationRepository,
+      CredentialRepository,
     ]),
     MongooseModule.forFeature([
       { name: Chat.name, schema: ChatSchema },
@@ -29,6 +45,8 @@ import { NotificationService } from 'src/notifications/notification.service';
   providers: [
     ChatGateway,
     ChatService,
+    UserService,
+    ImageService,
     RoomUserService,
     NotificationService,
     ChatRepository,
