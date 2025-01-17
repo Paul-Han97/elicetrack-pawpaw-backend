@@ -1,31 +1,52 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
+  Get,
   HttpCode,
-  HttpStatus,
   Inject,
   InternalServerErrorException,
   Logger,
-  ParseFilePipeBuilder,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   Post,
+  Query,
+  Redirect,
   Req,
   Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBadRequestResponse, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiConsumes,
+  ApiExcludeEndpoint,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
+import axios from 'axios';
 import { Request, Response } from 'express';
-import { HTTP_STATUS, LOGIN_COOKIE, SUCCESS_MESSAGE } from 'src/common/constants';
+import {
+  ENV_KEYS,
+  HTTP_STATUS,
+  LOGIN_COOKIE,
+  SUCCESS_MESSAGE,
+} from 'src/common/constants';
+import { Auth } from 'src/common/guards/auth.decorator';
+import { ResponseData } from 'src/common/types/response.type';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './dto/login.dto';
+import { KakaoLoginDto, LoginKakaoRedirectQueryDto } from './dto/login-kakao-redirect.dto';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SendTemporaryPasswordEmailDto } from './dto/send-temporary-password-email.dto';
 import { SendVerificationEmailDto } from './dto/send-verification-email.dto';
 import { ValidateVerificationDto } from './dto/validate-verifcation-code.dto';
 import { IAuthService } from './interfaces/auth.service.interface';
-import { Auth } from 'src/common/guards/auth.decorator';
-import { ResponseData } from 'src/common/types/response.type';
 
 @Controller('auth')
 export class AuthController {
@@ -34,7 +55,105 @@ export class AuthController {
   constructor(
     @Inject(AuthService)
     private readonly authService: IAuthService,
+
+    private readonly configService: ConfigService,
   ) {}
+
+  @ApiExcludeEndpoint()
+  @Get('login/kakao-redirect')
+  @Redirect('https://kdt-react-node-1-team01.elicecoding.com/', 301)
+  async kakaoOauthRedirect(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query() loginKakaoRedirectQueryDto: LoginKakaoRedirectQueryDto,
+  ) {
+    const { code } = loginKakaoRedirectQueryDto;
+    const url = this.configService.get<string>(ENV_KEYS.OAUTH_KAKAO_TOKEN);
+    const clientId = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_RESTAPI_KEY,
+    );
+    const redirectUri = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_LOGIN_REDIRECT,
+    );
+
+    const authorizeRes = await axios.post(
+      url,
+      {
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      },
+    );
+
+    const token = authorizeRes.data.access_token;
+    const getUserInfoUrl = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_USER_ME,
+    );
+    const userInfoRes = await axios.post(
+      getUserInfoUrl,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      },
+    );
+
+    const userInfo = userInfoRes.data;
+
+    const kakaoLoginDto = new KakaoLoginDto()
+    kakaoLoginDto.id = userInfo?.id ?? null;
+    kakaoLoginDto.email = userInfo?.kakao_account?.email ?? null;
+    kakaoLoginDto.nickname = userInfo?.properties?.nickname ?? null;
+
+    const result = await this.authService.kakaoLogin(kakaoLoginDto);
+    
+    req.session.user = {
+      id: result.data.user.id,
+      role: result.data.user.role,
+    };
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: null,
+    };
+
+    return resData;
+  }
+
+  @ApiOperation({
+    description: `
+    - 카카오 로그인 절차를 진행하여 인증 URL을 받습니다.`,
+  })
+  @Post('login/kakao')
+  async kakaoLoginDto() {
+    const url = this.configService.get<string>(ENV_KEYS.OAUTH_KAKAO_AUTHORIZE);
+
+    const clientId = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_RESTAPI_KEY,
+    );
+    const redirectUri = this.configService.get<string>(
+      ENV_KEYS.OAUTH_KAKAO_LOGIN_REDIRECT,
+    );
+    const responseType = 'code';
+
+    const authUrl = `${url}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
+
+    const resData: ResponseData = {
+      message: SUCCESS_MESSAGE.REQUEST,
+      data: {
+        url: authUrl,
+      },
+    };
+    return resData;
+  }
 
   @ApiOperation({
     summary: '서비스에 로그인을 진행 합니다.',
@@ -47,11 +166,8 @@ export class AuthController {
     - 숫자: 1개 이상
     - 특수문자: 1개 이상`,
   })
-  @ApiOkResponse({
-    type: LoginResponseDto,
-  })
   @ApiBadRequestResponse({
-    description: '계정 정보가 일치하지 않을 때'
+    description: '계정 정보가 일치하지 않을 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('login')
@@ -70,7 +186,7 @@ export class AuthController {
     summary: '서비스에서 로그아웃을 진행 합니다.',
     description: `
     - 서비스에서 로그아웃을 진행 합니다.
-    - 서버에서 사용자의 세션을 종료 합니다.`
+    - 서버에서 사용자의 세션을 종료 합니다.`,
   })
   @ApiOkResponse()
   @Auth()
@@ -78,8 +194,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     req.session.destroy((e) => {
-      if(e)
-        throw new InternalServerErrorException(e);
+      if (e) throw new InternalServerErrorException(e);
     });
 
     res.clearCookie(LOGIN_COOKIE);
@@ -87,8 +202,8 @@ export class AuthController {
     const resData: ResponseData = {
       message: SUCCESS_MESSAGE.REQUEST,
       data: null,
-    }
-    
+    };
+
     return resData;
   }
 
@@ -109,25 +224,30 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @ApiUnprocessableEntityResponse({
-    description: '파일 유효성 에러'
+    description: '파일 유효성 에러',
   })
   @Post('register')
   async register(
     @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 10240, // 10MB
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          fileIsRequired: false,
-        }),
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
     )
     image: Express.Multer.File,
     @Body() registerDto: RegisterDto,
   ) {
     registerDto.image = image;
-    return await this.authService.register(registerDto);
+
+    const result = await this.authService.register(registerDto);
+
+    return result;
   }
 
   @ApiOperation({
@@ -141,9 +261,11 @@ export class AuthController {
   async sendVerificationEmail(
     @Body() sendVerificationEmailDto: SendVerificationEmailDto,
   ) {
-    return await this.authService.sendVerificationEmail(
+    const result = await this.authService.sendVerificationEmail(
       sendVerificationEmailDto,
     );
+
+    return result;
   }
 
   @ApiOperation({
@@ -154,19 +276,21 @@ export class AuthController {
     true를 반환하면 5분간 서버 캐시에 인증된 이메일로 기록됩니다.`,
   })
   @ApiNotFoundResponse({
-    description: '서버 캐시에 저장된 인증코드가 없을 때'
+    description: '서버 캐시에 저장된 인증코드가 없을 때',
   })
   @ApiBadRequestResponse({
-    description: '인증코드가 유효하지 않을 때'
+    description: '인증코드가 유효하지 않을 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('validate-verification-code')
   async validateVerificationCode(
     @Body() validateVerificationDto: ValidateVerificationDto,
   ) {
-    return await this.authService.validateVerificationCode(
+    const result = await this.authService.validateVerificationCode(
       validateVerificationDto,
     );
+
+    return result;
   }
 
   @ApiOperation({
@@ -177,15 +301,17 @@ export class AuthController {
     - 사용자는 로그인할 때 발급 받은 임시 비밀번호로 로그인 해야 합니다.`,
   })
   @ApiBadRequestResponse({
-    description: '인증된 이메일이 아닐 때'
+    description: '인증된 이메일이 아닐 때',
   })
   @HttpCode(HTTP_STATUS.OK)
   @Post('send-temporary-password-email')
   async sendTemporaryPasswordEmail(
     @Body() sendTemporaryPasswordEmailDto: SendTemporaryPasswordEmailDto,
   ) {
-    return await this.authService.sendTemporaryPasswordEmail(
+    const result = await this.authService.sendTemporaryPasswordEmail(
       sendTemporaryPasswordEmailDto,
     );
+
+    return result;
   }
 }

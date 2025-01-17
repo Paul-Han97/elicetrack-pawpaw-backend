@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
-import { string } from 'joi';
 
 class ImageList {
   @ApiProperty({
@@ -17,18 +16,24 @@ class ImageList {
 
 class Author {
   @ApiProperty({
-    description: '게시글 작성자 ID'
+    description: '게시글 작성자 ID',
   })
   id: number;
 
   @ApiProperty({
-    description: '작성자의 닉네임'
+    description: '작성자의 닉네임',
   })
   nickname: string;
 
-  constructor(){
-    this.id = 0;
-    this.nickname = '';
+  @ApiProperty({
+    description: '작성자의 프로필 이미지'
+  })
+  imageUrl: string;
+
+  constructor() {
+    this.id = null;
+    this.nickname = null;
+    this.imageUrl = null;
   }
 }
 
@@ -39,16 +44,6 @@ class CommentList {
   id: number;
 
   @ApiProperty({
-    description: '댓글 작성자의 닉네임',
-  })
-  nickname: string;
-
-  @ApiProperty({
-    description: '댓글 작성자의 프로필 이미지',
-  })
-  imageUrl: string;
-
-  @ApiProperty({
     description: '댓글의 내용',
   })
   content: string;
@@ -57,6 +52,16 @@ class CommentList {
     description: '댓글의 작성 날짜',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: '댓글 작성자',
+    type: Author,
+  })
+  author: Author;
+
+  constructor() {
+    this.author = new Author();
+  }
 }
 
 export class GetBoardResponseDto {
@@ -92,7 +97,7 @@ export class GetBoardResponseDto {
   author: Author;
 
   @ApiProperty({
-    description: '사용자가 게시글의 좋아요를 클릭 했는지 여부'
+    description: '사용자가 게시글의 좋아요를 클릭 했는지 여부',
   })
   isLikeClicked: boolean;
 

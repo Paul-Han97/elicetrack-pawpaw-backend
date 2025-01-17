@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -62,13 +63,12 @@ export class PlaceController {
   async getNearbyPlaceList(
     @Query() getNearbyPlaceListQueryDto: GetNearbyPlaceListQueryDto,
   ) {
-    const places = await this.placeService.getNearbyPlaces(
+    const result = await this.placeService.getNearbyPlaces(
       getNearbyPlaceListQueryDto,
     );
 
-    return places;
+    return result;
   }
-
 
   @ApiOperation({
     summary: '시설물의 정보를 조회 합니다.',
@@ -85,7 +85,7 @@ export class PlaceController {
   @Get(':id')
   async getPlace(@Param('id') id: number) {
     const result = await this.placeService.getPlace(id);
-    
+
     return { data: result };
   }
 
@@ -103,6 +103,7 @@ export class PlaceController {
     type: CreatePlaceReviewResponseDto,
   })
   @Auth()
+  @ApiCookieAuth()
   @Post(':id/reviews')
   async createPlaceReview(
     @Req() req: Request,
@@ -166,6 +167,7 @@ export class PlaceController {
     type: UpdatePlaceReviewResponseDto,
   })
   @Auth()
+  @ApiCookieAuth()
   @Put(':id/reviews/:reviewId')
   async updateReview(
     @Req() req: Request,
@@ -201,6 +203,8 @@ export class PlaceController {
   @ApiOkResponse({
     type: DeletePlaceReviewResponseDto,
   })
+  @Auth()
+  @ApiCookieAuth()
   @Delete(':id/reviews/:reviewId')
   async deleteReview(
     @Req() req: Request,

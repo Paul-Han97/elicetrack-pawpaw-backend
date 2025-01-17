@@ -4,10 +4,16 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class RoomUser extends CommonEntity {
-  @Column()
-  roomId: string;
+  @Column({
+    nullable: false,
+  })
+  roomName: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.roomUserRecipient)
   @JoinColumn({ referencedColumnName: 'id' })
-  user: User;
+  recipient: User;
+
+  @ManyToOne(() => User, (user) => user.roomUserSender)
+  @JoinColumn({ referencedColumnName: 'id' })
+  sender: User;
 }

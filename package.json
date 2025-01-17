@@ -63,7 +63,6 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20",
-    "uuid": "^11.0.3",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

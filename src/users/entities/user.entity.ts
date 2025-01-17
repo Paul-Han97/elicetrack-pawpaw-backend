@@ -25,6 +25,11 @@ export class User extends CommonEntity {
   })
   canWalkingMate: boolean;
 
+  @Column({
+    nullable: true,
+  })
+  clientId: string;
+
   @ManyToOne(() => Role)
   @JoinColumn({ referencedColumnName: 'id' })
   role: Role;
@@ -34,7 +39,7 @@ export class User extends CommonEntity {
 
   @OneToMany(() => UserImage, (userImage) => userImage.user)
   userImage: UserImage[];
-  
+
   @OneToMany(() => UserLocation, (userLocation) => userLocation.user)
   userLocation: UserLocation[];
 
@@ -50,12 +55,18 @@ export class User extends CommonEntity {
   @OneToMany(() => Comment, (comment) => comment.user)
   comment: Comment[];
 
-  @OneToMany(() => Notification, (notification) => notification.user)
-  notification: Notification[];
-  
+  @OneToMany(() => Notification, (notification) => notification.recipient)
+  notificationRecipient: Notification[];
+
+  @OneToMany(() => Notification, (notification) => notification.sender)
+  notificationSender: Notification[];
+
   @OneToMany(() => Review, (review) => review.user)
   review: Review[];
-  
-  @OneToMany(() => RoomUser, (roomUser) => roomUser.user)
-  roomUser: RoomUser[];
+
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.sender)
+  roomUserSender: RoomUser[];
+
+  @OneToMany(() => RoomUser, (roomUser) => roomUser.recipient)
+  roomUserRecipient: RoomUser[];
 }

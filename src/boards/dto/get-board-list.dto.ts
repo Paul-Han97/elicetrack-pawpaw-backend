@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { BOARD_CATEGORY_TYPE } from 'src/common/constants';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
@@ -26,6 +26,11 @@ class Author {
     description: '작성자의 닉네임',
   })
   nickname: string;
+
+  @ApiProperty({
+    description: '작성자의 프로필 이미지'
+  })
+  imageUrl: string;
 }
 
 class BoardList {
@@ -80,7 +85,9 @@ export class GetBoardListQueryDto extends PaginationDto {
       - 기본값 : 전체`,
     required: false,
   })
-  category: string;
+  @IsEnum(BOARD_CATEGORY_TYPE)
+  @IsOptional()
+  category: BOARD_CATEGORY_TYPE;
 
   userId: number;
 }

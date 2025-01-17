@@ -128,7 +128,6 @@ export class PetService implements IPetService {
       );
     } catch (e) {
       if (tempDeleteImageDto.filenameList.length > 0) {
-        console.log(tempDeleteImageDto.filenameList);
         await this.imageService.deleteImageFromS3(tempDeleteImageDto);
       }
       throw e;

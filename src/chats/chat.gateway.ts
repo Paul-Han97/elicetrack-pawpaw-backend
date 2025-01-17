@@ -9,24 +9,30 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import * as dotenv from 'dotenv';
 import { Server, Socket } from 'socket.io';
+import { SOCKET_KEYS, SUCCESS_MESSAGE } from 'src/common/constants';
 import { WsAuthGuard } from 'src/common/guards/ws-auth.guard';
+import { INotificationService } from 'src/notifications/interfaces/notification.service.interface';
+import { NotificationService } from 'src/notifications/notification.service';
+import { IRoomUserService } from 'src/room-user/interfaces/room-user.service.interface';
+import { RoomUserService } from 'src/room-user/room-user.service';
+import { User } from 'src/users/entities/user.entity';
+import { IUserService } from 'src/users/interfaces/user.service.interface';
+import { UserService } from 'src/users/user.service';
 import { ChatService } from './chat.service';
+import { GetMessageByRoomNameDto } from './dto/get-message-by-room-name.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 import { IChatService } from './interfaces/chat.service.interface';
 
-type Room = {
-  roomId: string,
-  userList: [{
-    id: string,
-  }]
-}
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-@WebSocketGateway({
-  namespace: 'chats',
+@WebSocketGateway(Number(process.env.SOCKET_PORT), {
+  namespace: SOCKET_KEYS.NAMESPACE,
   cors: {
     origin: true,
-    credentials: true
-  }
+    credentials: true,
+  },
 })
 @UseGuards(WsAuthGuard)
 export class ChatGateway
@@ -35,103 +41,171 @@ export class ChatGateway
   constructor(
     @Inject(ChatService)
     private readonly chatService: IChatService,
-  ) {}
 
-  private readonly roomList:Array<Room> = [];
+    @Inject(RoomUserService)
+    private readonly roomUserService: IRoomUserService,
+
+    @Inject(NotificationService)
+    private readonly notificationService: INotificationService,
+
+    @Inject(UserService)
+    private readonly userService: IUserService,
+  ) {}
 
   @WebSocketServer()
   private readonly server: Server;
 
   async afterInit(server: Server) {}
 
-  async handleConnection(client: Socket) {
-    client.emit('receive-message', {
-      body: {
-        message: `client id: ${client.id} 연결`,
-      },
-    });
-  }
+  async handleConnection(client: Socket) {}
 
-  async handleDisconnect(client: any) {
-    client.emit('receive-message', {
-      body: {
-        message: `client id: ${client.id} 끊김`,
-      },
-    });
-  }
+  async handleDisconnect(client: Socket) {}
 
-  @SubscribeMessage('create-room')
+  @SubscribeMessage(SOCKET_KEYS.CREATE_ROOM)
   async createRoom(
-    @MessageBody() roomId: string,
+    @MessageBody() data: { recipientId: number },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('client id:', client.id);
-    await client.join(roomId);
-    client.emit('receive-message', {
-      body: {
-        message: `${client.id} 님이 ${roomId} 를 생성 하였습니다.`,
-      },
-    });
-    this.roomList.push({
-      roomId: roomId,
-      userList: [{
-        id: client.id,
-      }]
-    })
-    console.log('created client.rooms', client.rooms);
-  }
+    const user = <User>client.data;
+    const { recipientId } = data;
+    const { roomUser, hasRoomUser } = await this.roomUserService.createRoom(
+      user.id,
+      recipientId,
+    );
 
-  @SubscribeMessage('join')
-  async join(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
-    console.log('client id:', client.id);
-    await client.join(roomId);
-    for(const room of this.roomList) {
-      if(room.roomId === roomId) {
-        room.userList.push({id: client.id});
-        console.log(room);
-      }
+    if (hasRoomUser) {
+      client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
+        message: SUCCESS_MESSAGE.ROOM_ALREADY_EXIST,
+        data: {
+          roomId: roomUser.id,
+          roomName: roomUser.roomName,
+        },
+      });
+      return;
     }
-    console.log(this.roomList)
-    client.emit('receive-message', {
-      body: {
-        message: `${client.id} 님이 ${roomId} 로 연결 되었습니다.`,
+
+    const notification = await this.notificationService.wsCreateNotification({
+      recipientId,
+      senderId: user.id,
+      chat: null,
+      roomName: roomUser.roomName,
+    });
+
+    await client.join(roomUser.roomName);
+
+    client.emit(SOCKET_KEYS.CREATE_ROOM_RESPONSE, {
+      message: SUCCESS_MESSAGE.CREATED_CHAT_ROOM,
+      data: {
+        roomId: roomUser.id,
+        roomName: roomUser.roomName,
       },
     });
-    console.log('client.rooms', client.rooms);
+
+    const recipient = await this.userService.getUserById(recipientId);
+    client.to(recipient.clientId).emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+      message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
+      data: {
+        notification,
+      },
+    });
   }
 
-  @SubscribeMessage('send-message')
-  async sendMessage(
-    @MessageBody() body: { roomId: string; message: string },
+  @SubscribeMessage(SOCKET_KEYS.JOIN)
+  async join(
+    @MessageBody() data: { roomName: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('client id:', client.id);
-    console.log('client.rooms', client.rooms);
-    console.log(`body.roomId: ${body.roomId}`);
-    console.log(`body.message: ${body.message}`);
-    client.broadcast.to(body.roomId).emit('receive-message', {
-      body: {
-        message: body.message,
+    const { roomName } = data;
+    const user = <User>client.data;
+
+    const roomUser = await this.roomUserService.joinRoom(user.id, roomName);
+
+    await client.join(roomUser.roomName);
+
+    client.emit(SOCKET_KEYS.JOIN_RESPONSE, {
+      message: SUCCESS_MESSAGE.JOINED_ROOM,
+      data: {
+        roomName,
       },
     });
   }
 
-  @SubscribeMessage('get-room-list')
-  async getRoomList(@ConnectedSocket() client: Socket){
-    client.emit('receive-message', this.roomList);
+  @SubscribeMessage(SOCKET_KEYS.SEND_MESSAGE)
+  async sendMessage(
+    @MessageBody()
+    data: { roomName: string; message: string; recipientId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = <User>client.data;
+    const { roomName, message, recipientId } = data;
+
+    const sendMessageDto = new SendMessageDto();
+    sendMessageDto.senderId = user.id;
+    sendMessageDto.recipientId = recipientId;
+    sendMessageDto.roomName = roomName;
+    sendMessageDto.message = message;
+
+    const chat = await this.chatService.sendMessage(sendMessageDto);
+
+    const notification = await this.notificationService.wsCreateNotification({
+      senderId: user.id,
+      recipientId,
+      chat: chat,
+      roomName,
+    });
+
+    client.to(roomName).emit(SOCKET_KEYS.SEND_MESSAGE_RESPONSE, {
+      message: SUCCESS_MESSAGE.SENT_MESSAGE,
+      data: {
+        message,
+      },
+    });
+
+    client.broadcast.to(roomName).emit(SOCKET_KEYS.NOTIFICATION_RESPONSE, {
+      message: SUCCESS_MESSAGE.NOTIFICATION_ARRIVED,
+      data: {
+        notification,
+      },
+    });
   }
 
-  /**
-   * @name getChatList
-   * - 채팅방 목록을 조회 합니다.
-   * - room_user Table에서 사용자의 id를 조회하는데,
-   *  해당 roomId에는 2명이상 존재 해야 합니다.
-   * - 사용자가 채팅방에서 마지막으로 읽은 채팅보다 뒤에 받은 채팅이 있다면
-   *  새로운 채팅 상태를 나타낼 수 있는 응답을 포함 합니다.
-   */
-  @SubscribeMessage('get-chat-list')
-  async getChatList(
-    @MessageBody() message: string,
+  @SubscribeMessage(SOCKET_KEYS.JOIN_ROOM_LIST)
+  async joinRoomList(@ConnectedSocket() client: Socket) {
+    const user = <User>client.data;
+
+    await this.userService.updateClientId(user.id, client.id);
+
+    const roomNameList = await this.roomUserService.getRoomNameList(user.id);
+
+    for (const roomName of roomNameList) {
+      await client.join(roomName);
+    }
+
+    client.emit(SOCKET_KEYS.JOIN_ROOM_LIST_RESPONSE, {
+      message: SUCCESS_MESSAGE.JOINED_ROOM,
+      data: {
+        roomNameList,
+      },
+    });
+  }
+
+  @SubscribeMessage(SOCKET_KEYS.GET_MESSAGE_LIST)
+  async getMessageByRoomName(
+    @MessageBody() data: { roomName: string },
     @ConnectedSocket() client: Socket,
-  ) {}
+  ) {
+    const getMessageByRoomNameDto = new GetMessageByRoomNameDto();
+    getMessageByRoomNameDto.roomName = data.roomName;
+
+    const messageList = await this.chatService.getMessageByRoomName(
+      getMessageByRoomNameDto,
+    );
+
+    client.emit(SOCKET_KEYS.GET_MESSAGE_LIST_RESPONSE, {
+      message: SUCCESS_MESSAGE.FIND,
+      data: {
+        messageList,
+      },
+    });
+  }
 }

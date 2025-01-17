@@ -9,12 +9,13 @@ export class Migration1735209542569 implements MigrationInterface {
         await queryRunner.query(`INSERT INTO \`role\` (\`type\`) VALUES ('ADMIN')`);
         await queryRunner.query(`INSERT INTO \`login_method\` (\`type\`) VALUES ('BASIC')`);
         await queryRunner.query(`INSERT INTO \`login_method\` (\`type\`) VALUES ('GOOGLE')`);
+        await queryRunner.query(`INSERT INTO \`login_method\` (\`type\`) VALUES ('KAKAO')`);
         await queryRunner.query(`INSERT INTO \`pet_size\` (\`type\`) VALUES ('SMALL')`);
         await queryRunner.query(`INSERT INTO \`pet_size\` (\`type\`) VALUES ('MEDIUM')`);
         await queryRunner.query(`INSERT INTO \`pet_size\` (\`type\`) VALUES ('LARGE')`);
-        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('PROUD_PETS', '펫_자랑')`);
-        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('CONSULTATION', '고민_상담')`);
-        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('PROTECT', '임시_보호')`);
+        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('PROUD_PETS', '펫자랑')`);
+        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('CONSULTATION', '고민상담')`);
+        await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('PROTECT', '임시보호')`);
         await queryRunner.query(`INSERT INTO \`board_category\` (\`engName\`, \`korName\`) VALUES ('LIFE', '일상')`);
         await queryRunner.query(`INSERT INTO \`notification_type\` (\`type\`) VALUES ('RECEIVE_MESSAGE')`);
         await queryRunner.query(`INSERT INTO \`notification_type\` (\`type\`) VALUES ('INVITE')`);

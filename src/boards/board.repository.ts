@@ -7,7 +7,6 @@ import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
 } from './dto/get-board-list.dto';
-import { GetBoardDto } from './dto/get-board.dto';
 import { GetLatestListResponseDto } from './dto/get-latest-list.dto';
 import { GetPopularListResponseDto } from './dto/get-popular-list.dto';
 import { Board } from './entities/board.entity';
@@ -18,14 +17,27 @@ export class BoardRepository
   extends Repository<Board>
   implements IBoardRepository
 {
-  async findBoard(getBoardDto: GetBoardDto): Promise<Board> {
-    const { id } = getBoardDto;
-
-    console.log('id', id);
-    console.log('id', typeof id);
-
+  async findBoardComment(
+    id: number,
+    commentId: number,
+    userId?: number,
+  ): Promise<Board> {
     const result = await this.createQueryBuilder('board')
+      .leftJoinAndSelect('board.comment', 'comment')
+      .leftJoinAndSelect('comment.user', 'commentUser')
+      .where('board.id = :id', { id })
+      .andWhere('comment.id = :commentId', { commentId })
+      .andWhere('commentUser.id = :userId', { userId })
+      .getOne();
+
+    return result;
+  }
+
+  async findBoard(id: number, userId?: number): Promise<Board> {
+    const query = this.createQueryBuilder('board')
       .leftJoinAndSelect('board.user', 'user')
+      .leftJoinAndSelect('user.userImage', 'authorImage')
+      .leftJoinAndSelect('authorImage.image', 'authorProfileImage')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
       .leftJoinAndSelect('board.userBoardLike', 'userBoardLike')
       .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
@@ -35,8 +47,12 @@ export class BoardRepository
       .leftJoinAndSelect('userImage.image', 'commentUserImage')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
-      .where('board.id = :id', { id })
-      .getOne();
+      .where('board.id = :id', { id });
+
+    if (userId) {
+      query.andWhere('user.id = :userId', { userId });
+    }
+    const result = await query.getOne();
 
     return result;
   }
@@ -46,7 +62,7 @@ export class BoardRepository
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
       .leftJoinAndSelect('board.boardCategory', 'boardCategory')
-      .where('boardImage.isPrimary = true')
+      .where('(boardImage.isPrimary = true OR boardImage.isPrimary IS NULL)')
       .orderBy('board.id', 'DESC')
       .limit(count)
       .getMany();
@@ -55,8 +71,8 @@ export class BoardRepository
       return {
         id: board.id,
         title: board.title,
-        imageUrl: board.boardImage[0].image.url,
-        category: board.boardCategory.korName
+        imageUrl: board.boardImage[0]?.image?.url ?? null,
+        category: board.boardCategory.korName,
       };
     });
 
@@ -107,6 +123,7 @@ SELECT A.id, A.title, A.content, D.url, E.korName, COUNT(B.isLikeClicked) isLike
   LEFT OUTER JOIN board_image C ON C.boardId = A.id
   LEFT OUTER JOIN image D ON D.id = C.imageId 
   LEFT OUTER JOIN board_category E ON E.id = A.boardCategoryId
+ WHERE (C.isPrimary = true OR C.isPrimary IS NULL)
 GROUP BY A.id, A.title, A.content, D.url
 ORDER BY isLikeCount DESC
 		,id DESC
@@ -130,7 +147,9 @@ LIMIT ?`,
       .leftJoinAndSelect('userBoardLike.user', 'userBoardLikeUser')
       .leftJoinAndSelect('board.boardImage', 'boardImage')
       .leftJoinAndSelect('boardImage.image', 'image')
-      .where('boardImage.isPrimary = true')
+      .leftJoinAndSelect('user.userImage', 'userImage')
+      .leftJoinAndSelect('userImage.image', 'authorImage')
+      .where('(boardImage.isPrimary = true OR boardImage.isPrimary IS NULL)')
       .orderBy('board.id', 'DESC')
       .take(take);
 
@@ -159,6 +178,7 @@ LIMIT ?`,
         author: {
           id: board.user.id,
           nickname: board.user.nickname,
+          imageUrl: board.user?.userImage[0]?.image?.url ?? null,
         },
         imageList: [
           {

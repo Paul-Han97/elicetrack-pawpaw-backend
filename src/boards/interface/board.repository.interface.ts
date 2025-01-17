@@ -1,11 +1,9 @@
 import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { ResponseData } from 'src/common/types/response.type';
 import { Repository } from 'typeorm';
 import {
   GetBoardListQueryDto,
   GetBoardListResponseDto,
 } from '../dto/get-board-list.dto';
-import { GetBoardDto, GetBoardResponseDto } from '../dto/get-board.dto';
 import { GetLatestListResponseDto } from '../dto/get-latest-list.dto';
 import { GetPopularListResponseDto } from '../dto/get-popular-list.dto';
 import { Board } from '../entities/board.entity';
@@ -24,7 +22,7 @@ export interface IBoardRepository extends Repository<Board> {
     getBoardListQueryDto: GetBoardListQueryDto,
   ): Promise<GetBoardListResponseDto>;
 
-  findBoard(
-    getBoardDto: GetBoardDto,
-  ): Promise<Board>;
+  findBoard(id: number, userId?: number): Promise<Board>;
+
+  findBoardComment(id: number, commentId:number,  userId?: number): Promise<Board>
 }

@@ -7,6 +7,12 @@ import { UserService } from './user.service';
 import { BoardRepository } from 'src/boards/board.repository';
 import { LocationRepository } from 'src/locations/location.repository';
 import { UserLocationRepository } from 'src/user-locations/user-location.repository';
+import { ImageRepository } from 'src/images/image.repository';
+import { UserImageRepository } from 'src/user-images/user-image.repository';
+import { ImageService } from 'src/images/image.service';
+import { CredentialRepository } from 'src/credentials/credential.repository';
+import { UtilService } from 'src/common/utils/util.service';
+import { UtilModule } from 'src/common/utils/util.module';
 
 @Module({
   imports: [
@@ -16,10 +22,13 @@ import { UserLocationRepository } from 'src/user-locations/user-location.reposit
       BoardRepository,
       LocationRepository,
       UserLocationRepository,
+      ImageRepository,
+      UserImageRepository,
+      CredentialRepository,
     ]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, ImageService],
   exports: [UserService],
 })
 export class UserModule {}

@@ -1,7 +1,9 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
@@ -20,8 +22,10 @@ import { CommentModule } from './comments/comment.module';
 import { Comment } from './comments/entities/comment.entity';
 import { ENV_KEYS, MYSQL_MIGRATION_PATH } from './common/constants';
 import { UtilModule } from './common/utils/util.module';
+import { CounterModule } from './counters/counter.module';
 import { CredentialModule } from './credentials/credential.module';
 import { Credential } from './credentials/entities/credential.entity';
+import { CronModule } from './cron/cron.module';
 import { Gender } from './genders/entities/gender.entity';
 import { GenderModule } from './genders/gender.module';
 import { Image } from './images/entities/image.entity';
@@ -44,6 +48,7 @@ import { PlaceLocation } from './place-locations/entities/place-location.entity'
 import { PlaceLocationModule } from './place-locations/place-location.module';
 import { Place } from './places/entities/place.entity';
 import { PlaceModule } from './places/place.module';
+import { RedisModule } from './redis/redis.module';
 import { ReviewPlaceLike } from './review-place-likes/entities/review-place-like.entity';
 import { ReviewPlaceLikeModule } from './review-place-likes/review-place-like.module';
 import { Review } from './reviews/entities/review.entity';
@@ -60,9 +65,6 @@ import { UserLocation } from './user-locations/entities/user-location.entity';
 import { UserLocationModule } from './user-locations/user-location.module';
 import { User } from './users/entities/user.entity';
 import { UserModule } from './users/user.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ScheduleModule } from '@nestjs/schedule';
-import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -82,7 +84,6 @@ import { CronModule } from './cron/cron.module';
         redact: {
           remove: true,
           paths: [
-
             'req',
             'res',
             'req.headers["sec-ch-ua-platform"]',
@@ -114,11 +115,7 @@ import { CronModule } from './cron/cron.module';
         SESSION_SECRET: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PREFIX: Joi.string().required(),
-        DATABASE_MONGO_HOST: Joi.string().required(),
-        DATABASE_MONGO_NAME: Joi.string().required(),
-        DATABASE_MONGO_USERNAME: Joi.string().required(),
-        DATABASE_MONGO_PASSWORD: Joi.string().required(),
-        DATABASE_MONGO_PORT: Joi.number().port().required(),
+        DATABASE_MONGO_URI: Joi.string().required(),
         PUBLIC_PET_API_KEY: Joi.string().required(),
         PUBLIC_PET_API_END_POINT: Joi.string().required(),
         EMAIL_HOST: Joi.string().required(),
@@ -127,6 +124,12 @@ import { CronModule } from './cron/cron.module';
         EMAIL_PASSWORD: Joi.string().required(),
         PASSWORD_STRING: Joi.string().required(),
         PASSWORD_SPECIAL: Joi.string().required(),
+        SOCKET_PORT: Joi.number().port().required(),
+        OAUTH_KAKAO_RESTAPI_KEY: Joi.string().required(),
+        OAUTH_KAKAO_AUTHORIZE: Joi.string().required(),
+        OAUTH_KAKAO_TOKEN: Joi.string().required(),
+        OAUTH_KAKAO_LOGIN_REDIRECT: Joi.string().required(),
+        OAUTH_KAKAO_USER_ME: Joi.string().required(),
       }),
       isGlobal: true,
     }),
@@ -138,18 +141,7 @@ import { CronModule } from './cron/cron.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const host = configService.get<string>(ENV_KEYS.DATABASE_MONGO_HOST);
-        const name = configService.get<string>(ENV_KEYS.DATABASE_MONGO_NAME);
-        const username = configService.get<string>(
-          ENV_KEYS.DATABASE_MONGO_USERNAME,
-        );
-        const password = configService.get<string>(
-          ENV_KEYS.DATABASE_MONGO_PASSWORD,
-        );
-        const port = configService.get<string>(ENV_KEYS.DATABASE_MONGO_PORT);
-        
-        const uri = `mongodb://${username}:${password}@${host}:${port}/?authMechanism=SCRAM-SHA-256&authSource=${name}`;
-        
+        const uri = configService.get<string>(ENV_KEYS.DATABASE_MONGO_URI);
         return {
           uri,
           retryAttempts: 0,
@@ -244,11 +236,12 @@ import { CronModule } from './cron/cron.module';
     ReviewModule,
     ReviewPlaceLikeModule,
     RoomUserModule,
-    // RoomModule,
     ChatModule,
+    CounterModule,
     NotificationModule,
     NotificationTypeModule,
-    CronModule
+    CronModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

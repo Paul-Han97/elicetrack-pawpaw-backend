@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
   Get,
   Inject,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -15,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiConsumes,
+  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -34,7 +38,7 @@ import {
   SaveUserLocationDto,
 } from './dto/get-nearby-user-list.dto';
 import { GetUserDto, GetUserResponseDto } from './dto/get-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserResponseDto } from './dto/update-user.dto';
 import { IUserService } from './interfaces/user.service.interface';
 import { UserService } from './user.service';
 
@@ -99,18 +103,20 @@ export class UserController {
     description: `
     - 사용자의 ID로 정보를 조회 합니다.`,
   })
-  @ApiParam({
-    name: 'id',
-    description: '사용자의 ID',
-  })
+  @ApiCookieAuth()
+  @Auth()
   @ApiOkResponse({
     type: GetUserResponseDto,
   })
-  @Get(':id')
-  async getUser(@Param('id') id: number) {
+  @Get()
+  async getUser(@Req() req: Request) {
+    const user = req.session.user;
+
     const getUserDto = new GetUserDto();
-    getUserDto.id = id;
-    return await this.userService.getUser(getUserDto);
+    getUserDto.id = user.id;
+
+    const result = await this.userService.getUser(getUserDto);
+    return result;
   }
 
   @ApiOperation({
@@ -119,15 +125,18 @@ export class UserController {
     - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
     - 사용자의 반려동물들의 정보를 조회 합니다.`,
   })
-  @ApiParam({
-    name: 'id',
-    description: '사용자의 id',
-  })
   @ApiResponse({
     type: GetMyPageResponseDto,
   })
-  @Get(':id/my-pages')
-  async getMyPage(@Param('id') id: number) {}
+  @Auth()
+  @ApiCookieAuth()
+  @Get('my-pages')
+  async getMyPage(@Req() req: Request) {
+    const user = req.session.user;
+    const result = await this.userService.getMyPage(user.id);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자가 작성한 게시글 목록을 조회 합니다.',
@@ -137,12 +146,18 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyBoardListResponseDto],
   })
-  @Get(':id/boards')
+  @Auth()
+  @ApiCookieAuth()
+  @Get('boards')
   async getMyBoardList(
+    @Req() req: Request,
     @Query() paginationDto: PaginationDto,
-    @Param('id') id: number,
   ) {
-    const result = await this.userService.getMyBoardList(id, paginationDto);
+    const user = req.session.user;
+    const result = await this.userService.getMyBoardList(
+      user.id,
+      paginationDto,
+    );
 
     return result;
   }
@@ -155,12 +170,38 @@ export class UserController {
   @ApiOkResponse({
     type: [GetMyReviewListDto],
   })
-  @Get(':id/reviews')
+  @Auth()
+  @ApiCookieAuth()
+  @Get('reviews')
   async getMyReviewList(
+    @Req() req: Request,
     @Query() paginationDto: PaginationDto,
-    @Param('id') id: number,
   ) {
-    const result = await this.userService.getMyReviewList(id, paginationDto);
+    const user = req.session.user;
+    const result = await this.userService.getMyReviewList(
+      user.id,
+      paginationDto,
+    );
+
+    return result;
+  }
+
+  @ApiOperation({
+    summary: '사용자와 반려동물의 정보를 조회 합니다.',
+    description: `
+      - 사용자의 닉네임과 산책메이트 기능 ON/OFF 여부를 조회 합니다.
+      - 사용자의 반려동물들의 정보를 조회 합니다.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: '사용자의 ID',
+  })
+  @ApiResponse({
+    type: GetMyPageResponseDto,
+  })
+  @Get(':id')
+  async getUserInfo(@Param('id') id: number) {
+    const result = await this.userService.getMyPage(id);
 
     return result;
   }
@@ -168,17 +209,58 @@ export class UserController {
   @ApiOperation({
     summary: '사용자의 정보를 수정 합니다.',
     description: `
-    - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.`,
+    - Body 데이터를 기준으로 사용자의 정보를 수정 합니다.
+    - nickname: 최소 1글자 최대 30글자를 충족해야 합니다.
+    - canWalkingMate: 활성화 / 비활성화를 할 수 있습니다.
+      - 활성화 : true
+      - 비활성화 : false
+    - password: 아래의 조건을 충족해야 합니다.
+      - 최소 길이: 8
+      - 소문자: 1개 이상
+      - 대문자: 1개 이상
+      - 숫자: 1개 이상
+      - 특수문자: 1개 이상
+    - newPassword: 아래의 조건을 충족해야 합니다.
+      - 최소 길이: 8
+      - 소문자: 1개 이상
+      - 대문자: 1개 이상
+      - 숫자: 1개 이상
+      - 특수문자: 1개 이상
+    - nickname: 최소 1글자 최대 30글자를 충족해야 합니다.`,
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
-  @Put(':id')
-  @ApiOkResponse()
+  @Auth()
+  @ApiCookieAuth()
+  @Put()
+  @ApiOkResponse({
+    type: UpdateUserResponseDto,
+  })
   async updateUser(
-    @UploadedFile() image: Express.Multer.File,
-    @Param('id') id: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            // 공식 maxSize: 1024 * 1024 * 10 = 10MB
+            maxSize: 10_485_760,
+          }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
+    @Req() req: Request,
     @Body() updateUserDto: UpdateUserDto,
-  ) {}
+  ) {
+    const userId = req.session.user.id;
+    updateUserDto.id = userId;
+    updateUserDto.image = image;
+
+    const result = await this.userService.updateUser(updateUserDto);
+
+    return result;
+  }
 
   @ApiOperation({
     summary: '사용자 위치 저장',
@@ -193,8 +275,8 @@ export class UserController {
   ) {
     const userId = req.session.user.id;
     saveUserLocationDto.id = userId;
-    const result = this.userService.saveUserLocation(saveUserLocationDto);
 
+    const result = this.userService.saveUserLocation(saveUserLocationDto);
     return result;
   }
 }
