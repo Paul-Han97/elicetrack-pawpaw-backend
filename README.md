@@ -1,99 +1,98 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+![waving](https://capsule-render.vercel.app/api?type=waving&height=200&fontAlignY=40&text=PawPaw&color=gradient)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 서비스 목적
+- 반려인 커뮤니티
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 개발 인원
 
-## Description
+<table>
+  <tr>
+    <td align="center"><b>담당 파트</b></td>
+    <td align="center" colspan="2">백엔드</td>
+    <td align="center" colspan="3">프론트엔드</td>
+  </tr>
+  <tr>
+    <td align="center"><b>이름</b></td>
+    <td>한바울</td>
+    <td>손석경</td>
+    <td>이서빈</td>
+    <td>이주영</td>
+    <td>하정우</td>
+  </tr>
+</table>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 개발 기간
 
-## Project setup
+- 2024.12.17 ~ 2025.01.08
 
-```bash
-$ npm install
-```
+## 설계 및 프로세스
+- 백엔드는 공공데이터포털에서 반려동물 동반 입장이 가능한 시설물 21,139건의 데이터를 CSV 파일로 다운받아 DB에 삽입
+    - CSV 파일 [(공공데이터포털 링크)](https://www.data.go.kr/data/15111389/fileData.do?recommendDataYn=Y#/tab-layer-openapi)
+- 백엔드는 공공데이터포털에서 NestJs의 Task Scheduling(Cron) 기능을 이용하여 반려동물 동반 입장이 가능한 시설물 정보에서 하루 1000건(API 호출 제한 최대치)의 데이터를 DB에 삽입
+    - REST OpenAPI [(공공데이터포털 링크)](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15135102)
 
-## Compile and run the project
+- 사용자는 위치 기반 서비스를 이용 가능 (반경 250 / 500 / 1000 (m))
+    - 현재 위치를 기준으로 반려동물과 동반 가능한 시설물 조회가 가능
+    - 사용자는 시설물에 대한 리뷰 작성이 가능
+    - "산책메이트" 기능이 켜져있는 사용자에 한해 위치 정보(WGS84, SRID 4326)를 수집 및 주변 사용자 조회, 채팅 요청이 가능
+    - 채팅 요청을 받은 사용자에게 socket을 통한 알림을 표시하며 수락시 상호 채팅이 가능
+- 사용자는 마이페이지에서 반려동물을 등록하여 커뮤니티 이용 가능
 
-```bash
-# development
-$ npm run start
+## 담당 기능
+- 폴더 구조 구성 (3 Tier Architecture)
+- ERD 작성 및 TypeORM Migration 구성
+- Nginx Reverse Proxy 구성 및 배포
+- 구현한 기능
+    - 로그인 및 카카오 로그인 구현
+    - 게시판 기능 구현(AWS S3 이미지 업로드를 포함한 CRUD)
+    - Socket Io를 활용한 채팅 기능 구현
 
-# watch mode
-$ npm run start:dev
+## ERD
 
-# production mode
-$ npm run start:prod
-```
+### 공통 컬럼 부분
+![alt text](./readme-image/common-entity.png)
 
-## Run tests
+- 모든 테이블은 CommonEntity를 상속 받아 생성 및 수정한 날짜 / 사용자 조회 가능
 
-```bash
-# unit tests
-$ npm run test
+### WGS84 (위도, 경도) 부분
+![alt text](./readme-image/location.png)
 
-# e2e tests
-$ npm run test:e2e
+- 시설물의 위치와 사용자의 위치를 저장
+- Many To Many 테이블을 통해 확장이 가능
+- Spatial Index 활용
 
-# test coverage
-$ npm run test:cov
-```
+### 이미지 부분
+![alt text](./readme-image/image.png)
 
-## Deployment
+- S3에 저장한 이미지의 Url을 저장
+- Many To Many Table을 통해 확장이 가능
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### 사용자 정보 (계정 정보) 부분
+![alt text](./readme-image/user.png)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- User 테이블에 사용자 정보 저장
+- Credential 테이블에 계정 정보 저장
+  - LoginMethod 테이블로 소셜 로그인을 구분하여 확장이 가능(일반, 카카오, 구글 로그인 등)
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+### 반려동물과 동반 입장 가능한 시설물 부분
+![alt text](./readme-image/place.png)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- 시설물과 좋아요 기능을 포함한 리뷰 기능 CRUD
 
-## Resources
+### 커뮤니티 부분
+![alt text](./readme-image/board.png)
 
-Check out a few resources that may come in handy when working with NestJS:
+- 좋아요 기능을 포함한 게시글과 댓글 기능 CRUD
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 반려동물 부분
+![alt text](./readme-image/pet.png)
 
-## Support
+- 사용자의 반려동물 정보 CRUD
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 채팅 부분
+![alt text](./readme-image/chat.png)
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Chat Schema는 MongoDB에 저장했기 때문에 외래키로 연결 되어있지 않음
+- RoomUser 테이블에 채팅 요청, 수락 한 사용자 그리고 채팅방 이름을 저장
+- Notification 테이블에 채팅 요청 및 메세지 전송할 때 해당 정보를 이력처럼 저장
+  - NotificationType은 RECEIVE_MESSAGE | INVITE 으로 나뉘어 초대요청 알림인지 메세지 수신 알림인지 구분
